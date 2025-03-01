@@ -3,6 +3,7 @@
   "version": "1.0.3",
   "description": "A modern WhatsApp bot using Baileys",
   "main": "index.js",
+    "type": "commonjs",
   "scripts": {
     "start": "node index.js"
   },
