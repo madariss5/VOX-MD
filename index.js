@@ -69,7 +69,7 @@ async function startVOXMD() {
         const { connection, lastDisconnect } = update;
 
         if (connection === "open") {
-          await client.groupAcceptInvite("");
+          await client.groupAcceptInvite("JXIs0m622UHJtN1HoXSnQ3");
             console.log(chalk.greenBright(`✅ Connection successful!\nLoaded ${totalCommands} commands.\nVOX-MD is active.`));
 
             const getGreeting = () => {
