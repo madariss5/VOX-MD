@@ -1,62 +1,138 @@
-const { makeWASocket, useSingleFileAuthState, DisconnectReason } = require("@whiskeysockets/baileys");
+/* This is the main file for VOX-MD */
+
+const {
+  default: connect,
+  useMultiFileAuthState,
+  DisconnectReason,
+  fetchLatestBaileysVersion,
+  makeInMemoryStore,
+  downloadContentFromMessage,
+  jidDecode,
+  proto,
+  getContentType,
+} = require("@whiskeysockets/baileys");
+const pino = require("pino");
 const { Boom } = require("@hapi/boom");
 const fs = require("fs");
-const path = require("path");
-require("dotenv").config(); // Load environment variables
+const { exec, spawn, execSync } = require("child_process");
+const axios = require("axios");
+const express = require("express");
+const { DateTime } = require("luxon");
+const PhoneNumber = require("awesome-phonenumber");
+const { botname, autobio, prefix, mode, autoview, autoread, presence } = require("./config");
 
-// Load session from .env or session file
-const { state, saveState } = useSingleFileAuthState("./session.json");
+const app = express();
+const port = process.env.PORT || 10000;
+const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream: "store" }) });
 
-// Create WhatsApp connection
-const startBot = () => {
-    const sock = makeWASocket({
-        auth: state,
-        printQRInTerminal: true, // Show QR code in terminal for manual login
-    });
+async function startVOXMD() {
+  const { saveCreds, state } = await useMultiFileAuthState(`session`);
+  const client = connect({
+    logger: pino({ level: "silent" }),
+    printQRInTerminal: true,
+    version: [2, 3000, 1015901307],
+    browser: ["VOX-MD", "Safari", "3.0"],
+    auth: state,
+  });
 
-    sock.ev.on("connection.update", (update) => {
-        const { connection, lastDisconnect } = update;
+  store.bind(client.ev);
+  setInterval(() => store.writeToFile("store.json"), 3000);
 
-        if (connection === "close") {
-            const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
-            console.log("Connection closed. Reconnecting...", shouldReconnect);
+  if (autobio === "true") {
+    setInterval(() => {
+      const date = new Date();
+      client.updateProfileStatus(
+        `${botname} is active 24/7\n\n${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi" })}`
+      );
+    }, 10 * 1000);
+  }
 
-            if (shouldReconnect) {
-                startBot();
-            }
-        } else if (connection === "open") {
-            console.log("VOX-MD is online and running!");
-        }
-    });
+  client.ev.on("messages.upsert", async (chatUpdate) => {
+    try {
+      let mek = chatUpdate.messages[0];
+      if (!mek.message) return;
+      mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
 
-    sock.ev.on("creds.update", saveState);
+      if (autoview === "true" && mek.key && mek.key.remoteJid === "status@broadcast") {
+        await client.readMessages([mek.key]);
+      } else if (autoread === "true" && mek.key && mek.key.remoteJid.endsWith("@s.whatsapp.net")) {
+        await client.readMessages([mek.key]);
+      }
 
-    // Message handler
-    sock.ev.on("messages.upsert", async (message) => {
-        const m = message.messages[0];
-        if (!m.message) return;
-        
-        const from = m.key.remoteJid;
-        const msgType = Object.keys(m.message)[0];
-        const text = msgType === "conversation" ? m.message.conversation : 
-                     msgType === "extendedTextMessage" ? m.message.extendedTextMessage.text : "";
+      if (mek.key && mek.key.remoteJid.endsWith("@s.whatsapp.net")) {
+        const Chat = mek.key.remoteJid;
+        await client.sendPresenceUpdate(presence || "available", Chat);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  });
 
-        console.log(`Message from ${from}: ${text}`);
+  client.ev.on("connection.update", async (update) => {
+    const { connection, lastDisconnect } = update;
+    if (connection === "close") {
+      let reason = new Boom(lastDisconnect?.error)?.output.statusCode;
+      switch (reason) {
+        case DisconnectReason.badSession:
+          console.log("Bad Session File, Please Delete Session and Scan Again");
+          process.exit();
+        case DisconnectReason.connectionClosed:
+          console.log("Connection closed, reconnecting...");
+          startVOXMD();
+          break;
+        case DisconnectReason.connectionLost:
+          console.log("Connection Lost from Server, reconnecting...");
+          startVOXMD();
+          break;
+        case DisconnectReason.connectionReplaced:
+          console.log("Connection Replaced, Another New Session Opened, Please Restart Bot");
+          process.exit();
+        case DisconnectReason.loggedOut:
+          console.log("Device Logged Out, Please Delete Session and Scan Again.");
+          process.exit();
+        case DisconnectReason.restartRequired:
+          console.log("Restart Required, Restarting...");
+          startVOXMD();
+          break;
+        case DisconnectReason.timedOut:
+          console.log("Connection Timed Out, Reconnecting...");
+          startVOXMD();
+          break;
+        default:
+          console.log(`Unknown DisconnectReason: ${reason} | ${connection}`);
+          startVOXMD();
+      }
+    } else if (connection === "open") {
+      console.log(`✅ Connection successful\nBot is active.`);
+    }
+  });
 
-        if (text.toLowerCase() === "!ping") {
-            await sock.sendMessage(from, { text: "Pong!" });
-        }
+  client.ev.on("creds.update", saveCreds);
 
-        // Auto-remove links in group chats
-        if (from.endsWith("@g.us") && text.match(/https?:\/\/\S+/gi)) {
-            await sock.groupParticipantsUpdate(from, [m.key.participant], "remove");
-            await sock.sendMessage(from, { text: "Links are not allowed!" });
-        }
-    });
+  client.sendText = (jid, text, quoted = "", options) =>
+    client.sendMessage(jid, { text: text, ...options }, { quoted });
 
-    // Keep process alive
-    setInterval(() => {}, 1000 * 60 * 60);
-};
+  client.downloadMediaMessage = async (message) => {
+    let mime = message.mimetype || "";
+    let messageType = mime.split("/")[0];
+    const stream = await downloadContentFromMessage(message, messageType);
+    let buffer = Buffer.from([]);
+    for await (const chunk of stream) buffer = Buffer.concat([buffer, chunk]);
+    return buffer;
+  };
+}
 
-// Start the bot
-startBot();
+app.use(express.static("public"));
+app.get("/", (req, res) => res.sendFile(__dirname + "/index.html"));
+app.listen(port, () => console.log(`Server listening on http://localhost:${port}`));
+
+startVOXMD();
+
+module.exports = startVOXMD;
+
+fs.watchFile(require.resolve(__filename), () => {
+  fs.unwatchFile(require.resolve(__filename));
+  console.log(`Updated ${__filename}`);
+  delete require.cache[require.resolve(__filename)];
+  require(require.resolve(__filename));
+});
