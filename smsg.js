@@ -1,10 +1,19 @@
 const {
   proto,
   getContentType,
-  jidNormalizedUser, // Correct function for normalizing JIDs
+  jidNormalizedUser,
 } = require("@whiskeysockets/baileys");
-const { readFileSync } = require('fs');
-const kali = readFileSync('./dreaded.jpg');
+const { readFileSync, readdirSync } = require("fs");
+const path = require("path");
+
+// Function to get a random image from ./Voxmdgall
+function getRandomImage() {
+  const dir = "./Voxmdgall";
+  const files = readdirSync(dir).filter(file => /\.(jpg|jpeg|png|gif)$/i.test(file));
+  if (files.length === 0) return null;
+  const randomFile = files[Math.floor(Math.random() * files.length)];
+  return readFileSync(path.join(dir, randomFile));
+}
 
 function smsg(conn, m, store) {
   if (!m) return m;
@@ -43,9 +52,7 @@ function smsg(conn, m, store) {
         m.quoted = m.quoted[type];
       }
       if (typeof m.quoted === "string")
-        m.quoted = {
-          text: m.quoted,
-        };
+        m.quoted = { text: m.quoted };
       m.quoted.mtype = type;
       m.quoted.id = m.msg.contextInfo.stanzaId;
       m.quoted.chat = m.msg.contextInfo.remoteJid || m.chat;
@@ -79,17 +86,20 @@ function smsg(conn, m, store) {
   if (m.msg.url) m.download = () => conn.downloadMediaMessage(m.msg);
   m.text = m.msg.text || m.msg.caption || m.message.conversation || m.msg.contentText || m.msg.selectedDisplayText || m.msg.title || "";
 
+  // Reply function with footer
   m.reply = (text, chatId = m.chat, options = {}) => {
     return conn.sendMessage(chatId, 
       {
-        text: text,
+        text: `\n${text}\n\n─────── ✦ ✧ ✦ ───────\n\n` + 
+              `*🤖 BOT NAME:* VOX-MD\n` +
+              `*👤 AUTHOR:* KANAMBO\n` +
+              `*⚡ POWERED BY:* ©VOXNET.INC`,
         contextInfo: {
           externalAdReply: {
             title: `KANAMBO V2`,
             body: m.pushName,
             previewType: "PHOTO",
-            thumbnailUrl: 'https://avatars.githubusercontent.com/u/106575586?v=4', 
-            thumbnail: kali, 
+            thumbnail: getRandomImage(), // Set a random image
             sourceUrl: 'https://github.com/Kanambp/dreaded-v2'
           }
         }
