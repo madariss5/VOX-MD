@@ -56,15 +56,15 @@ module.exports = async (context) => {
         // Stylish Menu Text
         let menuText = `╔════ ⟡ *VOX-MD* ⟡ ════╗\n`;
         menuText += `       *🎮 𝑾𝑬𝑳𝑪𝑶𝑴𝑬 🎮*\n`;
-        menuText += `╚═════════════════╝\n\n`;
+        menuText += `╚═════════════════╝\n`;
         menuText += `👤 *𝑼𝑺𝑬𝑹:* ${m.pushName}\n`;
         menuText += `🤖 *𝑩𝑶𝑻:* ${botname}\n`;
         menuText += `📝 *𝑪𝑶𝑴𝑴𝑨𝑵𝑫𝑺:* ${totalCommands}\n`;
         menuText += `🕒 *𝑻𝑰𝑴𝑬:* ${getCurrentTimeInNairobi()}\n`;
         menuText += `✍️ *𝑷𝑹𝑬𝑭𝑰𝑿:* ${prefix}\n`;
         menuText += `🔓 *𝑴𝑶𝑫𝑬:* ${mode}\n`;
-        menuText += `📚 *𝑳𝑰𝑩𝑹𝑨𝑹𝒀:* Baileys\n`;
-        menuText += `━━━━━━━━━━━━━━\n\n`;
+        menuText += `📚 *𝑳𝑰𝑩𝑹𝑨𝒓𝒀:* Baileys\n`;
+        menuText += `━━━━━━━━━━━━━━\n`;
 
         // Add command categories
         for (const category of categories) {
@@ -91,10 +91,19 @@ module.exports = async (context) => {
         const voiceBuffer = getMenuVoice();
         const thumbnailBuffer = getRandomThumbnail(); // Get random image buffer
 
-        // Send menu with a random image as thumbnail
+        // Send menu with a random image as thumbnail and WhatsApp link as the source URL
         await client.sendMessage(m.chat, {
             image: thumbnailBuffer,
-            caption: menuText
+            caption: menuText,
+            contextInfo: {
+                externalAdReply: {
+                    title: "VOX-MD",
+                    body: "Click to join our WhatsApp group!",
+                    mediaType: 1, // Image
+                    thumbnail: thumbnailBuffer,
+                    sourceUrl: groupLink // WhatsApp group link in the source URL
+                }
+            }
         }, { quoted: m });
 
         // Send menu voice
