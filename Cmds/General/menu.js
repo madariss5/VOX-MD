@@ -18,20 +18,21 @@ module.exports = async (context) => {
             { name: 'Utils', emoji: '🎭' }
         ];
 
-        // Get a random image from Voxmdgall
-        const getRandomImage = () => {
-            const assetsPath = path.join(__dirname, '../../Voxmdgall'); // Fixed path
+        // Function to get a random image URL from Voxmdgall folder
+        const getRandomThumbnailUrl = () => {
+            const assetsPath = path.join(__dirname, '../../Voxmdgall'); 
             if (!fs.existsSync(assetsPath)) throw new Error("🚫 Voxmdgall folder not found!");
 
             const images = fs.readdirSync(assetsPath).filter(file => /\.(jpg|jpeg|png|gif)$/i.test(file));
             if (images.length === 0) throw new Error("🚫 No images found in Voxmdgall!");
 
-            return path.join(assetsPath, images[Math.floor(Math.random() * images.length)]);
+            const randomImage = images[Math.floor(Math.random() * images.length)];
+            return `https://your-server-url.com/Voxmdgall/${randomImage}`; // Replace with your actual hosting URL
         };
 
         // Get the menu voice audio
         const getMenuVoice = () => {
-            const voicePath = path.join(__dirname, '../../Voxmdgall/Voxb/menu.mp3'); // Fixed path
+            const voicePath = path.join(__dirname, '../../Voxmdgall/Voxb/menu.mp3'); 
             if (!fs.existsSync(voicePath)) throw new Error("🚫 Menu voice file not found!");
             return voicePath;
         };
@@ -93,20 +94,18 @@ module.exports = async (context) => {
 
         menuText += `\n🌟 𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗯𝘆: @ 𝗩𝗢𝗫𝗡𝗘𝗧.𝗜𝗡𝗖.\n`;
 
-        const imageBuffer = fs.readFileSync(getRandomImage());
         const voiceBuffer = fs.readFileSync(getMenuVoice());
+        const thumbnailUrl = getRandomThumbnailUrl(); // Get random image URL
 
-        // Send menu image
+        // Send menu with random thumbnail URL
         await client.sendMessage(m.chat, {
-            image: imageBuffer,
-            caption: menuText,
-            jpegThumbnail: imageBuffer,
+            text: menuText,
             contextInfo: {
                 externalAdReply: {
                     showAdAttribution: false,
                     title: `KANAMBO`,
                     body: `Hi ${m.pushName}`,
-                    thumbnail: imageBuffer,
+                    thumbnailUrl: thumbnailUrl,
                     sourceUrl: `https://github.com/Kanambp/dreaded-v2`,
                     mediaType: 1,
                     renderLargerThumbnail: true
