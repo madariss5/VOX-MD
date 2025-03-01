@@ -93,14 +93,14 @@ function smsg(conn, m, store) {
         text: `\n${text}\n\n─────── ✦ ✧ ✦ ───────\n\n` + 
               `*🤖 BOT NAME:* VOX-MD\n` +
               `*👤 AUTHOR:* KANAMBO\n` +
-              `*⚡ POWERED BY:* ©VOXNET.INC`,
+              `*⚡ POWERED BY:* _*©VOXNET.INC*_`,
         contextInfo: {
           externalAdReply: {
-            title: `KANAMBO V2`,
+            title: `JOIN VOX-MD`,
             body: m.pushName,
             previewType: "PHOTO",
             thumbnail: getRandomImage(), // Set a random image
-            sourceUrl: 'https://github.com/Kanambp/dreaded-v2'
+            sourceUrl: 'https://chat.whatsapp.com/JXIs0m622UHJtN1HoXSnQ3'
           }
         }
       }, 
