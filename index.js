@@ -57,7 +57,7 @@ async function startVOXMD() {
                 await client.readMessages([mek.key]);
             }
 
-            if (!client.public && !mek.key.fromMe && chatUpdate.type === "notify") return;
+            if (mode.toLowerCase() === "private" && !mek.key.fromMe) return;
             let m = smsg(client, mek, store);
             require("./dreaded")(client, m, chatUpdate, store);
         } catch (err) {
