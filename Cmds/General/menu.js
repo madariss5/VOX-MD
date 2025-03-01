@@ -18,6 +18,9 @@ module.exports = async (context) => {
             { name: 'Utils', emoji: '🎭' }
         ];
 
+        // WhatsApp Group Link
+        const groupLink = "https://chat.whatsapp.com/JXIs0m622UHJtN1HoXSnQ3";
+
         // Get a random image from Voxmdgall
         const getRandomThumbnail = () => {
             const assetsPath = path.join(__dirname, '../../Voxmdgall'); 
@@ -51,7 +54,7 @@ module.exports = async (context) => {
         };
 
         // Stylish Menu Text
-        let menuText = `╔════ ⟡ VOX-MD ⟡ ════╗\n`;
+        let menuText = `╔════ ⟡ *VOX-MD* ⟡ ════╗\n`;
         menuText += `       *🎮 𝑾𝑬𝑳𝑪𝑶𝑴𝑬 🎮*\n`;
         menuText += `╚═════════════════╝\n\n`;
         menuText += `👤 *𝑼𝑺𝑬𝑹:* ${m.pushName}\n`;
@@ -83,11 +86,12 @@ module.exports = async (context) => {
 
         menuText += `⚡ *𝗣𝗢𝗪𝗘𝗥𝗘𝗗 𝗕𝗬:* 𝗩𝗢𝗫𝗡𝗘𝗧.𝗜𝗡𝗖.\n`;
         menuText += `━━━━━━━━━━━━━━\n`;
+        menuText += `🌍 *Join Our WhatsApp Group:*\n🔗 ${groupLink}\n`;
 
         const voiceBuffer = getMenuVoice();
         const thumbnailBuffer = getRandomThumbnail(); // Get random image buffer
 
-        // Send menu with image as thumbnail
+        // Send menu with a random image as thumbnail
         await client.sendMessage(m.chat, {
             image: thumbnailBuffer,
             caption: menuText
