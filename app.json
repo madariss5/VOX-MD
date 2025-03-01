@@ -1,0 +1,53 @@
+{
+  "name": "VOX-MD",
+  "description": "This is a simple WhatsApp bot built with Node.js and Baileys with MD support.",
+  "repository": "https://github.com/Vox-Net/VOX-MD.git",
+  "logo": "https://telegra.ph/file/d6dab955fbaa42fce2280.jpg",
+  "keywords": [
+    "bot",
+    "whatsapp",
+    "baileys-md",
+    "whatsapp-bot"
+  ],
+  "env": {
+    "PREFIX": {
+      "description": "Command prefix for the bot",
+      "value": ".",
+      "required": true
+    },
+    "SESSION_DATA": {
+      "description": "Session ID for bot authentication",
+      "required": true
+    },
+    "MODE": {
+      "description": "Bot mode: 'public' or 'private'",
+      "value": "private",
+      "required": false
+    },
+    "AUTO_READ_STATUS": {
+      "description": "Automatically mark messages as read",
+      "value": "true",
+      "required": false
+    },
+    "BOT_NAME": {
+      "description": "Display name for the bot",
+      "value": "VOX-MD",
+      "required": false
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    },
+    {
+      "url": "https://github.com/clhuang/heroku-buildpack-webp-binaries.git"
+    },
+    {
+      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest"
+    }
+  ],
+  "stack": "heroku-24",
+  "scripts": {
+    "postdeploy": "npm install --force"
+  }
+}
