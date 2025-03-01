@@ -1,5 +1,5 @@
 {
-  "name": "VOX-MD",
+  "name": "DREADED-V2",
   "version": "2.0.0",
   "description": "WhatsApp Multi Device Bot",
   "main": "index.js",
@@ -18,13 +18,13 @@
     "bot-md",
     "whatsapp-multi-device"
   ],
-  
-  "author": "KANAMBO",
+  "base": "https://github.com/DikaArdnt/Hisoka-Morou",
+  "author": "Fortunatus",
   "license": "MIT",
   "dependencies": {
          
-      "@whiskeysockets/baileys": "^6.6.0",
-      "dotenv": "^16.3.1",
+  "@whiskeysockets/baileys": "git+https://github.com/Fortunatusmokaya/baileys.git",
+
     
     "@adiwajshing/keyed-db": "^0.2.4",
     "@distube/ytdl-core": "^4.15.1",
@@ -112,4 +112,4 @@
     "url": "https://github.com/Fortunatusmokaya/dreaded-v2/issues"
   },
   "homepage": "https://github.com/Fortunatusmokaya/dreaded-v2#readme"
-  }
+}
