@@ -1,17 +1,10 @@
 const {
-  default: dreadedConnect,
-  useMultiFileAuthState,
-  DisconnectReason,
-  fetchLatestBaileysVersion,
-  makeInMemoryStore,
-  downloadContentFromMessage,
-  jidDecode,
   proto,
   getContentType,
+  jidNormalizedUser, // Correct function for normalizing JIDs
 } = require("@whiskeysockets/baileys");
 const { readFileSync } = require('fs');
 const kali = readFileSync('./dreaded.jpg');
-
 
 function smsg(conn, m, store) {
   if (!m) return m;
@@ -22,8 +15,8 @@ function smsg(conn, m, store) {
     m.chat = m.key.remoteJid;
     m.fromMe = m.key.fromMe;
     m.isGroup = m.chat.endsWith("@g.us");
-    m.sender = conn.decodeJid((m.fromMe && conn.user.id) || m.participant || m.key.participant || m.chat || "");
-    if (m.isGroup) m.participant = conn.decodeJid(m.key.participant) || "";
+    m.sender = jidNormalizedUser((m.fromMe && conn.user.id) || m.participant || m.key.participant || m.chat || "");
+    if (m.isGroup) m.participant = jidNormalizedUser(m.key.participant) || "";
   }
   if (m.message) {
     m.mtype = getContentType(m.message);
@@ -57,8 +50,8 @@ function smsg(conn, m, store) {
       m.quoted.id = m.msg.contextInfo.stanzaId;
       m.quoted.chat = m.msg.contextInfo.remoteJid || m.chat;
       m.quoted.isBaileys = m.quoted.id ? m.quoted.id.startsWith("BAE5") && m.quoted.id.length === 16 : false;
-      m.quoted.sender = conn.decodeJid(m.msg.contextInfo.participant);
-      m.quoted.fromMe = m.quoted.sender === conn.decodeJid(conn.user.id);
+      m.quoted.sender = jidNormalizedUser(m.msg.contextInfo.participant);
+      m.quoted.fromMe = m.quoted.sender === jidNormalizedUser(conn.user.id);
       m.quoted.text = m.quoted.text || m.quoted.caption || m.quoted.conversation || m.quoted.contentText || m.quoted.selectedDisplayText || m.quoted.title || "";
       m.quoted.mentionedJid = m.msg.contextInfo ? m.msg.contextInfo.mentionedJid : [];
       m.getQuotedObj = m.getQuotedMessage = async () => {
@@ -76,71 +69,37 @@ function smsg(conn, m, store) {
         ...(m.isGroup ? { participant: m.quoted.sender } : {}),
       }));
 
-      /**
-       *
-       * @returns
-       */
       m.quoted.delete = () => conn.sendMessage(m.quoted.chat, { delete: vM.key });
 
-      /**
-       *
-       * @param {*} jid
-       * @param {*} forceForward
-       * @param {*} options
-       * @returns
-       */
       m.quoted.copyNForward = (jid, forceForward = false, options = {}) => conn.copyNForward(jid, vM, forceForward, options);
 
-      /**
-       *
-       * @returns
-       */
       m.quoted.download = () => conn.downloadMediaMessage(m.quoted);
     }
   }
   if (m.msg.url) m.download = () => conn.downloadMediaMessage(m.msg);
   m.text = m.msg.text || m.msg.caption || m.message.conversation || m.msg.contentText || m.msg.selectedDisplayText || m.msg.title || "";
-  /**
-   * Reply to this message
-   * @param {String|Object} text
-   * @param {String|false} chatId
-   * @param {Object} options
-   */
 
-
-m.reply = (text, chatId = m.chat, options = {}) => {
-  return conn.sendMessage(chatId, 
-    {
-      text: text,
-      contextInfo: {
-        externalAdReply: {
-          title: `KANAMBO V2`,
-          body: m.pushName,
-          previewType: "PHOTO",
-          thumbnailUrl: 'https://avatars.githubusercontent.com/u/106575586?v=4', 
-          thumbnail: kali, 
-          sourceUrl: 'https://github.com/Kanambp/dreaded-v2'
+  m.reply = (text, chatId = m.chat, options = {}) => {
+    return conn.sendMessage(chatId, 
+      {
+        text: text,
+        contextInfo: {
+          externalAdReply: {
+            title: `KANAMBO V2`,
+            body: m.pushName,
+            previewType: "PHOTO",
+            thumbnailUrl: 'https://avatars.githubusercontent.com/u/106575586?v=4', 
+            thumbnail: kali, 
+            sourceUrl: 'https://github.com/Kanambp/dreaded-v2'
+          }
         }
-      }
-    }, 
-    { quoted: m, ...options }
-  );
-};
+      }, 
+      { quoted: m, ...options }
+    );
+  };
 
-
-  
-  /**
-   * Copy this message
-   */
   m.copy = () => exports.smsg(conn, M.fromObject(M.toObject(m)));
 
-  /**
-   *
-   * @param {*} jid
-   * @param {*} forceForward
-   * @param {*} options
-   * @returns
-   */
   m.copyNForward = (jid = m.chat, forceForward = false, options = {}) => conn.copyNForward(jid, m, forceForward, options);
 
   return m;
