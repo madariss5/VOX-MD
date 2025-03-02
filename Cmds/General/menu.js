@@ -67,7 +67,7 @@ module.exports = async (context) => {
         menuText += `━━━━━━━━━━━━━━\n`;
 
         // Add Read More Effect
-        menuText += `\n\n⏬ *Tap to View More Commands* ⏬\n\n`.repeat(5);
+        menuText += `\n⏬ *Tap to View More Commands* ⏬\n\n`.repeat(5);
 
         // Add command categories
         for (const category of categories) {
