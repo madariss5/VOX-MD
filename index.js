@@ -85,7 +85,7 @@ async function startVOXMD() {
             const getCurrentTimeInNairobi = () => DateTime.now().setZone('Africa/Nairobi').toFormat("hh:mm a");  
 
             let message = `╭═══💠 *VOX-MD BOT* 💠═══╮\n`;  
-            message += `┃ 🤖 *BOT NAME:* ${botname}\n`;  
+            message += `┃   _*BOT STATUS*_: Online✅\n`;  
             message += `┃ 🔓 *MODE:* ${mode.toUpperCase()}\n`;  
             message += `┃ 📝 *PREFIX:* ${prefix}\n`;  
             message += `┃ ⚙️ *COMMANDS:* ${totalCommands}\n`;  
