@@ -8,10 +8,10 @@ module.exports = async (context) => {
             return m.reply("🎵 *Please provide a song name!*\nExample: *.play Alan Walker Faded*");
         }
 
-        // Your YouTube API Key (Replace with your own key)
+        // ✅ Use your YouTube API Key
         const YOUTUBE_API_KEY = "AIzaSyDq8-DaZcV-sARibHL4_7Bkt-kQvhK67-s";
 
-        // Step 1: Search YouTube for the video
+        // 🔍 Step 1: Search YouTube for the video
         const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(text)}&type=video&maxResults=1&key=${YOUTUBE_API_KEY}`;
         
         let searchResponse;
@@ -19,38 +19,37 @@ module.exports = async (context) => {
             searchResponse = await axios.get(searchUrl);
         } catch (error) {
             console.error("❌ YouTube API Error:", error.response?.data || error.message);
-            return m.reply("🚨 *Failed to search YouTube!* Please try again later.");
+            return m.reply("🚨 *YouTube search failed!* Try again later.");
         }
 
-        // Extract video ID
+        // 🎥 Extract video details
         const video = searchResponse.data.items[0];
-        if (!video) {
-            return m.reply("❌ *No results found!* Try another song name.");
-        }
+        if (!video) return m.reply("❌ *No results found!* Try another song.");
+
         const videoId = video.id.videoId;
         const videoTitle = video.snippet.title;
         const videoChannel = video.snippet.channelTitle;
         const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-        // Step 2: Fetch MP3 download link from loader.to
-        const loaderUrl = `https://loader.to/ajax/download.php?url=${encodeURIComponent(youtubeUrl)}&format=mp3`;
-        
+        // 🔽 Step 2: Fetch MP3 download link from Loader.to
+        const loaderUrl = `https://loader.to/ajax/progress.php?url=${encodeURIComponent(youtubeUrl)}&format=mp3`;
+
         let downloadResponse;
         try {
             downloadResponse = await axios.get(loaderUrl);
         } catch (error) {
-            console.error("❌ Download API Error:", error.response?.data || error.message);
-            return m.reply("🚨 *Failed to fetch MP3 download link!* Please try again.");
+            console.error("❌ Loader.to API Error:", error.response?.data || error.message);
+            return m.reply("🚨 *Failed to fetch MP3 link!* Try again.");
         }
 
-        // Extract MP3 download URL
+        // 🔗 Extract MP3 download URL
         const downloadData = downloadResponse.data;
-        if (!downloadData || !downloadData.link) {
-            return m.reply("❌ *Download failed!* Please try another song.");
+        if (!downloadData || !downloadData.download_url) {
+            return m.reply("❌ *Download failed!* Try another song.");
         }
-        const mp3Url = downloadData.link;
+        const mp3Url = downloadData.download_url;
 
-        // Step 3: Send confirmation message
+        // ✅ Step 3: Send Confirmation Message
         let message = `🎶 *Audio Download Ready!*\n\n`;
         message += `📌 *Title:* ${videoTitle}\n`;
         message += `🎤 *Channel:* ${videoChannel}\n`;
@@ -59,7 +58,7 @@ module.exports = async (context) => {
 
         await m.reply(message);
 
-        // Step 4: Send MP3 file to the user
+        // 🎵 Step 4: Send MP3 file to the user
         await client.sendMessage(
             m.chat,
             {
