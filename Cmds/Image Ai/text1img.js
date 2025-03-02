@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 
 module.exports = async (context) => {
-    const { client, m, text1img } = context;
+    const { client, m, text } = context;
 
     // Modern Header
     const header = `╔══ ✨ *AI IMAGE GENERATOR* ✨ ══╗`;
