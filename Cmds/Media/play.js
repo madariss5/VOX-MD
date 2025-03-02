@@ -2,30 +2,37 @@ module.exports = async (context) => {
     const { client, m, text, fetchJson } = context;
 
     try {
-        if (!text) return m.reply("🎵 *Please enter a song name to download!*");
+        if (!text) return m.reply("🎵 *Please provide a YouTube link!*");
 
-        let data = await fetchJson(`https://gtech-api-xtp1.onrender.com/api/search/itunes?apikey=APIKEY&name=${encodeURIComponent(text)}`);
+        let data = await fetchJson(`https://api.ryzendesu.vip/api/downloader/ytmp3?url=${encodeURIComponent(text)}`);
 
-        if (!data || !data.result || !data.result[0]) {
-            return m.reply("❌ *No songs found!*");
+        if (!data || !data.url) {
+            return m.reply("❌ *Failed to retrieve audio!* Please check the link.");
         }
 
-        const { trackName: title, previewUrl: audioUrl, artistName: author } = data.result[0];
+        const { title, author, lengthSeconds, thumbnail, url, quality, filename } = data;
 
-        await m.reply(`🎶 *Downloading:* ${title}\n🎤 *Artist:* ${author}`);
+        let message = `🎶 *Audio Download Ready!*\n\n`;
+        message += `📌 *Title:* ${title}\n`;
+        message += `🎤 *Channel:* ${author}\n`;
+        message += `⏳ *Duration:* ${lengthSeconds} seconds\n`;
+        message += `🔉 *Quality:* ${quality}\n\n`;
+        message += `📥 *Downloading...*`;
+
+        await m.reply(message);
 
         await client.sendMessage(
             m.chat,
             {
-                document: { url: audioUrl },
+                document: { url },
                 mimetype: "audio/mpeg",
-                fileName: `${title}.mp3`,
+                fileName: `${filename}.mp3`,
             },
             { quoted: m }
         );
 
     } catch (error) {
         console.error("API Error:", error.message);
-        m.reply("❌ *Download failed: Unable to retrieve audio.*");
+        m.reply("❌ *Download failed.* Please try again later.");
     }
 };
