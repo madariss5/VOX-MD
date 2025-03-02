@@ -1,7 +1,7 @@
 const {
   BufferJSON, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, proto,
   generateWAMessageContent, generateWAMessage, prepareWAMessageMedia, areJidsSameUser,
-  getContentType, jidNormalizedUser // Correct function to replace client.decodeJid
+  getContentType, jidNormalizedUser
 } = require("@whiskeysockets/baileys");
 
 const fs = require("fs");
@@ -40,7 +40,9 @@ const {
 
 module.exports = dreaded = async (client, m, chatUpdate, store) => {
   try {
-    var body =
+    if (!m || !m.message) return; // Prevent bot from crashing if m is undefined
+
+    let body =
       m.mtype === "conversation"
         ? m.message.conversation
         : m.mtype === "imageMessage"
@@ -49,13 +51,13 @@ module.exports = dreaded = async (client, m, chatUpdate, store) => {
             ? m.message.extendedTextMessage.text
             : "";
 
-    const Tag = (m.mtype == "extendedTextMessage" &&
+    let Tag = (m.mtype == "extendedTextMessage" &&
       m.message.extendedTextMessage.contextInfo != null)
       ? m.message.extendedTextMessage.contextInfo.mentionedJid
       : [];
 
-    var msgDreaded = m.message.extendedTextMessage?.contextInfo?.quotedMessage;
-    var budy = typeof m.text == "string" ? m.text : "";
+    let msgDreaded = m.message.extendedTextMessage?.contextInfo?.quotedMessage;
+    let budy = typeof m.text == "string" ? m.text : "";
 
     const timestamp = speed();
     const dreadedspeed = speed() - timestamp;
@@ -66,14 +68,15 @@ module.exports = dreaded = async (client, m, chatUpdate, store) => {
     const args = body.trim().split(/ +/).slice(1);
     const pushname = m.pushName || "No Name";
 
-    // FIXED: Use jidNormalizedUser() instead of client.decodeJid
+    // Ensure proper bot number recognition
     const botNumber = jidNormalizedUser(client.user.id);
     
     const itsMe = m.sender === botNumber;
-    let text = (q = args.join(" "));
+    let text = args.join(" ");
     const arg = budy.trim().substring(budy.indexOf(" ") + 1);
     const arg1 = arg.trim().substring(arg.indexOf(" ") + 1);
 
+    // Extract Group Admins
     const getGroupAdmins = (participants) => {
       let admins = [];
       for (let i of participants) {
@@ -141,7 +144,11 @@ module.exports = dreaded = async (client, m, chatUpdate, store) => {
     const resolvedCommandName = aliases[commandName] || commandName;
 
     if (commands[resolvedCommandName]) {
-      await commands[resolvedCommandName](context);
+      try {
+        await commands[resolvedCommandName](context);
+      } catch (err) {
+        console.log(`❌ Error executing ${resolvedCommandName}:`, err);
+      }
     }
 
   } catch (err) {
