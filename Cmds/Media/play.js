@@ -1,3 +1,4 @@
+
 const fs = require('fs');
 const path = require('path');
 const fetch = require('node-fetch');
@@ -33,23 +34,27 @@ module.exports = async (context) => {
     client.ultra[m.sender] = {
         result,
         key,
+        chat: m.chat,  // Store chat ID
         timeout: setTimeout(() => {
             client.sendMessage(m.chat, { delete: key });
             delete client.ultra[m.sender];
         }, 150 * 1000),
     };
 
-    // One-time listener for user selection
+    // Listener for user selection
     const messageListener = async ({ messages }) => {
         const msg = messages[0];
-        if (!msg || !msg.message || msg.key.remoteJid !== m.sender) return;
+        if (!msg || !msg.message) return;
+        
+        const sender = msg.key.remoteJid;
+        if (!client.ultra[sender]) return;  // Ignore if sender isn't in selection
 
         const choice = parseInt(msg.message.conversation.trim());
         if (isNaN(choice) || choice < 1 || choice > result.allLinks.length) {
-            return client.sendMessage(msg.key.remoteJid, { text: `⚠️ Choose a number between 1 and ${result.allLinks.length}.` }, { quoted: msg });
+            return client.sendMessage(sender, { text: `⚠️ Choose a number between 1 and ${result.allLinks.length}.` }, { quoted: msg });
         }
 
-        // Remove listener after selection to prevent spam
+        // Stop listening after user selects a song
         client.ev.off('messages.upsert', messageListener);
 
         const selectedUrl = result.allLinks[choice - 1].url;
@@ -80,18 +85,18 @@ module.exports = async (context) => {
 
             const caption = `🎵 *Title:* ${response.title || 'Unknown'}\n👤 *Artist:* ${response.author || 'Unknown'}\n⏳ *Duration:* ${response.duration || 'Unknown'}\n👀 *Views:* ${response.views || '0'}\n📅 *Uploaded on:* ${response.upload || 'Unknown Date'}`;
 
-            await client.sendMessage(msg.key.remoteJid, { audio: fs.readFileSync(audioPath), mimetype: mime.lookup(audioPath) || 'audio/mpeg', caption }, { quoted: msg });
+            await client.sendMessage(sender, { audio: fs.readFileSync(audioPath), mimetype: mime.lookup(audioPath) || 'audio/mpeg', caption }, { quoted: msg });
 
             fs.unlinkSync(videoPath);
             fs.unlinkSync(audioPath);
         } catch (error) {
             console.error('Error fetching video:', error.message);
-            await client.sendMessage(msg.key.remoteJid, { text: '❌ An error occurred while fetching the video. Try again later.' }, { quoted: msg });
+            await client.sendMessage(sender, { text: '❌ An error occurred while fetching the video. Try again later.' }, { quoted: msg });
         }
 
         // Cleanup user selection
-        clearTimeout(client.ultra[msg.key.remoteJid].timeout);
-        delete client.ultra[msg.key.remoteJid];
+        clearTimeout(client.ultra[sender].timeout);
+        delete client.ultra[sender];
     };
 
     // Register listener (removes itself after execution)
@@ -126,4 +131,4 @@ async function fetchWithRetry(url, retries = 3) {
         if (response.ok) return response;
     }
     throw new Error('Failed to fetch media content after retries');
-                                  }
+                               }
