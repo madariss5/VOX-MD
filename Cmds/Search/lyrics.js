@@ -1,28 +1,15 @@
-const axios = require("axios");
+const axios = require('axios');
 
-module.exports = async (context) => {
-    const { client, m, text } = context;
-
-    if (!text) return m.reply("❌ *Provide a song name!*");
-
+module.exports = async (title) => {
     try {
-        const response = await axios.get(`https://api.ryzendesu.vip/api/search/lyrics?query=${encodeURIComponent(text)}`, {
-            headers: {
-                "accept": "application/json"
-            }
-        });
-
+        const response = await axios.get(`https://api.dreaded.site/api/lyrics?title=${encodeURIComponent(title)}`);
         if (response.data && response.data.lyrics) {
-            const lyrics = response.data.lyrics;
-            const maxLength = 4000; // WhatsApp message limit
-            const formattedLyrics = lyrics.length > maxLength ? lyrics.substring(0, maxLength) + "...\n\n🔗 *Lyrics too long?* Try searching online!" : lyrics;
-
-            await client.sendMessage(m.chat, { text: `🎶 *Lyrics for:* _${text}_\n\n${formattedLyrics}` }, { quoted: m });
+            return response.data.lyrics;
         } else {
-            m.reply(`❌ *No lyrics found for:* _${text}_`);
+            return "❌ Lyrics not found!";
         }
     } catch (error) {
-        console.error("Error fetching lyrics:", error);
-        m.reply("⚠️ *Error fetching lyrics. Try again later!*");
+        console.error("Error fetching lyrics:", error.message);
+        return "❌ Failed to retrieve lyrics. Please try again later.";
     }
 };
