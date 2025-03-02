@@ -2,6 +2,11 @@ const fetch = require("node-fetch");
 
 module.exports = async (client, m, text) => {
     try {
+        if (!m || !m.chat) {
+            console.error("❌ Error: 'm' is undefined or missing 'chat'.");
+            return;
+        }
+
         if (!text) {
             return client.sendMessage(m.chat, { text: "⚠️ *Provide a prompt for image generation!*\n\nExample:\n`.text2img anime girl with pink hair`" }, { quoted: m });
         }
