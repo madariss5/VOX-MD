@@ -39,15 +39,18 @@ module.exports = async (context) => {
         }, 150 * 1000),
     };
 
-    // Listen for a one-time user response
-    client.ev.on('messages.upsert', async ({ messages }) => {
+    // One-time listener for user selection
+    const messageListener = async ({ messages }) => {
         const msg = messages[0];
-        if (!msg || !msg.message || !client.ultra[msg.key.remoteJid]) return;
+        if (!msg || !msg.message || msg.key.remoteJid !== m.sender) return;
 
         const choice = parseInt(msg.message.conversation.trim());
         if (isNaN(choice) || choice < 1 || choice > result.allLinks.length) {
             return client.sendMessage(msg.key.remoteJid, { text: `⚠️ Choose a number between 1 and ${result.allLinks.length}.` }, { quoted: msg });
         }
+
+        // Remove listener after selection to prevent spam
+        client.ev.off('messages.upsert', messageListener);
 
         const selectedUrl = result.allLinks[choice - 1].url;
         try {
@@ -89,7 +92,10 @@ module.exports = async (context) => {
         // Cleanup user selection
         clearTimeout(client.ultra[msg.key.remoteJid].timeout);
         delete client.ultra[msg.key.remoteJid];
-    });
+    };
+
+    // Register listener (removes itself after execution)
+    client.ev.on('messages.upsert', messageListener);
 };
 
 // Search for music on YouTube
@@ -120,4 +126,4 @@ async function fetchWithRetry(url, retries = 3) {
         if (response.ok) return response;
     }
     throw new Error('Failed to fetch media content after retries');
-}
+                                  }
