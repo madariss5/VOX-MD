@@ -4,26 +4,24 @@ module.exports = async (context) => {
     const { client, m, args } = context;
 
     try {
-        // Validate input
-        if (!args.length) {
-            return m.reply("❌ Please provide a prompt!\n\nExample: `.text2img A cyberpunk warrior with neon lights`");
-        }
-
-        const prompt = args.join(" ");
+        const prompt = args.join(" ") || "anime girl"; // Default prompt
         const apiUrl = `https://api.ryzendesu.vip/api/ai/text2img?prompt=${encodeURIComponent(prompt)}`;
 
-        // Fetch image from the API
-        const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
-        const imageBuffer = Buffer.from(response.data, "binary");
+        console.log(`Requesting: ${apiUrl}`);
 
-        // Send generated image
+        const response = await axios.get(apiUrl);
+        if (response.status !== 200) throw new Error(`API Error: ${response.status}`);
+
+        const imageUrl = response.data; // Ensure this matches the actual API response structure
+        console.log(`Image URL: ${imageUrl}`);
+
         await client.sendMessage(m.chat, {
-            image: imageBuffer,
-            caption: `✨ *AI-Generated Image*\n🎨 *Prompt:* ${prompt}`,
+            image: { url: imageUrl },
+            caption: `🖼️ *AI-Generated Image*\nPrompt: ${prompt}`
         }, { quoted: m });
 
     } catch (error) {
-        console.error(error);
-        m.reply("❌ Failed to generate an image. Please try again later!");
+        console.error("Error in text2img:", error);
+        m.reply("❌ Failed to generate image. Check logs for details.");
     }
 };
