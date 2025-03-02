@@ -1,27 +1,29 @@
-const fetch = require("node-fetch");
+const axios = require('axios');
 
-module.exports = async (client, m, text) => {
+module.exports = async (context) => {
+    const { client, m, args } = context;
+
     try {
-        if (!m || !m.chat) {
-            console.error("❌ Error: 'm' is undefined or missing 'chat'.");
-            return;
+        // Validate input
+        if (!args.length) {
+            return m.reply("❌ Please provide a prompt!\n\nExample: `.text2img A cyberpunk warrior with neon lights`");
         }
 
-        if (!text) {
-            return client.sendMessage(m.chat, { text: "⚠️ *Provide a prompt for image generation!*\n\nExample:\n`.text2img anime girl with pink hair`" }, { quoted: m });
-        }
+        const prompt = args.join(" ");
+        const apiUrl = `https://api.ryzendesu.vip/api/ai/text2img?prompt=${encodeURIComponent(prompt)}`;
 
-        await client.sendMessage(m.chat, { text: "⏳ *Generating AI image... Please wait.*" }, { quoted: m });
+        // Fetch image from the API
+        const response = await axios.get(apiUrl, { responseType: 'arraybuffer' });
+        const imageBuffer = Buffer.from(response.data, "binary");
 
-        const apiUrl = `https://api.ryzendesu.vip/api/ai/text2img?prompt=${encodeURIComponent(text)}`;
-
-        let response = await fetch(apiUrl);
-        let imageBuffer = await response.buffer();
-
-        await client.sendMessage(m.chat, { image: imageBuffer, caption: "✨ *AI-Generated Image* ✨" }, { quoted: m });
+        // Send generated image
+        await client.sendMessage(m.chat, {
+            image: imageBuffer,
+            caption: `✨ *AI-Generated Image*\n🎨 *Prompt:* ${prompt}`,
+        }, { quoted: m });
 
     } catch (error) {
         console.error(error);
-        client.sendMessage(m.chat, { text: "⚠️ *Failed to generate AI image.*\nPlease try again later." }, { quoted: m });
+        m.reply("❌ Failed to generate an image. Please try again later!");
     }
 };
