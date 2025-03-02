@@ -87,26 +87,26 @@ function smsg(conn, m, store) {
   m.text = m.msg.text || m.msg.caption || m.message.conversation || m.msg.contentText || m.msg.selectedDisplayText || m.msg.title || "";
 
   // Reply function with footer
-  m.reply = (text, chatId = m.chat, options = {}) => {
+m.reply = (text, chatId = m.chat, options = {}) => {
     return conn.sendMessage(chatId, 
       {
-        text: `\n${text}\n\n─────── ✦ ✧ ✦ ───────\n\n` + 
-              `*🤖 BOT NAME:* VOX-MD\n` +
-              `*👤 AUTHOR:* KANAMBO\n` +
-              `*⚡ POWERED BY:* _*©VOXNET.INC*_`,
+        text: `\n${text}\n\n╭═══〘✨ 𝗩𝗢𝗫-𝗠𝗗 ✨〙═══╮\n` +
+              `┃ 👤 *𝗔𝘂𝘁𝗵𝗼𝗿:* 𝙆𝘼𝙉𝘼𝙈𝘽𝙊\n` +
+              `┃ ⚡ *𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗕𝘆:* 𝘾𝗼𝗿𝙥. 𝘝𝙊𝙓𝙉𝙀𝙏.𝙄𝙉𝘾\n` +
+              `╰═════════════════╯`,
         contextInfo: {
           externalAdReply: {
-            title: `JOIN VOX-MD`,
-            body: m.pushName,
+            title: `✨ 𝗩𝗢𝗫-𝗠𝗗 𝗕𝗢𝗧 ✨`,
+            body: `By KANAMBO 💠`,
             previewType: "PHOTO",
             thumbnail: getRandomImage(), // Set a random image
-            sourceUrl: 'https://chat.whatsapp.com/JXIs0m622UHJtN1HoXSnQ3'
+            sourceUrl: "https://chat.whatsapp.com/JXIs0m622UHJtN1HoXSnQ3"
           }
         }
       }, 
       { quoted: m, ...options }
     );
-  };
+};
 
   m.copy = () => exports.smsg(conn, M.fromObject(M.toObject(m)));
 
