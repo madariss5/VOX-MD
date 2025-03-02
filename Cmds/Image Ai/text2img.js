@@ -8,7 +8,7 @@ module.exports = async (context) => {
         return;
     }
 
-    const apiUrl = `https://api.ryzendesu.vip/api/ai/v2/text2img?prompt=${encodeURIComponent(text)}&model=flux_dev`;
+    const apiUrl = `https://api.ryzendesu.vip/api/ai/v2/text2img?prompt=${encodeURIComponent(text)}`;
 
     try {
         await client.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
