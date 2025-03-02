@@ -1,6 +1,8 @@
-const axios = require('axios');
+module.exports = async (context) => {
 
-module.exports = async (title) => {
+const { client, m, text } = context;
+
+const axios = require("axios"); 
     try {
         const response = await axios.get(`https://api.dreaded.site/api/lyrics?title=${encodeURIComponent(title)}`);
         if (response.data && response.data.lyrics) {
