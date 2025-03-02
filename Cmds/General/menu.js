@@ -9,6 +9,7 @@ module.exports = async (context) => {
         const categories = [
             { name: 'AI', emoji: '🤖' },
             { name: 'General', emoji: '✍️' },
+            { name: 'Animu', emoji: '🐺' },
             { name: 'Media', emoji: '🎥' },
             { name: 'Search', emoji: '🔍' },
             { name: 'Editting', emoji: '✂️' },
