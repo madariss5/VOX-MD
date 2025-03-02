@@ -1,24 +1,46 @@
-const axios = require('axios');
-const fs = require('fs');
+const axios = require("axios");
+const fs = require("fs");
+const path = require("path");
 
-const generateImage = async (prompt) => {
-    try {
-        const response = await axios.get(`https://api.ryzendesu.vip/api/ai/text2img`, {
-            params: { prompt: prompt },
-            headers: {
-                'Accept': 'image/png',
-                'User-Agent': 'VOX-MD-BOT/1.0' // Add a User-Agent to bypass Cloudflare
-            },
-            responseType: 'arraybuffer' // Get binary data
-        });
+module.exports = {
+    name: "text2img",
+    description: "Generates an AI image based on a text prompt",
+    async execute(client, message, args) {
+        try {
+            if (!args.length) {
+                return message.reply("❌ *Please provide a prompt for the AI image!*");
+            }
 
-        // Save image as a file (optional)
-        fs.writeFileSync('output.png', response.data);
-        console.log('Image saved as output.png');
-    } catch (error) {
-        console.error('Error fetching image:', error.response ? error.response.data : error.message);
+            const prompt = encodeURIComponent(args.join(" "));
+            const apiUrl = `https://api.ryzendesu.vip/api/ai/text2img?prompt=${prompt}`;
+            const headers = {
+                "Accept": "image/png"
+            };
+
+            // Fetch image from API
+            const response = await axios.get(apiUrl, { headers, responseType: "arraybuffer" });
+
+            if (response.status !== 200) {
+                return message.reply("⚠️ *Failed to generate image. Please try again!*");
+            }
+
+            // Save the image temporarily
+            const imagePath = path.join(__dirname, "generated.png");
+            fs.writeFileSync(imagePath, response.data);
+
+            // Send the image as a document
+            await client.sendMessage(message.key.remoteJid, {
+                document: fs.readFileSync(imagePath),
+                mimetype: "image/png",
+                fileName: "AI_Image.png",
+                caption: `✨ *Here is your AI-generated image!*`
+            });
+
+            // Delete the image after sending
+            fs.unlinkSync(imagePath);
+        } catch (error) {
+            console.error("❌ Error in text2img:", error);
+            message.reply("❌ *An error occurred while generating the image.*");
+        }
     }
 };
-
-// Example Usage
-generateImage('a girl with glasses pink short hair with uniform and blushing');
