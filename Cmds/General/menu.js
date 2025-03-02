@@ -53,10 +53,10 @@ module.exports = async (context) => {
             return DateTime.now().setZone('Africa/Nairobi').toLocaleString(DateTime.TIME_SIMPLE);
         };
 
-        // Stylish Menu Text with Read More
-        let menuText = `╔════ ⟡ *VOX-MD* ⟡ ════╗\n`;
-        menuText += `       *🎮 𝑾𝑬𝑳𝑪𝑶𝑴𝑬 🎮*\n`;
-        menuText += `╚═════════════════╝\n`;
+        // Stylish Menu Text
+        let menuText = `┏━━━━━━ ❨ *VOX-MD* ❩ ━━━━━━┓\n`;
+        menuText += `       🎮 *𝑾𝑬𝑳𝑪𝑶𝑴𝑬* 🎮\n`;
+        menuText += `┗━━━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
         menuText += `👤 *𝑼𝑺𝑬𝑹:* ${m.pushName}\n`;
         menuText += `🤖 *𝑩𝑶𝑻:* ${botname}\n`;
         menuText += `📝 *𝑪𝑶𝑴𝑴𝑨𝑵𝑫𝑺:* ${totalCommands}\n`;
@@ -67,7 +67,7 @@ module.exports = async (context) => {
         menuText += `━━━━━━━━━━━━━━\n`;
 
         // Add Read More Effect
-        menuText += `\n\n\u200B`.repeat(10);
+        menuText += `\n\n⏬ *Tap to View More Commands* ⏬\n\n`.repeat(5);
 
         // Add command categories
         for (const category of categories) {
@@ -76,12 +76,12 @@ module.exports = async (context) => {
 
             const commandFiles = fs.readdirSync(categoryPath).filter(file => file.endsWith('.js'));
 
-            menuText += `🌟 *${category.name.toUpperCase()}* ${category.emoji}\n`;
-            menuText += `══════════════\n`;
+            menuText += `\n⭐ *${category.name.toUpperCase()}* ${category.emoji}\n`;
+            menuText += `━━━━━━━━━━━━━━\n`;
 
             for (const file of commandFiles) {
                 const commandName = file.replace('.js', '');
-                menuText += `  ➤ 🔹 *${prefix}${commandName}*\n`;
+                menuText += `➤ 🔹 *${prefix}${commandName}*\n`;
             }
 
             menuText += '\n';
