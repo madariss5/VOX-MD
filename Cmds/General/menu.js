@@ -53,7 +53,7 @@ module.exports = async (context) => {
             return DateTime.now().setZone('Africa/Nairobi').toLocaleString(DateTime.TIME_SIMPLE);
         };
 
-        // Stylish Menu Text
+        // Stylish Menu Text with Read More
         let menuText = `╔════ ⟡ *VOX-MD* ⟡ ════╗\n`;
         menuText += `       *🎮 𝑾𝑬𝑳𝑪𝑶𝑴𝑬 🎮*\n`;
         menuText += `╚═════════════════╝\n`;
@@ -65,6 +65,9 @@ module.exports = async (context) => {
         menuText += `🔓 *𝑴𝑶𝑫𝑬:* ${mode}\n`;
         menuText += `📚 *𝑳𝑰𝑩𝑹𝑨𝒓𝒀:* Baileys\n`;
         menuText += `━━━━━━━━━━━━━━\n`;
+
+        // Add Read More Effect
+        menuText += `\n\n\u200B`.repeat(10);
 
         // Add command categories
         for (const category of categories) {
