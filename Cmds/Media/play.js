@@ -8,10 +8,10 @@ module.exports = async (context) => {
             return m.reply("🎵 *Please provide a song name!*\nExample: *.play Alan Walker Faded*");
         }
 
-        // ✅ Use your YouTube API Key
+        // Your YouTube API Key (Replace with your actual key)
         const YOUTUBE_API_KEY = "AIzaSyDq8-DaZcV-sARibHL4_7Bkt-kQvhK67-s";
 
-        // 🔍 Step 1: Search YouTube for the video
+        // Step 1: Search YouTube for the video
         const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(text)}&type=video&maxResults=1&key=${YOUTUBE_API_KEY}`;
         
         let searchResponse;
@@ -19,37 +19,40 @@ module.exports = async (context) => {
             searchResponse = await axios.get(searchUrl);
         } catch (error) {
             console.error("❌ YouTube API Error:", error.response?.data || error.message);
-            return m.reply("🚨 *YouTube search failed!* Try again later.");
+            return m.reply("🚨 *Failed to search YouTube!* Please try again later.");
         }
 
-        // 🎥 Extract video details
+        // Extract video ID
         const video = searchResponse.data.items[0];
-        if (!video) return m.reply("❌ *No results found!* Try another song.");
-
+        if (!video) {
+            return m.reply("❌ *No results found!* Try another song name.");
+        }
         const videoId = video.id.videoId;
         const videoTitle = video.snippet.title;
         const videoChannel = video.snippet.channelTitle;
         const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-        // 🔽 Step 2: Fetch MP3 download link from Loader.to
-        const loaderUrl = `https://loader.to/ajax/progress.php?url=${encodeURIComponent(youtubeUrl)}&format=mp3`;
+        // Step 2: Fetch MP3 download link from api.ryzendesu.vip
+        const downloadUrl = `https://api.ryzendesu.vip/api/downloader/ytmp3?url=${encodeURIComponent(youtubeUrl)}`;
 
         let downloadResponse;
         try {
-            downloadResponse = await axios.get(loaderUrl);
+            downloadResponse = await axios.get(downloadUrl, {
+                headers: { "Accept": "application/json" }
+            });
         } catch (error) {
-            console.error("❌ Loader.to API Error:", error.response?.data || error.message);
-            return m.reply("🚨 *Failed to fetch MP3 link!* Try again.");
+            console.error("❌ Download API Error:", error.response?.data || error.message);
+            return m.reply("🚨 *Failed to fetch MP3 download link!* Please try again.");
         }
 
-        // 🔗 Extract MP3 download URL
+        // Extract MP3 download URL
         const downloadData = downloadResponse.data;
-        if (!downloadData || !downloadData.download_url) {
-            return m.reply("❌ *Download failed!* Try another song.");
+        if (!downloadData || !downloadData.url) {
+            return m.reply("❌ *Download failed!* Please try another song.");
         }
-        const mp3Url = downloadData.download_url;
+        const mp3Url = downloadData.url;
 
-        // ✅ Step 3: Send Confirmation Message
+        // Step 3: Send confirmation message
         let message = `🎶 *Audio Download Ready!*\n\n`;
         message += `📌 *Title:* ${videoTitle}\n`;
         message += `🎤 *Channel:* ${videoChannel}\n`;
@@ -58,7 +61,7 @@ module.exports = async (context) => {
 
         await m.reply(message);
 
-        // 🎵 Step 4: Send MP3 file to the user
+        // Step 4: Send MP3 file to the user
         await client.sendMessage(
             m.chat,
             {
