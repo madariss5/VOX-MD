@@ -39,11 +39,14 @@ module.exports = async (context) => {
         }, 150 * 1000),
     };
 
-    client.once('message', async (msg) => {
-        if (!client.ultra[msg.sender]) return;
-        const choice = parseInt(msg.text.trim());
-        if (choice < 1 || choice > result.allLinks.length) {
-            return client.sendMessage(msg.chat, { text: `⚠️ Choose a number between 1 and ${result.allLinks.length}.` }, { quoted: msg });
+    // Listen for a one-time user response
+    client.ev.on('messages.upsert', async ({ messages }) => {
+        const msg = messages[0];
+        if (!msg || !msg.message || !client.ultra[msg.key.remoteJid]) return;
+
+        const choice = parseInt(msg.message.conversation.trim());
+        if (isNaN(choice) || choice < 1 || choice > result.allLinks.length) {
+            return client.sendMessage(msg.key.remoteJid, { text: `⚠️ Choose a number between 1 and ${result.allLinks.length}.` }, { quoted: msg });
         }
 
         const selectedUrl = result.allLinks[choice - 1].url;
@@ -74,19 +77,22 @@ module.exports = async (context) => {
 
             const caption = `🎵 *Title:* ${response.title || 'Unknown'}\n👤 *Artist:* ${response.author || 'Unknown'}\n⏳ *Duration:* ${response.duration || 'Unknown'}\n👀 *Views:* ${response.views || '0'}\n📅 *Uploaded on:* ${response.upload || 'Unknown Date'}`;
 
-            await client.sendMessage(msg.chat, { audio: fs.readFileSync(audioPath), mimetype: mime.lookup(audioPath) || 'audio/mpeg', caption }, { quoted: msg });
+            await client.sendMessage(msg.key.remoteJid, { audio: fs.readFileSync(audioPath), mimetype: mime.lookup(audioPath) || 'audio/mpeg', caption }, { quoted: msg });
 
             fs.unlinkSync(videoPath);
             fs.unlinkSync(audioPath);
         } catch (error) {
             console.error('Error fetching video:', error.message);
-            await client.sendMessage(msg.chat, { text: '❌ An error occurred while fetching the video. Try again later.' }, { quoted: msg });
+            await client.sendMessage(msg.key.remoteJid, { text: '❌ An error occurred while fetching the video. Try again later.' }, { quoted: msg });
         }
 
-        delete client.ultra[msg.sender];
+        // Cleanup user selection
+        clearTimeout(client.ultra[msg.key.remoteJid].timeout);
+        delete client.ultra[msg.key.remoteJid];
     });
 };
 
+// Search for music on YouTube
 async function searchAndDownloadMusic(query) {
     try {
         const { videos } = await yts(query);
@@ -107,10 +113,11 @@ async function searchAndDownloadMusic(query) {
     }
 }
 
+// Fetch with retry mechanism
 async function fetchWithRetry(url, retries = 3) {
     for (let i = 0; i < retries; i++) {
         const response = await fetch(url);
         if (response.ok) return response;
     }
     throw new Error('Failed to fetch media content after retries');
-  }
+}
