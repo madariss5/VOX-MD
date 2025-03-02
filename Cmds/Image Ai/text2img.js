@@ -1,27 +1,24 @@
 const axios = require('axios');
+const fs = require('fs');
 
-module.exports = async (context) => {
-    const { client, m, args } = context;
-
+const generateImage = async (prompt) => {
     try {
-        const prompt = args.join(" ") || "anime girl"; // Default prompt
-        const apiUrl = `https://api.ryzendesu.vip/api/ai/text2img?prompt=${encodeURIComponent(prompt)}`;
+        const response = await axios.get(`https://api.ryzendesu.vip/api/ai/text2img`, {
+            params: { prompt: prompt },
+            headers: {
+                'Accept': 'image/png',
+                'User-Agent': 'VOX-MD-BOT/1.0' // Add a User-Agent to bypass Cloudflare
+            },
+            responseType: 'arraybuffer' // Get binary data
+        });
 
-        console.log(`Requesting: ${apiUrl}`);
-
-        const response = await axios.get(apiUrl);
-        if (response.status !== 200) throw new Error(`API Error: ${response.status}`);
-
-        const imageUrl = response.data; // Ensure this matches the actual API response structure
-        console.log(`Image URL: ${imageUrl}`);
-
-        await client.sendMessage(m.chat, {
-            image: { url: imageUrl },
-            caption: `🖼️ *AI-Generated Image*\nPrompt: ${prompt}`
-        }, { quoted: m });
-
+        // Save image as a file (optional)
+        fs.writeFileSync('output.png', response.data);
+        console.log('Image saved as output.png');
     } catch (error) {
-        console.error("Error in text2img:", error);
-        m.reply("❌ Failed to generate image. Check logs for details.");
+        console.error('Error fetching image:', error.response ? error.response.data : error.message);
     }
 };
+
+// Example Usage
+generateImage('a girl with glasses pink short hair with uniform and blushing');
