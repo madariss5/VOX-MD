@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-module.exports = async (client, m, args) => {
+module.exports = async (client, m, text) => {
     try {
         let text = args.join(" ");
         if (!text) {
