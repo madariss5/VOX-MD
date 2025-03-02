@@ -1,17 +1,30 @@
 const axios = require("axios");
+const fetch = require("node-fetch");
 
 module.exports = async (context) => {
     const { client, m, text } = context;
 
+    let teks = text ? text : m.quoted && m.quoted.text ? m.quoted.text : '';
+    if (!teks) throw '✳️ Enter the name of the song';
+
     try {
-        const response = await axios.get(`https://api.dreaded.site/api/lyrics?title=${encodeURIComponent(text)}`);
-        if (response.data && response.data.lyrics) {
-            return response.data.lyrics;
-        } else {
-            return "❌ Lyrics not found!";
-        }
-    } catch (error) {
-        console.error("Error fetching lyrics:", error.message);
-        return "❌ Failed to retrieve lyrics. Please try again later.";
+        let res = await fetch(`https://some-random-api.com/lyrics?title=${encodeURIComponent(teks)}`);
+        if (!res.ok) throw await res.text();
+
+        let json = await res.json();
+        if (!json.lyrics) throw '❌ Lyrics not found!';
+
+        await client.sendFile(
+            m.chat,
+            json.thumbnail.genius || '',
+            null,
+            `▢ *${json.title}*\n*${json.author}*\n\n${json.lyrics}`,
+            m
+        );
+
+        m.react('✅');
+    } catch (e) {
+        console.error('Error fetching lyrics:', e);
+        m.react('❌');
     }
 };
