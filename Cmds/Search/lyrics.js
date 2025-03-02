@@ -6,13 +6,15 @@ module.exports = async (context) => {
     if (!text) return m.reply("❌ *Provide a song name!*");
 
     try {
-        const response = await axios.get(`https://api.ryzendesu.vip/api/search/lyrics?query=${encodeURIComponent(text)}`);
+        const response = await axios.get(`https://api.ryzendesu.vip/api/search/lyrics?query=${encodeURIComponent(text)}`, {
+            headers: {
+                "accept": "application/json"
+            }
+        });
 
         if (response.data && response.data.lyrics) {
             const lyrics = response.data.lyrics;
-
-            // Trimming long lyrics to prevent WhatsApp message limit issues
-            const maxLength = 4000; // WhatsApp limit
+            const maxLength = 4000; // WhatsApp message limit
             const formattedLyrics = lyrics.length > maxLength ? lyrics.substring(0, maxLength) + "...\n\n🔗 *Lyrics too long?* Try searching online!" : lyrics;
 
             await client.sendMessage(m.chat, { text: `🎶 *Lyrics for:* _${text}_\n\n${formattedLyrics}` }, { quoted: m });
