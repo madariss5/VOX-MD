@@ -1,37 +1,59 @@
-const axios = require('axios');
+const axios = require("axios");
 
 module.exports = async (context) => {
-    const { client, m, text } = context;
+    const { client, m, text, fetchJson } = context;
 
     try {
-        if (!text) return m.reply("🎵 *Please provide a YouTube link!*");
+        if (!text) return m.reply("🎵 *Please provide a song name!*");
 
-        const apiUrl = `https://loader.to/ajax/download.php?url=${encodeURIComponent(text)}&format=mp3`;
+        // Fetch YouTube video URL based on search query
+        let searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(text)}&key=YOUR_YOUTUBE_API_KEY&type=video&maxResults=1`;
 
-        let data;
+        let searchData;
         try {
-            const response = await axios.get(apiUrl, {
+            searchData = await fetchJson(searchUrl);
+            console.log("✅ YouTube Search Response:", JSON.stringify(searchData, null, 2));
+        } catch (searchError) {
+            console.error("❌ YouTube Search API Error:", searchError.message);
+            return m.reply("🚨 *Failed to search YouTube!* Please try again.");
+        }
+
+        if (!searchData || !searchData.items || searchData.items.length === 0) {
+            return m.reply("❌ *No results found!* Please try a different song.");
+        }
+
+        const videoId = searchData.items[0].id.videoId;
+        const videoTitle = searchData.items[0].snippet.title;
+        const videoChannel = searchData.items[0].snippet.channelTitle;
+        const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
+        // Fetch MP3 download link
+        const downloadUrl = `https://loader.to/ajax/download.php?url=${encodeURIComponent(videoUrl)}&format=mp3`;
+
+        let downloadData;
+        try {
+            const response = await axios.get(downloadUrl, {
                 headers: {
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
                 }
             });
-            data = response.data;
-            console.log("✅ API Response:", JSON.stringify(data, null, 2));
-        } catch (apiError) {
-            console.error("❌ API Error:", apiError.message);
-            return m.reply("🚨 *API request failed!* Please try again later.");
+            downloadData = response.data;
+            console.log("✅ Download API Response:", JSON.stringify(downloadData, null, 2));
+        } catch (downloadError) {
+            console.error("❌ Download API Error:", downloadError.message);
+            return m.reply("🚨 *Failed to retrieve download link!* Please try again.");
         }
 
-        if (!data || !data.download_url) {
-            return m.reply("❌ *Failed to retrieve audio!* Please check the link.");
+        if (!downloadData || !downloadData.link) {
+            return m.reply("❌ *Download link not found!* Try another song.");
         }
 
-        const { title, author, length, thumbnail, download_url } = data;
+        const mp3Url = downloadData.link;
 
         let message = `🎶 *Audio Download Ready!*\n\n`;
-        message += `📌 *Title:* ${title}\n`;
-        message += `🎤 *Channel:* ${author}\n`;
-        message += `⏳ *Duration:* ${length} seconds\n\n`;
+        message += `📌 *Title:* ${videoTitle}\n`;
+        message += `🎤 *Channel:* ${videoChannel}\n`;
+        message += `🔗 *YouTube Link:* ${videoUrl}\n\n`;
         message += `📥 *Downloading...*`;
 
         await m.reply(message);
@@ -39,9 +61,9 @@ module.exports = async (context) => {
         await client.sendMessage(
             m.chat,
             {
-                document: { url: download_url },
+                document: { url: mp3Url },
                 mimetype: "audio/mpeg",
-                fileName: `${title}.mp3`,
+                fileName: `${videoTitle}.mp3`,
             },
             { quoted: m }
         );
