@@ -66,9 +66,6 @@ module.exports = async (context) => {
         menuText += `📚 *𝑳𝑰𝑩𝑹𝑨𝒓𝒀:* Baileys\n`;
         menuText += `━━━━━━━━━━━━━━\n`;
 
-        // Add Read More Effect
-        menuText += `\n⏬ *Tap to View More Commands* ⏬\n\n`.repeat(5);
-
         // Add command categories
         for (const category of categories) {
             const categoryPath = path.join(__dirname, `../${category.name}`);
