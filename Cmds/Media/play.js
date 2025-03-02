@@ -4,7 +4,17 @@ module.exports = async (context) => {
     try {
         if (!text) return m.reply("🎵 *Please provide a YouTube link!*");
 
-        let data = await fetchJson(`https://api.ryzendesu.vip/api/downloader/ytmp3?url=${encodeURIComponent(text)}`);
+        let data;
+        try {
+            data = await fetchJson(`https://api.ryzendesu.vip/api/downloader/ytmp3?url=${encodeURIComponent(text)}`, {
+                headers: { "Accept": "application/json" } // ✅ Added header
+            });
+
+            console.log("✅ API Response:", JSON.stringify(data, null, 2)); // Debugging
+        } catch (apiError) {
+            console.error("❌ API Error:", apiError.message);
+            return m.reply("🚨 *API request failed!* Please try again later.");
+        }
 
         if (!data || !data.url) {
             return m.reply("❌ *Failed to retrieve audio!* Please check the link.");
@@ -32,7 +42,7 @@ module.exports = async (context) => {
         );
 
     } catch (error) {
-        console.error("API Error:", error.message);
+        console.error("General Error:", error.message);
         m.reply("❌ *Download failed.* Please try again later.");
     }
 };
