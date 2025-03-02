@@ -1,81 +1,67 @@
-const fs = require('fs');
-const path = require('path');
-const fetch = require('node-fetch');
-const yts = require('youtube-yts');
-const ffmpeg = require('fluent-ffmpeg');
-const mime = require('mime-types');
-const { promisify } = require('util');
-const { pipeline } = require('stream');
-const { ytmp4 } = require('api-qasim');
+const fetch = require("node-fetch");
+const yts = require("youtube-yts");
+const { ytmp4 } = require("api-qasim");
+const fs = require("fs");
+const path = require("path");
+const { promisify } = require("util");
+const { pipeline } = require("stream");
+const ffmpeg = require("fluent-ffmpeg");
+const mime = require("mime-types");
 
 const streamPipeline = promisify(pipeline);
-const customTmpDir = path.join(__dirname, 'custom_tmp');
+const customTmpDir = path.join(__dirname, "custom_tmp");
 if (!fs.existsSync(customTmpDir)) fs.mkdirSync(customTmpDir);
 
 module.exports = async (context) => {
     const { client, m, text } = context;
-    if (!text) return client.sendMessage(m.chat, { text: '✳️ Enter a song name to search!' }, { quoted: m });
+    if (!text) return client.sendMessage(m.chat, { text: "✳️ Enter a song name to search!" }, { quoted: m });
 
-    client.ultra = client.ultra || {};
-    await client.sendMessage(m.chat, { react: { text: '🎶', key: m.key } });
+    await client.sendMessage(m.chat, { react: { text: "🎶", key: m.key } });
 
-    const result = await searchAndDownloadMusic(text);
-    if (!result.allLinks.length) {
-        return client.sendMessage(m.chat, { text: '❌ No results found.' }, { quoted: m });
-    }
-
-    const infoText = `🎵 Reply with a number to select a song:\n\n`;
-    const orderedLinks = result.allLinks.map((link, index) => `*${index + 1}.* ${link.title}`).join('\n\n');
-    const fullText = `${infoText}\n${orderedLinks}`;
-
-    const { key } = await client.sendMessage(m.chat, { text: fullText }, { quoted: m });
-
-    client.ultra[m.sender] = {
-        result,
-        key,
-        chatId: m.chat,
-        timeout: setTimeout(() => {
-            client.sendMessage(m.chat, { delete: key });
-            delete client.ultra[m.sender];
-        }, 150 * 1000),
-    };
-};
-
-// ✅ Fix the export and function name issue
-async function handleSongSelection(client, msg) {
-    if (!client.ultra || !client.ultra[msg.sender]) return;
-    
-    const userData = client.ultra[msg.sender];
-    const choice = parseInt(msg.text.trim());
-    
-    if (isNaN(choice) || choice < 1 || choice > userData.result.allLinks.length) {
-        return client.sendMessage(msg.chat, { text: `⚠️ Choose a number between 1 and ${userData.result.allLinks.length}.` }, { quoted: msg });
-    }
-
-    delete client.ultra[msg.sender];
-    
-    const selectedUrl = userData.result.allLinks[choice - 1].url;
     try {
-        const response = await ytmp4(selectedUrl);
-        if (!response || !response.video) throw new Error('No video URL found.');
+        const searchResults = await yts(text);
+        if (!searchResults.videos.length) {
+            return client.sendMessage(m.chat, { text: "❌ No results found." }, { quoted: m });
+        }
+
+        const video = searchResults.videos[0];
+        const response = await ytmp4(video.url);
+        if (!response || !response.video) throw new Error("No video URL found.");
 
         const videoUrl = response.video;
+        const videoPath = path.join(customTmpDir, "video.mp4");
+        const audioPath = path.join(customTmpDir, "audio.mp3");
+
         const mediaResponse = await fetch(videoUrl);
-        const mediaBuffer = Buffer.from(await mediaResponse.arrayBuffer());
+        if (!mediaResponse.ok) throw new Error("Failed to fetch video.");
 
-        const audioPath = path.join(customTmpDir, 'audio.mp3');
-        fs.writeFileSync(audioPath, mediaBuffer);
+        await streamPipeline(mediaResponse.body, fs.createWriteStream(videoPath));
 
-        const caption = `🎵 *Title:* ${response.title || 'Unknown'}\n👤 *Artist:* ${response.author || 'Unknown'}\n⏳ *Duration:* ${response.duration || 'Unknown'}\n👀 *Views:* ${response.views || '0'}\n📅 *Uploaded on:* ${response.upload || 'Unknown Date'}`;
+        await new Promise((resolve, reject) => {
+            ffmpeg(videoPath)
+                .audioCodec("libmp3lame")
+                .audioBitrate(128)
+                .toFormat("mp3")
+                .on("end", resolve)
+                .on("error", reject)
+                .save(audioPath);
+        });
 
-        await client.sendMessage(msg.chat, { audio: fs.readFileSync(audioPath), mimetype: mime.lookup(audioPath) || 'audio/mpeg', caption }, { quoted: msg });
+        const audioBuffer = fs.readFileSync(audioPath);
+        const base64Audio = audioBuffer.toString("base64");
+        const audioMimeType = mime.lookup(audioPath) || "audio/mpeg";
 
+        await client.sendMessage(m.chat, {
+            document: { url: `data:${audioMimeType};base64,${base64Audio}` },
+            mimetype: audioMimeType,
+            fileName: `${video.title}.mp3`,
+            caption: `🎵 *Title:* ${video.title}\n👤 *Artist:* ${video.author.name}\n⏳ *Duration:* ${video.timestamp}\n🔗 *Source:* ${video.url}`
+        }, { quoted: m });
+
+        fs.unlinkSync(videoPath);
         fs.unlinkSync(audioPath);
     } catch (error) {
-        console.error('Error fetching video:', error.message);
-        await client.sendMessage(msg.chat, { text: '❌ An error occurred while fetching the video. Try again later.' }, { quoted: msg });
+        console.error("Error:", error.message);
+        await client.sendMessage(m.chat, { text: "❌ An error occurred while fetching the song. Try again later." }, { quoted: m });
     }
-}
-
-// ✅ Properly export function
-module.exports.handleSongSelection = handleSongSelection;
+};
