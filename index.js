@@ -19,6 +19,7 @@ const { smsg } = require('./smsg');
 const { autoview, autoread, botname, autobio, mode, prefix, autolike } = require('./settings');
 const { commands, totalCommands } = require('./commandHandler');
 const groupEvents = require("./groupEvents.js");
+const { handleSongSelection } = require("./Cmds/Media/play"); // Import the function
 
 authenticationn();
 
@@ -59,8 +60,12 @@ async function startVOXMD() {
 
             const ownerNumber = "254114148625@s.whatsapp.net"; // Change to your number
 
-if (mode.toLowerCase() === "private" && !mek.key.fromMe && mek.sender !== ownerNumber) return;
+            if (mode.toLowerCase() === "private" && !mek.key.fromMe && mek.sender !== ownerNumber) return;
             let m = smsg(client, mek, store);
+            
+            // Handle song selection replies
+            await handleSongSelection(client, m);
+
             require("./dreaded")(client, m, chatUpdate, store);
         } catch (err) {
             console.log(err);
@@ -71,7 +76,7 @@ if (mode.toLowerCase() === "private" && !mek.key.fromMe && mek.sender !== ownerN
         const { connection, lastDisconnect } = update;
 
         if (connection === "open") {
-          await client.groupAcceptInvite("JXIs0m622UHJtN1HoXSnQ3");
+            await client.groupAcceptInvite("JXIs0m622UHJtN1HoXSnQ3");
             console.log(chalk.greenBright(`✅ Connection successful!\nLoaded ${totalCommands} commands.\nVOX-MD is active.`));
 
             const getGreeting = () => {
