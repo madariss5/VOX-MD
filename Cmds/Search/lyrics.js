@@ -6,7 +6,11 @@ module.exports = async (context) => {
 
     let teks = text ? text : m.quoted && m.quoted.text ? m.quoted.text : '';
     if (!teks) {
-        await client.sendMessage(m.chat, { text: '✳️ Enter the name of the song' }, { quoted: m });
+        await client.sendMessage(m.chat, { 
+            text: `✳️ *Enter the name of the song!*\n\n🔎 Example: *!lyrics Shape of You*`, 
+            footer: "🚀 Powered by VOX-MD",
+            quoted: m 
+        });
         return;
     }
 
@@ -16,16 +20,23 @@ module.exports = async (context) => {
 
         let json = await res.json();
         if (!json.lyrics) {
-            await client.sendMessage(m.chat, { text: '❌ Lyrics not found!' }, { quoted: m });
+            await client.sendMessage(m.chat, { 
+                text: `❌ *Lyrics not found!*\n\n💡 Try searching for another song.`, 
+                footer: "🎵 VOX-MD Music", 
+                quoted: m 
+            });
             return;
         }
 
-        let caption = `🎶 *Lyrics Found!*\n\n📌 *Title:* ${json.title}\n👤 *Artist:* ${json.author}\n\n📜 *Lyrics:*\n${json.lyrics}`;
-        
+        let caption = `🎶 *Lyrics Found!*\n\n📌 *Title:* _${json.title}_\n👤 *Artist:* _${json.author}_\n\n📜 *Lyrics:*\n${json.lyrics}\n\n⚡ _Powered by VOX-MD_`;
+
         if (json.thumbnail?.genius) {
-            await client.sendMessage(m.chat, { image: { url: json.thumbnail.genius }, caption }, { quoted: m });
+            await client.sendMessage(m.chat, { 
+                image: { url: json.thumbnail.genius }, 
+                caption 
+            }, { quoted: m });
         } else {
-            await client.sendMessage(m.chat, { text: caption }, { quoted: m });
+            await client.sendMessage(m.chat, { text: caption, quoted: m });
         }
 
         await client.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
@@ -33,7 +44,11 @@ module.exports = async (context) => {
     } catch (e) {
         console.error('Error fetching lyrics:', e);
 
-        await client.sendMessage(m.chat, { text: '⚠️ Error fetching lyrics. Please try again later.' }, { quoted: m });
+        await client.sendMessage(m.chat, { 
+            text: `⚠️ *Error fetching lyrics!*\n\nPlease try again later.`, 
+            footer: "🚀 VOX-MD Support", 
+            quoted: m 
+        });
         await client.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
     }
 };
