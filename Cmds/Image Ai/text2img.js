@@ -2,12 +2,11 @@ const fetch = require("node-fetch");
 
 module.exports = async (client, m, text) => {
     try {
-        let text = args.join(" ");
         if (!text) {
-            return m.reply("⚠️ *Provide a prompt for image generation!*\n\nExample:\n`.text2img anime girl with pink hair`");
+            return client.sendMessage(m.chat, { text: "⚠️ *Provide a prompt for image generation!*\n\nExample:\n`.text2img anime girl with pink hair`" }, { quoted: m });
         }
 
-        await m.reply("⏳ *Generating AI image... Please wait.*");
+        await client.sendMessage(m.chat, { text: "⏳ *Generating AI image... Please wait.*" }, { quoted: m });
 
         const apiUrl = `https://api.ryzendesu.vip/api/ai/text2img?prompt=${encodeURIComponent(text)}`;
 
@@ -18,6 +17,6 @@ module.exports = async (client, m, text) => {
 
     } catch (error) {
         console.error(error);
-        m.reply("⚠️ *Failed to generate AI image.*\nPlease try again later.");
+        client.sendMessage(m.chat, { text: "⚠️ *Failed to generate AI image.*\nPlease try again later." }, { quoted: m });
     }
 };
