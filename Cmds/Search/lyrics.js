@@ -1,5 +1,4 @@
 const axios = require("axios");
-const fetch = require("node-fetch");
 
 module.exports = async (context) => {
     const { client, m, text } = context;
@@ -14,12 +13,13 @@ module.exports = async (context) => {
         return;
     }
 
-    try {
-        let res = await fetch(`https://some-random-api.com/lyrics?title=${encodeURIComponent(teks)}`);
-        if (!res.ok) throw await res.text();
+    // Send a "Please wait..." message before fetching the lyrics
+    await m.reply("⏳ *Please wait...* Fetching song lyrics...");
 
-        let json = await res.json();
-        if (!json.lyrics) {
+    try {
+        let { data } = await axios.get(`https://fastrestapis.fasturl.cloud/music/songlyrics-v2?name=${encodeURIComponent(teks)}`);
+
+        if (data.status !== 200 || !data.result) {
             await client.sendMessage(m.chat, { 
                 text: `❌ *Lyrics not found!*\n\n💡 Try searching for another song.`, 
                 footer: "🎵 VOX-MD Music", 
@@ -28,11 +28,13 @@ module.exports = async (context) => {
             return;
         }
 
-        let caption = `🎶 *Lyrics Found!*\n\n📌 *Title:* _${json.title}_\n👤 *Artist:* _${json.author}_\n\n📜 *Lyrics:*\n${json.lyrics}\n\n⚡ _Powered by VOX-MD_`;
+        let { title, artist, lyrics, thumbnail } = data.result;
 
-        if (json.thumbnail?.genius) {
+        let caption = `🎶 *Lyrics Found!*\n\n📌 *Title:* _${title}_\n👤 *Artist:* _${artist}_\n\n📜 *Lyrics:*\n${lyrics}\n\n⚡ _Powered by VOX-MD_`;
+
+        if (thumbnail) {
             await client.sendMessage(m.chat, { 
-                image: { url: json.thumbnail.genius }, 
+                image: { url: thumbnail }, 
                 caption 
             }, { quoted: m });
         } else {
