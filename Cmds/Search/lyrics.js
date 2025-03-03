@@ -13,7 +13,7 @@ module.exports = async (context) => {
         return;
     }
 
-    // Send a "Please wait..." message before fetching the lyrics
+    // Send "Please wait..." message before fetching
     await m.reply("⏳ *Please wait...* Fetching song lyrics...");
 
     try {
@@ -30,8 +30,15 @@ module.exports = async (context) => {
 
         let { title, artist, lyrics, thumbnail } = data.result;
 
-        // Ensure lyrics are properly formatted
-        let formattedLyrics = typeof lyrics === 'object' ? Object.values(lyrics).join("\n") : lyrics;
+        // **Fix: Convert lyrics from objects to text**
+        let formattedLyrics = "";
+        if (Array.isArray(lyrics)) {
+            formattedLyrics = lyrics.map(line => line.text || "").join("\n");
+        } else if (typeof lyrics === "object") {
+            formattedLyrics = Object.values(lyrics).map(line => line.text || "").join("\n");
+        } else {
+            formattedLyrics = lyrics; // Use as is if already a string
+        }
 
         let caption = `🎶 *Lyrics Found!*\n\n📌 *Title:* _${title}_\n👤 *Artist:* _${artist}_\n\n📜 *Lyrics:*\n${formattedLyrics}\n\n⚡ _Powered by VOX-MD_`;
 
