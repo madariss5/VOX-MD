@@ -6,16 +6,17 @@ module.exports = async (context) => {
     try {
         // Fetch hug GIF from API
         const response = await axios.get('https://api.waifu.pics/sfw/hug');
-        const hugGifUrl = response.data.link;
+        const hugGifUrl = response.data.url; // FIXED: Correct response property
 
         // Get mentioned user
-        const mentionedUser = m.quoted ? m.quoted.sender : m.mentionedJid[0];
+        const mentionedUser = m.quoted ? m.quoted.sender : (m.mentionedJid && m.mentionedJid[0]);
         const sender = m.sender;
 
         // Format message
         let messageText = "";
         if (mentionedUser) {
-            messageText = `🤗 *${m.pushName}* gives a big hug to *${await client.getName(mentionedUser)}*! 💖`;
+            const mentionedName = await client.getName(mentionedUser);
+            messageText = `🤗 *${m.pushName}* gives a big hug to *${mentionedName}*! 💖`;
         } else {
             messageText = `🤗 *${m.pushName}* hugs themselves! 🤍`;
         }
@@ -27,7 +28,7 @@ module.exports = async (context) => {
         }, { quoted: m });
 
     } catch (error) {
-        console.error(error);
+        console.error("Error fetching hug GIF:", error);
         m.reply("❌ Failed to fetch hug GIF. Please try again later!");
     }
 };
