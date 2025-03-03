@@ -21,11 +21,14 @@ module.exports = async (context) => {
             messageText = `🤗 *${m.pushName}* hugs themselves! 🤍`;
         }
 
+        // Download the GIF to a buffer (ensures proper format)
+        const gifBuffer = await axios.get(hugGifUrl, { responseType: "arraybuffer" });
+
         // Send hug GIF with caption
         await client.sendMessage(m.chat, {
-            video: { url: hugGifUrl }, // Changed to "video" for GIF support
+            video: gifBuffer.data, // Send as video buffer
             caption: messageText,
-            gifPlayback: true // Enables GIF playback
+            gifPlayback: true // Ensures looping GIF
         }, { quoted: m });
 
     } catch (error) {
