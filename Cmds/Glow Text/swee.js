@@ -4,7 +4,8 @@ module.exports = async (context) => {
     try {
         if (!text) return m.reply("✨ *Enter the text you want to glow!*");
 
-        const apiUrl = `https://fastrestapis.fasturl.cloud/maker/glowtxt?text=${encodeURIComponent(text)}&style=sweetheart&glow=1&animation=pulse`;
+        // Adjust the size parameters if the API supports it
+        const apiUrl = `https://fastrestapis.fasturl.cloud/maker/glowtxt?text=${encodeURIComponent(text)}&style=sweetheart&glow=1&animation=pulse&width=500&height=500`;
 
         await client.sendMessage(
             m.chat,
