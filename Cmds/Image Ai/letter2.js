@@ -4,19 +4,19 @@ module.exports = async (context) => {
     const { client, m, text } = context;
 
     if (!text) {
-        return m.reply("❌ *Please provide the note content!*\n\nExample usage:\n`.note Name | Class | Subject | Date (YYYY-MM-DD) | Your note here`");
+        return m.reply("❌ *Please provide the note content!*\n\nExample usage:\n`.letter2 Name | Class | Subject | Date (YYYY-MM-DD) | Your note here`");
     }
 
     try {
         // Notify user that the process has started
         await client.sendMessage(m.chat, { 
-            text: "📝 *Generating your handwritten note... Please wait!* ⏳" 
+            text: "📝 *Generating your MyHandsareHoldingYou handwritten note... Please wait!* ⏳" 
         });
 
         // Parse user input
         const input = text.split("|").map((t) => t.trim());
         if (input.length < 5) {
-            return m.reply("❌ *Invalid format!*\n\nExample:\n`.note Hikaru | XII - Bio A | Sexual Organs | 2025-01-25 | The human reproductive organs consist of...`");
+            return m.reply("❌ *Invalid format!*\n\nExample:\n`.letter2 PETER KANAMBO | XII - Bio A | Sexual Organs | 2025-01-25 | The human reproductive organs consist of...`");
         }
 
         const [name, classroom, subject, date, content] = input;
