@@ -12,6 +12,9 @@ module.exports = async (context) => {
 
         const urlYt = videos[0].url;
 
+        // Show "Please wait..." message immediately
+        await m.reply("⏳ *Please wait...*");
+
         try {
             let data = await fetchJson(`https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`);
 
@@ -25,9 +28,7 @@ module.exports = async (context) => {
                 throw new Error("Invalid response structure.");
             }
 
-            const title = metadata.title || "Unknown Title";
-
-            await m.reply(`✅ *Downloading:* *${title}*\n⏳ Please wait...`);
+            const title = metadata.title || metadata.id || "Unknown";
 
             await client.sendMessage(
                 m.chat,
