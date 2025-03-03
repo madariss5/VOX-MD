@@ -19,7 +19,7 @@ module.exports = async (context) => {
     try {
         let { data } = await axios.get(`https://fastrestapis.fasturl.cloud/music/songlyrics-v2?name=${encodeURIComponent(teks)}`);
 
-        if (data.status !== 200 || !data.result) {
+        if (data.status !== 200 || !data.result || !data.result.lyrics) {
             await client.sendMessage(m.chat, { 
                 text: `❌ *Lyrics not found!*\n\n💡 Try searching for another song.`, 
                 footer: "🎵 VOX-MD Music", 
@@ -30,7 +30,10 @@ module.exports = async (context) => {
 
         let { title, artist, lyrics, thumbnail } = data.result;
 
-        let caption = `🎶 *Lyrics Found!*\n\n📌 *Title:* _${title}_\n👤 *Artist:* _${artist}_\n\n📜 *Lyrics:*\n${lyrics}\n\n⚡ _Powered by VOX-MD_`;
+        // Ensure lyrics are properly formatted
+        let formattedLyrics = typeof lyrics === 'object' ? Object.values(lyrics).join("\n") : lyrics;
+
+        let caption = `🎶 *Lyrics Found!*\n\n📌 *Title:* _${title}_\n👤 *Artist:* _${artist}_\n\n📜 *Lyrics:*\n${formattedLyrics}\n\n⚡ _Powered by VOX-MD_`;
 
         if (thumbnail) {
             await client.sendMessage(m.chat, { 
