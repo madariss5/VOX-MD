@@ -1,7 +1,7 @@
 const fetch = require("node-fetch");
 
 module.exports = async (context) => {
-    const { client, m, text, botname, fetchJson } = context;
+    const { client, m, text, fetchJson } = context;
 
     if (!text) {
         return m.reply("⚠️ Provide some text for AI image generation.\n\nExample:\n`.text2img anime girl, cyberpunk style, futuristic background`");
@@ -9,7 +9,10 @@ module.exports = async (context) => {
 
     try {
         // Fetch API response
-        const data = await fetchJson(`https://api.ryzendesu.vip/api/ai/text2img?prompt=${encodeURIComponent(text)}`);
+        const url = `https://api.ryzendesu.vip/api/ai/text2img?prompt=${encodeURIComponent(text)}`;
+        const data = await fetchJson(url);
+
+        console.log("Full API Response:", data); // Log full response for debugging
 
         // Validate API response
         if (data && data.data && data.data.image) {
@@ -22,7 +25,7 @@ module.exports = async (context) => {
             }, { quoted: m });
 
         } else {
-            m.reply("❌ API Error: No image generated. Please try again later.");
+            m.reply("❌ API Error: No image generated.\n\n🔍 Debug Info:\n" + JSON.stringify(data, null, 2));
         }
 
     } catch (error) {
