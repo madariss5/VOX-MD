@@ -4,7 +4,7 @@ module.exports = async (context) => {
     const { client, m, text } = context;
 
     if (!text) {
-        return m.reply("❌ *Please provide the note content!*\n\nExample usage:\n`.letter1 _Name_ | _Class or Reg.no or Id no...etc_| _Subject or Main topic_ | _Date (YYYY-MM-DD)_ | _Your note here or paragraph_`");
+        return m.reply("❌ *Please provide the note content!*\n\nExample usage:\n`.letter3 _Name_ | _Class or Reg.no or Id no...etc_| _Subject or Main topic_ | _Date (YYYY-MM-DD)_ | _Your note here or paragraph_`");
     }
 
     try {
@@ -16,7 +16,7 @@ module.exports = async (context) => {
         // Parse user input
         const input = text.split("|").map((t) => t.trim());
         if (input.length < 5) {
-            return m.reply("❌ *Invalid format!*\n\nExample:\n`.letter1 PETER KANAMBO | XII - Bio A | Sexual Organs | 2025-01-25 | The human reproductive organs consist of...`");
+            return m.reply("❌ *Invalid format!*\n\nExample:\n`.letter3 PETER KANAMBO | XII - Bio A | Sexual Organs | 2025-01-25 | The human reproductive organs consist of...`");
         }
 
         const [name, classroom, subject, date, content] = input;
