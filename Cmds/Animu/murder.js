@@ -1,34 +1,35 @@
 const axios = require('axios');
 
 module.exports = async (context) => {
-    const { client, m, args } = context;
+    const { client, m, parseMention } = context;
 
     try {
-        // Fetch hug GIF from API
-        const response = await axios.get('https://api.waifu.pics/sfw/hug');
-        const hugGifUrl = response.data.url; // FIXED: Correct response property
+        // Fetch kill image from API
+        const response = await axios.get('https://api.waifu.pics/sfw/kill');
+        const killImageUrl = response.data.url;
 
-        // Get mentioned user
-        const mentionedUser = m.quoted ? m.quoted.sender : (m.mentionedJid && m.mentionedJid[0]);
-        const sender = m.sender;
-
-        // Format message
+        // Get mentioned user or quoted user
+        let mentionedUser = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : (m.quoted ? m.quoted.sender : null);
+        
         let messageText = "";
+        let mentionedJid = [];
+
         if (mentionedUser) {
-            const mentionedName = await client.getName(mentionedUser);
-            messageText = `😭 *${m.pushName}* kills *${mentionedName}*! 💔`;
+            messageText = `💀 *${m.pushName}* just eliminated *@${mentionedUser.split("@")[0]}*... RIP! ⚰️`;
+            mentionedJid.push(mentionedUser);
         } else {
-            messageText = `😭*${m.pushName}* kill themselves! 💔`;
+            messageText = `💀 *${m.pushName}* has self-destructed! 💥`;
         }
 
-        // Send hug GIF with caption
+        // Send image with caption
         await client.sendMessage(m.chat, {
-            image: { url: hugGifUrl },
+            image: { url: killImageUrl },
             caption: messageText,
+            mentions: mentionedJid
         }, { quoted: m });
 
     } catch (error) {
-        console.error("Error fetching hug GIF:", error);
-        m.reply("❌ Failed to fetch hug GIF. Please try again later!");
+        console.error("Error fetching kill image:", error);
+        m.reply("❌ Failed to fetch kill image. Please try again later!");
     }
 };
