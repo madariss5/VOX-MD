@@ -1,51 +1,42 @@
-const axios = require("axios");
-const yts = require("yt-search");
-
 module.exports = async (context) => {
-    const { client, m, text } = context;
-
-    if (!text) {
-        return m.reply("❌ *Error:* What song do you want to download?");
-    }
+    const { client, m, text, fetchJson } = context;
+    const yts = require("yt-search");
 
     try {
+        if (!text) return m.reply("🎵 *What song do you want to download?*");
+
         const { videos } = await yts(text);
         if (!videos || videos.length === 0) {
-            return m.reply("❌ *Error:* No songs found!");
+            return m.reply("❌ *No songs found!*");
         }
 
         const urlYt = videos[0].url;
-        const apiKey = "c85d8cd99e55ad019bac35fd7877c28d"; // Your API Key
-        const apiUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`;
 
-        const { data } = await axios.get(apiUrl, {
-            headers: {
-                "accept": "application/json",
-                "x-api-key": apiKey
+        try {
+            let data = await fetchJson(`https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`);
+
+            if (!data || data.status !== 200) {
+                throw new Error("Failed to fetch the song.");
             }
-        });
 
-        if (data.status === 200 && data.result && data.result.media) {
-            const { media, metadata } = data.result;
-            const { title } = metadata;
+            const { metadata, media } = data.result;
 
-            await m.reply(`⏳ *Downloading:* ${title}`);
+            await m.reply(`✅ *Downloading:* *${metadata.title}*\n⏳ Please wait...`);
 
             await client.sendMessage(
                 m.chat,
                 {
                     document: { url: media },
                     mimetype: "audio/mpeg",
-                    fileName: `${title}.mp3`
+                    fileName: `${metadata.title}.mp3`,
                 },
                 { quoted: m }
             );
-        } else {
-            throw new Error("Invalid API response");
+        } catch (error) {
+            console.error("API request failed:", error.message);
+            m.reply("❌ *Download failed: Unable to retrieve audio.*");
         }
-
     } catch (error) {
-        console.error("API request failed:", error);
-        m.reply("❌ *Download failed:* Unable to retrieve audio.");
+        m.reply("❌ *Download failed:*\n" + error.message);
     }
 };
