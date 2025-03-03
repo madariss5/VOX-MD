@@ -5,7 +5,7 @@ module.exports = async (context) => {
 
     try {
         // Fetch hug GIF from API
-        const response = await axios.get('https://some-random-api.com/animu/hug');
+        const response = await axios.get('https://api.waifu.pics/sfw/hug');
         const hugGifUrl = response.data.link;
 
         // Get mentioned user
