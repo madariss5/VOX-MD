@@ -1,33 +1,32 @@
 const fetch = require("node-fetch");
 
-module.exports = async (client, m, chatUpdate, store) => {
-  try {
-    const { prefix, command, args } = m;
-    
-    if (!args.length) {
-      throw `This command generates AI images from text prompts.\n\nExample usage:\n${prefix + command} anime girl, cyberpunk style, futuristic background`;
+module.exports = async (context) => {
+    const { client, m, text, botname, fetchJson } = context;
+
+    if (!text) {
+        return m.reply("⚠️ Provide some text for AI image generation.\n\nExample:\n`.text2img anime girl, cyberpunk style, futuristic background`");
     }
 
-    const text = args.join(" "); // Join all arguments into a single prompt
+    try {
+        // Fetch API response
+        const data = await fetchJson(`https://api.ryzendesu.vip/api/ai/text2img?prompt=${encodeURIComponent(text)}`);
 
-    await m.reply("⏳ Generating AI image, please wait...");
+        // Validate API response
+        if (data && data.data && data.data.image) {
+            const imageUrl = data.data.image;
 
-    const apiUrl = `https://api.ryzendesu.vip/api/ai/text2img?prompt=${encodeURIComponent(text)}`;
-    
-    const response = await fetch(apiUrl);
-    const jsonResponse = await response.json();
+            // Send image response
+            await client.sendMessage(m.chat, { 
+                image: { url: imageUrl }, 
+                caption: `✅ *AI Image Generated Successfully!*\n\n🖌️ *Prompt:* ${text}`
+            }, { quoted: m });
 
-    // Check if API returned an error
-    if (!jsonResponse || !jsonResponse.data || !jsonResponse.data.image) {
-      throw `❌ API Error: Invalid response.\nPlease try again later.`;
+        } else {
+            m.reply("❌ API Error: No image generated. Please try again later.");
+        }
+
+    } catch (error) {
+        console.error("Error in text2img.js:", error);
+        m.reply(`❌ Something went wrong...\n\nError: ${error.message || error}`);
     }
-
-    const imageUrl = jsonResponse.data.image;
-    
-    await client.sendMessage(m.chat, { image: { url: imageUrl }, caption: `✅ *AI Image Generated*\n\nPrompt: ${text}` }, { quoted: m });
-
-  } catch (err) {
-    console.error(`Error in text2img.js: ${err}`);
-    m.reply(`❌ Error: ${err}`);
-  }
 };
