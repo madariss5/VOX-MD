@@ -4,37 +4,33 @@ module.exports = async (context) => {
     const { client, m } = context;
 
     try {
-        // Fetch GIF from API
+        // Fetch image from API
         const response = await axios.get('https://api.waifu.pics/sfw/hug');
-        const gifUrl = response.data.url; 
+        const hugImageUrl = response.data.url;
 
-        // Get mentioned user or quoted user
+        // Get mentioned or quoted user
         let mentionedUser = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : (m.quoted ? m.quoted.sender : null);
 
         let messageText = "";
         let mentionedJid = [];
 
         if (mentionedUser) {
-            const mentionedName = await client.getName(mentionedUser);
+            const mentionedName = await client.fetchName(mentionedUser); // FIXED getName issue
             messageText = `🤗 *${m.pushName}* gives a big hug to *@${mentionedUser.split("@")[0]}*! 💖`;
-            mentionedJid.push(mentionedUser); // Tagging the user
+            mentionedJid.push(mentionedUser);
         } else {
             messageText = `🤗 *${m.pushName}* hugs themselves! 🤍`;
         }
 
-        // Fetch GIF as a buffer
-        const gifBuffer = await axios.get(gifUrl, { responseType: "arraybuffer" });
-
-        // Send as GIF (video)
+        // Send image with caption
         await client.sendMessage(m.chat, {
-            video: gifBuffer.data,
+            image: { url: hugImageUrl },
             caption: messageText,
-            gifPlayback: true, // Enables looping animation
-            mentions: mentionedJid // Ensures the tagged user is notified
+            mentions: mentionedJid
         }, { quoted: m });
 
     } catch (error) {
-        console.error("Error fetching hug GIF:", error);
-        m.reply("❌ Failed to fetch hug GIF. Please try again later!");
+        console.error("Error fetching hug image:", error);
+        m.reply("❌ Failed to fetch hug image. Please try again later!");
     }
 };
