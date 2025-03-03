@@ -57,17 +57,21 @@ module.exports = async (context) => {
         };
 
         // Stylish Menu Text
-        let menuText = `┏━━━━━━ ❨ *VOX-MD* ❩ ━━━━━━┓\n`;
-        menuText += `       🎮 *𝑾𝑬𝑳𝑪𝑶𝑴𝑬* 🎮\n`;
-        menuText += `┗━━━━━━━━━━━━━━━━━━━━━━━━┛\n\n`;
-        menuText += `👤 *𝑼𝑺𝑬𝑹:* ${m.pushName}\n`;
-        menuText += `🤖 *𝑩𝑶𝑻:* ${botname}\n`;
-        menuText += `📝 *𝑪𝑶𝑴𝑴𝑨𝑵𝑫𝑺:* ${totalCommands}\n`;
-        menuText += `🕒 *𝑻𝑰𝑴𝑬:* ${getCurrentTimeInNairobi()}\n`;
-        menuText += `✍️ *𝑷𝑹𝑬𝑭𝑰𝑿:* ${prefix}\n`;
-        menuText += `🔓 *𝑴𝑶𝑫𝑬:* ${mode}\n`;
-        menuText += `📚 *𝑳𝑰𝑩𝑹𝑨𝒓𝒀:* Baileys\n`;
-        menuText += `━━━━━━━━━━━━━━\n`;
+        let menuText = `╔══❖•ೋ°⚡ *VOX-MD MENU* ⚡°ೋ•❖══╗\n`;
+menuText += `      🎮 *WELCOME TO VOX-MD* 🎮\n`;
+menuText += `╚════════════════════════════╝\n\n`;
+
+menuText += `💠 *USER:* 〘 ${m.pushName} 〙\n`;
+menuText += `🤖 *BOT:* 〘 ${botname} 〙\n`;
+menuText += `📌 *COMMANDS:* 〘 ${totalCommands} 〙\n`;
+menuText += `⏳ *TIME:* 〘 ${getCurrentTimeInNairobi()} 〙\n`;
+menuText += `✍️ *PREFIX:* 〘 ${prefix} 〙\n`;
+menuText += `🔓 *MODE:* 〘 ${mode} 〙\n`;
+menuText += `📚 *LIBRARY:* 〘 Baileys 〙\n`;
+
+menuText += `╭══════════════════════════╮\n`;
+menuText += `   🚀 *POWERED BY VOX-MD* 🚀\n`;
+menuText += `╰══════════════════════════╯\n`;
 
         // Add command categories
         for (const category of categories) {
