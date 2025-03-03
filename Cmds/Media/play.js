@@ -15,20 +15,26 @@ module.exports = async (context) => {
         try {
             let data = await fetchJson(`https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`);
 
-            if (!data || data.status !== 200) {
+            if (!data || data.status !== 200 || !data.result) {
                 throw new Error("Failed to fetch the song.");
             }
 
             const { metadata, media } = data.result;
 
-            await m.reply(`✅ *Downloading:* *${metadata.title}*\n⏳ Please wait...`);
+            if (!metadata || !media) {
+                throw new Error("Invalid response structure.");
+            }
+
+            const title = metadata.title || "Unknown Title";
+
+            await m.reply(`✅ *Downloading:* *${title}*\n⏳ Please wait...`);
 
             await client.sendMessage(
                 m.chat,
                 {
                     document: { url: media },
                     mimetype: "audio/mpeg",
-                    fileName: `${metadata.title}.mp3`,
+                    fileName: `${title}.mp3`,
                 },
                 { quoted: m }
             );
