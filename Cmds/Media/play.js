@@ -11,6 +11,7 @@ module.exports = async (context) => {
         }
 
         const urlYt = videos[0].url;
+        const songTitle = videos[0].title.replace(/[^\w\s]/gi, ""); // Remove special characters
 
         // Show "Please wait..." message immediately
         await m.reply("⏳ *Please wait...*");
@@ -18,24 +19,18 @@ module.exports = async (context) => {
         try {
             let data = await fetchJson(`https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`);
 
-            if (!data || data.status !== 200 || !data.result) {
+            if (!data || data.status !== 200 || !data.result || !data.result.media) {
                 throw new Error("Failed to fetch the song.");
             }
 
-            const { metadata, media } = data.result;
-
-            if (!metadata || !media) {
-                throw new Error("Invalid response structure.");
-            }
-
-            const title = metadata.title || metadata.id || "Unknown";
+            const audioUrl = data.result.media;
 
             await client.sendMessage(
                 m.chat,
                 {
-                    document: { url: media },
+                    document: { url: audioUrl },
                     mimetype: "audio/mpeg",
-                    fileName: `${title}.mp3`,
+                    fileName: `${songTitle}.mp3`, // Cleaned song title as filename
                 },
                 { quoted: m }
             );
