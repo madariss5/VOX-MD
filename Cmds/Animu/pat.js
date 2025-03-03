@@ -5,7 +5,7 @@ module.exports = async (context) => {
 
     try {
         // Fetch hug GIF from API
-        const response = await axios.get('https://api.waifu.pics/sfw/hug');
+        const response = await axios.get('https://api.waifu.pics/sfw/pat');
         const hugGifUrl = response.data.url; // FIXED: Correct response property
 
         // Get mentioned user
