@@ -1,30 +1,36 @@
 const axios = require('axios');
 
 module.exports = async (context) => {
-    const { client, m, args } = context;
+    const { client, m } = context;
 
     try {
-        // Fetch hug GIF from API
+        // Fetch GIF from API
         const response = await axios.get('https://api.waifu.pics/sfw/hug');
-        const hugGifUrl = response.data.url; // FIXED: Correct response property
+        const gifUrl = response.data.url; 
 
-        // Get mentioned user
-        const mentionedUser = m.quoted ? m.quoted.sender : (m.mentionedJid && m.mentionedJid[0]);
-        const sender = m.sender;
+        // Get mentioned user or quoted user
+        let mentionedUser = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : (m.quoted ? m.quoted.sender : null);
 
-        // Format message
         let messageText = "";
+        let mentionedJid = [];
+
         if (mentionedUser) {
             const mentionedName = await client.getName(mentionedUser);
-            messageText = `🤗 *${m.pushName}* gives a big hug to *${mentionedName}*! 💖`;
+            messageText = `🤗 *${m.pushName}* gives a big hug to *@${mentionedUser.split("@")[0]}*! 💖`;
+            mentionedJid.push(mentionedUser); // Tagging the user
         } else {
             messageText = `🤗 *${m.pushName}* hugs themselves! 🤍`;
         }
 
-        // Send hug GIF with caption
+        // Fetch GIF as a buffer
+        const gifBuffer = await axios.get(gifUrl, { responseType: "arraybuffer" });
+
+        // Send as GIF (video)
         await client.sendMessage(m.chat, {
-            image: { url: hugGifUrl },
+            video: gifBuffer.data,
             caption: messageText,
+            gifPlayback: true, // Enables looping animation
+            mentions: mentionedJid // Ensures the tagged user is notified
         }, { quoted: m });
 
     } catch (error) {
