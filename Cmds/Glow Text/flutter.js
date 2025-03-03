@@ -12,7 +12,7 @@ module.exports = async (context) => {
         await client.sendMessage(
             m.chat,
             {
-                gif: { url: apiUrl },
+                image : { url: apiUrl },
                 caption: `💖 *Here is your glowing text:* _"${text}"_`,
             },
             { quoted: m }
