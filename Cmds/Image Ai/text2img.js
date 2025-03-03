@@ -4,7 +4,9 @@ const fetch = require("node-fetch");
 module.exports = async (client, m, chatUpdate, store) => {
   try {
     const { text, prefix, command, botname, author, packname, wm } = client;
-    const user = global.db.data.users[m.sender];
+    
+    // Ensure global.db and users exist
+    const user = (global.db && global.db.data && global.db.data.users) ? global.db.data.users[m.sender] : {};
 
     if (user.isLoadingAnimeDif) {
       await m.reply("⏱️ Processing, please wait...");
