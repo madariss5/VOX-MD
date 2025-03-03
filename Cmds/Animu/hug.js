@@ -1,21 +1,20 @@
 const axios = require('axios');
 
 module.exports = async (context) => {
-    const { client, m } = context;
+    const { client, m, parseMention } = context;
 
     try {
-        // Fetch image from API
+        // Fetch hug image from API
         const response = await axios.get('https://api.waifu.pics/sfw/hug');
         const hugImageUrl = response.data.url;
 
-        // Get mentioned or quoted user
+        // Get mentioned user or quoted user
         let mentionedUser = m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : (m.quoted ? m.quoted.sender : null);
-
+        
         let messageText = "";
         let mentionedJid = [];
 
         if (mentionedUser) {
-            const mentionedName = await client.fetchName(mentionedUser); // FIXED getName issue
             messageText = `🤗 *${m.pushName}* gives a big hug to *@${mentionedUser.split("@")[0]}*! 💖`;
             mentionedJid.push(mentionedUser);
         } else {
