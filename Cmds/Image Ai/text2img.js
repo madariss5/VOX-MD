@@ -1,7 +1,4 @@
-const {
-  fetchJson, getBuffer, getRandom, fetchBuffer
-} = require('./lib/botFunctions.js');
-
+const { fetchJson, getBuffer, getRandom } = require('../../lib/botFunctions.js');
 const fetch = require("node-fetch");
 
 module.exports = async (client, m, chatUpdate, store) => {
@@ -10,17 +7,16 @@ module.exports = async (client, m, chatUpdate, store) => {
     const user = global.db.data.users[m.sender];
 
     if (user.isLoadingAnimeDif) {
-      await m.reply("⏱️ Sedang dalam proses, harap tunggu hingga selesai.");
+      await m.reply("⏱️ Processing, please wait...");
       return;
     }
 
     if (!text) {
-      throw `This command generates images from text prompts.\n\nExample usage:\n${prefix + command} Genshin Impact, Yae Miko, anime girl with glasses, pink short hair, in a uniform, anime style, full body, bokeh`;
+      throw `This command generates AI images from text prompts.\n\nExample:\n${prefix + command} anime girl, cyberpunk style, futuristic background`;
     }
 
     user.isLoadingAnimeDif = true;
     await m.reply("⏳ Processing your request...");
-    await client.relayMessage(m.chat, { reactionMessage: { key: m.key, text: '⏱️' } }, { messageId: m.key.id });
 
     const apiUrl = `https://api.ryzendesu.vip/api/ai/text2img?prompt=${encodeURIComponent(text)}`;
 
@@ -31,7 +27,7 @@ module.exports = async (client, m, chatUpdate, store) => {
       await client.sendFile(m.chat, imageBuffer, 'image.jpg', wm, m);
       m.react('✅');
     } catch (error) {
-      client.reply(m.chat, '❌ API request failed. Please try again later.', m);
+      client.reply(m.chat, '❌ API request failed. Try again later.', m);
     } finally {
       user.isLoadingAnimeDif = false;
     }
