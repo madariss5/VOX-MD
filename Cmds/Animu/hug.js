@@ -6,7 +6,7 @@ module.exports = async (context) => {
     try {
         // Fetch hug GIF from API
         const response = await axios.get('https://api.waifu.pics/sfw/hug');
-        const hugGifUrl = response.data.url; // API returns a GIF URL
+        const hugGifUrl = response.data.url; // FIXED: Correct response property
 
         // Get mentioned user
         const mentionedUser = m.quoted ? m.quoted.sender : (m.mentionedJid && m.mentionedJid[0]);
@@ -21,14 +21,10 @@ module.exports = async (context) => {
             messageText = `🤗 *${m.pushName}* hugs themselves! 🤍`;
         }
 
-        // Download the GIF to a buffer (ensures proper format)
-        const gifBuffer = await axios.get(hugGifUrl, { responseType: "arraybuffer" });
-
         // Send hug GIF with caption
         await client.sendMessage(m.chat, {
-            video: gifBuffer.data, // Send as video buffer
+            image: { url: hugGifUrl },
             caption: messageText,
-            gifPlayback: true // Ensures looping GIF
         }, { quoted: m });
 
     } catch (error) {
