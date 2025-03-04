@@ -14,12 +14,12 @@ module.exports = async (context) => {
         if (images.length === 0) throw new Error("🚫 No images found in Voxmdgall!");
 
         const randomImage = images[Math.floor(Math.random() * images.length)];
-        return path.join(assetsPath, randomImage); // Return image file path
+        return path.join(assetsPath, randomImage); // Return full image path
     };
 
     let imagePath;
     try {
-        imagePath = getRandomThumbnail(); // Call function and store result
+        imagePath = getRandomThumbnail();
     } catch (error) {
         console.error(error.message);
         imagePath = null;
@@ -34,11 +34,13 @@ module.exports = async (context) => {
 
     // Send response with random image if available
     if (imagePath) {
+        const imageBuffer = fs.readFileSync(imagePath); // Read image as buffer
         await client.sendMessage(
             m.chat,
             {
-                image: { url: `file://${imagePath}` },
+                image: imageBuffer, // Send as buffer
                 caption: aliveMessage,
+                mimetype: "image/jpeg", // Set correct MIME type
                 fileLength: "9999999999898989899999999"
             },
             { quoted: m }
