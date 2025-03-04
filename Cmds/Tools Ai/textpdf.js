@@ -8,7 +8,7 @@ module.exports = async (context) => {
             "📄 *Enter the text you want to convert to PDF!*\n\n" +
             "✨ *You can also add a title, header, and an optional watermark/logo.*\n\n" +
             "📝 *Example:*\n" +
-            "`.textpdf This is an example text | My Title | My Header | https://yourlogo.com/logo.png`\n\n" +
+            "`.textpdf This is an example text | My Header| My title | https://yourlogo.com/logo.png`\n\n" +
             "💡 *Watermark (logo) is optional. If not provided, it will be skipped.*"
         );
     }
@@ -20,11 +20,11 @@ module.exports = async (context) => {
         });
 
         // Split text input into parts
-        let [pdfText, title, header, watermark] = text.split("|").map(t => t.trim());
+        let [pdfText, header, title, watermark] = text.split("|").map(t => t.trim());
 
         // Default values if not provided
-        title = title || "Document";
         header = header || "This is the header text";
+        title = title || "Document";
         watermark = watermark ? `&watermark=${encodeURIComponent(watermark)}` : ""; // Only add watermark if provided
 
         // Construct API URL (without watermark if not provided)
