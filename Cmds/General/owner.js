@@ -6,33 +6,56 @@ module.exports = async (context) => {
 
     try {
         const ownerName = "Kanambo";
-        const ownerNumber = "+254114148625";
+        const ownerNumber = "+254114148625"; // Format: Without '+' for WhatsApp vCard
         const email = "voxmd@devopps.com";
         const organization = "VOXNET.INC";
         const footer = "🌟 Powered by: @ VOXNET.INC";
 
+        // vCard that allows direct WhatsApp messaging
         const vcard = `BEGIN:VCARD
 VERSION:3.0
 FN:${ownerName}
-TEL;TYPE=CELL:${ownerNumber}
+TEL;waid=${ownerNumber}:${ownerNumber}
 EMAIL:${email}
 ORG:${organization}
 NOTE: Contact ${ownerName} for bot-related inquiries.
 END:VCARD`;
 
+        // Owner info (sent with image)
         const ownerInfo = `╭───────────◆
 │ 👑 *Bot Owner Info*
 │ 📌 *Name:* ${ownerName}
-│ 📞 *Contact:* ${ownerNumber}
+│ 📞 *Contact:* wa.me/${ownerNumber}
 │ 📩 *Email:* ${email}
 │ 🏢 *Org:* ${organization}
 ╰───────────◆
 ${footer}`;
 
-        // Send owner info
-        await client.sendMessage(m.chat, { text: ownerInfo }, { quoted: m });
+        // Path to the image folder
+        const imagePath = path.resolve(__dirname, "../../Voxmdgall/Voxb");
 
-        // Send vCard
+        // Check if folder exists and contains images
+        let imageBuffer = null;
+        if (fs.existsSync(imagePath)) {
+            const images = fs.readdirSync(imagePath).filter(file => file.endsWith(".jpg") || file.endsWith(".png"));
+            if (images.length > 0) {
+                const randomImage = images[Math.floor(Math.random() * images.length)];
+                const imageUrl = path.join(imagePath, randomImage);
+                imageBuffer = fs.readFileSync(imageUrl); // Read image as buffer
+            }
+        }
+
+        // Send owner info with image (compact format)
+        await client.sendMessage(
+            m.chat,
+            {
+                image: imageBuffer ? { mimetype: "image/jpeg", jpegThumbnail: imageBuffer } : null,
+                caption: ownerInfo,
+            },
+            { quoted: m }
+        );
+
+        // Send vCard contact
         await client.sendMessage(
             m.chat,
             {
@@ -44,26 +67,7 @@ ${footer}`;
             { quoted: m }
         );
 
-        // Send a random image from Voxmdgall/Voxb
-        const imagePath = path.resolve(__dirname, "../../Voxmdgall/Voxb");
-        if (fs.existsSync(imagePath)) {
-            const images = fs.readdirSync(imagePath).filter(file => file.endsWith(".jpg") || file.endsWith(".png"));
-            if (images.length > 0) {
-                const randomImage = images[Math.floor(Math.random() * images.length)];
-                const imageUrl = path.join(imagePath, randomImage);
-
-                await client.sendMessage(
-                    m.chat,
-                    {
-                        image: { url: imageUrl },
-                        caption: "👑 *Kanambo - The Bot Owner!*",
-                    },
-                    { quoted: m }
-                );
-            }
-        }
-
-        // Send a specific voice file from Voxmdgall/Voxb/menu.mp3
+        // Send the specific voice file from Voxmdgall/Voxb/menu.mp3
         const voicePath = path.resolve(__dirname, "../../Voxmdgall/Voxb/menu.mp3");
         if (fs.existsSync(voicePath)) {
             await client.sendMessage(
