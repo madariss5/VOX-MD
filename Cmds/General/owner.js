@@ -6,12 +6,12 @@ module.exports = async (context) => {
 
     try {
         const ownerName = "Kanambo";
-        const ownerNumber = "+254114148625"; // Format: Without '+' for WhatsApp vCard
+        const ownerNumber = "+254114148625"; // WhatsApp-compatible format
         const email = "voxmd@devopps.com";
         const organization = "VOXNET.INC";
         const footer = "🌟 Powered by: @ VOXNET.INC";
 
-        // vCard that allows direct WhatsApp messaging
+        // vCard for direct WhatsApp messaging
         const vcard = `BEGIN:VCARD
 VERSION:3.0
 FN:${ownerName}
@@ -21,7 +21,7 @@ ORG:${organization}
 NOTE: Contact ${ownerName} for bot-related inquiries.
 END:VCARD`;
 
-        // Owner info (sent with image)
+        // Owner information
         const ownerInfo = `╭───────────◆
 │ 👑 *Bot Owner Info*
 │ 📌 *Name:* ${ownerName}
@@ -31,29 +31,38 @@ END:VCARD`;
 ╰───────────◆
 ${footer}`;
 
-        // Path to the image folder
+        // Get a random image from Voxmdgall/Voxb
         const imagePath = path.resolve(__dirname, "../../Voxmdgall/Voxb");
-
-        // Check if folder exists and contains images
         let imageBuffer = null;
+        let imageFilePath = null;
+
         if (fs.existsSync(imagePath)) {
             const images = fs.readdirSync(imagePath).filter(file => file.endsWith(".jpg") || file.endsWith(".png"));
             if (images.length > 0) {
                 const randomImage = images[Math.floor(Math.random() * images.length)];
-                const imageUrl = path.join(imagePath, randomImage);
-                imageBuffer = fs.readFileSync(imageUrl); // Read image as buffer
+                imageFilePath = path.join(imagePath, randomImage);
+                imageBuffer = fs.readFileSync(imageFilePath); // Read image file
             }
         }
 
-        // Send owner info with image (compact format)
-        await client.sendMessage(
-            m.chat,
-            {
-                image: imageBuffer ? { mimetype: "image/jpeg", jpegThumbnail: imageBuffer } : null,
-                caption: ownerInfo,
-            },
-            { quoted: m }
-        );
+        // Send owner info with the random image as a header
+        if (imageBuffer) {
+            await client.sendMessage(
+                m.chat,
+                {
+                    image: { url: imageFilePath },
+                    caption: ownerInfo,
+                },
+                { quoted: m }
+            );
+        } else {
+            // If no image is available, send owner info as text
+            await client.sendMessage(
+                m.chat,
+                { text: ownerInfo },
+                { quoted: m }
+            );
+        }
 
         // Send vCard contact
         await client.sendMessage(
