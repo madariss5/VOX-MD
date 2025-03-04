@@ -5,9 +5,9 @@ module.exports = async (context) => {
     const { client, m, prefix } = context;
     const botname = process.env.BOTNAME || "VOX-MD";
 
-    // Function to get a random image or GIF (supports .webp, .jpg, .jpeg, .png, .gif)
+    // Function to get a random media file (supports .webp, .jpg, .jpeg, .png, .gif)
     const getRandomMedia = () => {
-        const assetsPath = path.join(__dirname, "../../Voxmdgall"); // Make sure this path is correct
+        const assetsPath = path.join(__dirname, "../../Voxmdgall"); 
         if (!fs.existsSync(assetsPath)) throw new Error("🚫 Voxmdgall folder not found!");
 
         const mediaFiles = fs.readdirSync(assetsPath).filter(file => /\.(webp|jpg|jpeg|png|gif)$/i.test(file));
@@ -16,7 +16,7 @@ module.exports = async (context) => {
         return path.join(assetsPath, mediaFiles[Math.floor(Math.random() * mediaFiles.length)]);
     };
 
-    // Construct alive message
+    // Alive message content
     const aliveMessage = `✨ *${botname} is Online✅!*\n\n` +
         `👋 Hello *${m.pushName}*, I'm here to assist you.\n\n` +
         `📌 *Type:* \`${prefix}menu\` *to see my commands.*\n\n` +
@@ -24,10 +24,9 @@ module.exports = async (context) => {
         `_Powered by VOX-MD_ 🚀`;
 
     try {
-        const mediaPath = getRandomMedia(); // Get a random media file
-        const mediaBuffer = fs.readFileSync(mediaPath); // Read the file as a buffer
+        const mediaPath = getRandomMedia(); 
+        const mediaBuffer = fs.readFileSync(mediaPath);
 
-        // Determine the correct MIME type
         let mediaMimeType;
         if (mediaPath.endsWith(".jpg") || mediaPath.endsWith(".jpeg")) {
             mediaMimeType = "image/jpeg";
@@ -41,8 +40,18 @@ module.exports = async (context) => {
             throw new Error("🚫 Unsupported media format!");
         }
 
-        // Send the image or GIF as an actual buffer (WhatsApp-friendly)
+        // Send image/GIF
         await client.sendMessage(
             m.chat,
             {
                 image: mediaBuffer,
+                mimetype: mediaMimeType,
+                caption: aliveMessage
+            },
+            { quoted: m }
+        );
+    } catch (error) {
+        console.error("❌ Error in alive.js:", error);
+        await m.reply(`⚠️ *Error:* Could not load image. Here is the text version:\n\n${aliveMessage}`);
+    }
+};
