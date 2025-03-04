@@ -5,9 +5,9 @@ module.exports = async (context) => {
     const { client, m, prefix } = context;
     const botname = process.env.BOTNAME || "VOX-MD";
 
-    // Function to get a random image (supports .webp, .jpg, .jpeg, .png, .gif)
+    // Function to get a random image or GIF (supports .webp, .jpg, .jpeg, .png, .gif)
     const getRandomMedia = () => {
-        const assetsPath = path.join(__dirname, "../../Voxmdgall"); // Adjust path as needed
+        const assetsPath = path.join(__dirname, "../../Voxmdgall"); // Make sure this path is correct
         if (!fs.existsSync(assetsPath)) throw new Error("🚫 Voxmdgall folder not found!");
 
         const mediaFiles = fs.readdirSync(assetsPath).filter(file => /\.(webp|jpg|jpeg|png|gif)$/i.test(file));
@@ -24,21 +24,25 @@ module.exports = async (context) => {
         `_Powered by VOX-MD_ 🚀`;
 
     try {
-        const mediaPath = getRandomMedia(); // Get random media file
+        const mediaPath = getRandomMedia(); // Get a random media file
         const mediaBuffer = fs.readFileSync(mediaPath); // Read the file as a buffer
-        const mediaMimeType = mediaPath.endsWith(".gif") ? "image/gif" : "image/jpeg"; // Detect format
 
+        // Determine the correct MIME type
+        let mediaMimeType;
+        if (mediaPath.endsWith(".jpg") || mediaPath.endsWith(".jpeg")) {
+            mediaMimeType = "image/jpeg";
+        } else if (mediaPath.endsWith(".png")) {
+            mediaMimeType = "image/png";
+        } else if (mediaPath.endsWith(".gif")) {
+            mediaMimeType = "image/gif";
+        } else if (mediaPath.endsWith(".webp")) {
+            mediaMimeType = "image/webp";
+        } else {
+            throw new Error("🚫 Unsupported media format!");
+        }
+
+        // Send the image or GIF as an actual buffer (WhatsApp-friendly)
         await client.sendMessage(
             m.chat,
             {
-                image: mediaBuffer, // Send actual image/GIF as buffer
-                mimetype: mediaMimeType,
-                caption: aliveMessage
-            },
-            { quoted: m }
-        );
-    } catch (error) {
-        console.error("❌ Error sending alive message:", error);
-        await m.reply(aliveMessage);
-    }
-};
+                image: mediaBuffer,
