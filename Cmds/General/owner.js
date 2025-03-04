@@ -57,17 +57,6 @@ ${footer}`;
             );
         }
 
-        // ✅ Send vCard contact with working WhatsApp direct chat
-        await client.sendMessage(
-            m.chat,
-            {
-                contacts: {
-                    displayName: ownerName,
-                    contacts: [{ vcard }],
-                },
-            },
-            { quoted: m }
-        );
 
         // Send the specific voice file from Voxmdgall/Voxb/menu.mp3
         const voicePath = path.resolve(__dirname, "../../Voxmdgall/Voxb/menu.mp3");
