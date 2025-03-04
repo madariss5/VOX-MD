@@ -14,11 +14,11 @@ module.exports = async (context) => {
         // WhatsApp direct chat link
         const whatsappLink = `https://wa.me/${ownerNumber}`;
 
-        // vCard with proper formatting for direct messaging
+        // ✅ Corrected vCard with `waid` for direct chat
         const vcard = `BEGIN:VCARD
 VERSION:3.0
 FN:${ownerName}
-TEL;TYPE=cell:${ownerNumber}
+TEL;TYPE=work,voice;waid=${ownerNumber}:${ownerNumber}
 EMAIL:${email}
 ORG:${organization}
 NOTE: Contact ${ownerName} via WhatsApp directly.
@@ -68,7 +68,7 @@ ${footer}`;
             );
         }
 
-        // Send vCard contact with working WhatsApp chat link
+        // ✅ Send vCard contact with working WhatsApp direct chat
         await client.sendMessage(
             m.chat,
             {
