@@ -14,7 +14,7 @@ module.exports = async (context) => {
         });
 
         // API request
-        const apiUrl = `https://fastrestapis.fasturl.cloud/search/recipe?name=${encodeURIComponent(text)&lang=eng}`;
+        const apiUrl = `https://fastrestapis.fasturl.cloud/search/recipe?name=${encodeURIComponent(text)}&lang=eng`;
         const response = await axios.get(apiUrl);
 
         if (response.data.status !== 200 || !response.data.result.length) {
