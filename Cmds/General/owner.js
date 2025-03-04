@@ -6,26 +6,30 @@ module.exports = async (context) => {
 
     try {
         const ownerName = "Kanambo";
-        const ownerNumber = "+254114148625"; // WhatsApp-compatible format
+        const ownerNumber = "+254114148625"; // Ensure it's a valid WhatsApp number
         const email = "voxmd@devopps.com";
         const organization = "VOXNET.INC";
         const footer = "🌟 Powered by: @ VOXNET.INC";
 
-        // vCard for direct WhatsApp messaging
+        // WhatsApp direct chat link
+        const whatsappLink = `https://wa.me/${ownerNumber}`;
+
+        // vCard with proper formatting for direct messaging
         const vcard = `BEGIN:VCARD
 VERSION:3.0
 FN:${ownerName}
-TEL;waid=${ownerNumber}:${ownerNumber}
+TEL;TYPE=cell:${ownerNumber}
 EMAIL:${email}
 ORG:${organization}
-NOTE: Contact ${ownerName} for bot-related inquiries.
+NOTE: Contact ${ownerName} via WhatsApp directly.
+URL:${whatsappLink}
 END:VCARD`;
 
-        // Owner information
+        // Owner information with direct WhatsApp link
         const ownerInfo = `╭───────────◆
 │ 👑 *Bot Owner Info*
 │ 📌 *Name:* ${ownerName}
-│ 📞 *Contact:* wa.me/${ownerNumber}
+│ 📞 *Contact:* [Chat on WhatsApp](https://wa.me/${ownerNumber})
 │ 📩 *Email:* ${email}
 │ 🏢 *Org:* ${organization}
 ╰───────────◆
@@ -64,7 +68,7 @@ ${footer}`;
             );
         }
 
-        // Send vCard contact
+        // Send vCard contact with working WhatsApp chat link
         await client.sendMessage(
             m.chat,
             {
