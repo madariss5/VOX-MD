@@ -5,18 +5,25 @@ module.exports = async (context) => {
     const { client, m, prefix } = context;
     const botname = process.env.BOTNAME || "VOX-MD";
 
-    // Correct path to Voxmdgall (since it's in the repo root)
+    // Function to get a random thumbnail from Voxmdgall
     const getRandomThumbnail = () => {
-            const assetsPath = path.join(__dirname, '../../Voxmdgall'); 
-            if (!fs.existsSync(assetsPath)) throw new Error("🚫 Voxmdgall folder not found!");
+        const assetsPath = path.join(__dirname, '../../Voxmdgall'); 
+        if (!fs.existsSync(assetsPath)) throw new Error("🚫 Voxmdgall folder not found!");
 
-            const images = fs.readdirSync(assetsPath).filter(file => /\.(jpg|jpeg|png|gif)$/i.test(file));
-            if (images.length === 0) throw new Error("🚫 No images found in Voxmdgall!");
+        const images = fs.readdirSync(assetsPath).filter(file => /\.(jpg|jpeg|png|gif)$/i.test(file));
+        if (images.length === 0) throw new Error("🚫 No images found in Voxmdgall!");
 
-            const randomImage = images[Math.floor(Math.random() * images.length)];
-            return fs.readFileSync(path.join(assetsPath, randomImage)); // Return image buffer
-        };
+        const randomImage = images[Math.floor(Math.random() * images.length)];
+        return path.join(assetsPath, randomImage); // Return image file path
+    };
 
+    let imagePath;
+    try {
+        imagePath = getRandomThumbnail(); // Call function and store result
+    } catch (error) {
+        console.error(error.message);
+        imagePath = null;
+    }
 
     // Construct alive message
     const aliveMessage = `✨ *${botname} is Online✅!*\n\n` +
@@ -26,11 +33,11 @@ module.exports = async (context) => {
         `_Powered by VOX-MD_ 🚀`;
 
     // Send response with random image if available
-    if (randomImage) {
+    if (imagePath) {
         await client.sendMessage(
             m.chat,
             {
-                image: { url: `file://${randomImage}` },
+                image: { url: `file://${imagePath}` },
                 caption: aliveMessage,
                 fileLength: "9999999999898989899999999"
             },
