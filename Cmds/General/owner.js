@@ -14,22 +14,11 @@ module.exports = async (context) => {
         // WhatsApp direct chat link
         const whatsappLink = `https://wa.me/${ownerNumber}`;
 
-        // ✅ Corrected vCard with `waid` for direct chat
-        const vcard = `BEGIN:VCARD
-VERSION:3.0
-FN:${ownerName}
-TEL;TYPE=work,voice;waid=${ownerNumber}:${ownerNumber}
-EMAIL:${email}
-ORG:${organization}
-NOTE: Contact ${ownerName} via WhatsApp directly.
-URL:${whatsappLink}
-END:VCARD`;
-
         // Owner information with direct WhatsApp link
         const ownerInfo = `╭───────────◆
 │ 👑 *Bot Owner Info*
 │ 📌 *Name:* ${ownerName}
-│ 📞 *Contact:* [Chat on WhatsApp](https://wa.me/${ownerNumber})
+│ 📞 *Contact:* https://wa.me/${ownerNumber}
 │ 📩 *Email:* ${email}
 │ 🏢 *Org:* ${organization}
 ╰───────────◆
