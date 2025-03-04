@@ -10,7 +10,7 @@ module.exports = async (context) => {
         const assetsPath = path.join(__dirname, '../../Voxmdgall'); 
         if (!fs.existsSync(assetsPath)) throw new Error("🚫 Voxmdgall folder not found!");
 
-        const images = fs.readdirSync(assetsPath).filter(file => /\.(jpg|jpeg|png|gif)$/i.test(file));
+        const images = fs.readdirSync(assetsPath).filter(file => /\.(jpg|jpeg|png)$/i.test(file));
         if (images.length === 0) throw new Error("🚫 No images found in Voxmdgall!");
 
         const randomImage = images[Math.floor(Math.random() * images.length)];
@@ -40,7 +40,7 @@ module.exports = async (context) => {
             {
                 image: imageBuffer, // Send as buffer
                 caption: aliveMessage,
-                mimetype: "image/jpeg", // Set correct MIME type
+                mimetype: "image/jpg", // Set correct MIME type
                 fileLength: "9999999999898989899999999"
             },
             { quoted: m }
