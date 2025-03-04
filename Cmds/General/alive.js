@@ -7,7 +7,7 @@ module.exports = async (context) => {
     const botname = process.env.BOTNAME || "VOX-MD";
 
     // Get random image from ./Voxmdgall/
-    const galleryPath = path.join(__dirname, "../Voxmdgall");
+    const galleryPath = path.join(__dirname, "./.../Voxmdgall");
     const files = fs.readdirSync(galleryPath).filter(file => /\.(jpg|jpeg|png|gif)$/i.test(file));
     const randomImage = files.length > 0 ? path.join(galleryPath, files[Math.floor(Math.random() * files.length)]) : null;
 
