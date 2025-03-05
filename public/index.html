@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notification</title>
+    <title>Notification | VOX-MD</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
@@ -14,25 +14,38 @@
             font-family: 'Poppins', sans-serif;
         }
 
-        /* Animated Gradient Background */
+        /* Fireworks Background */
         body {
-            background: linear-gradient(-45deg, #001F3F, #00698f, #243B55, #004d40);
-            background-size: 300% 300%;
-            animation: gradientAnimation 8s ease infinite;
+            background-color: #0a0a0a;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Fireworks Canvas */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* Glowing "VOX-MD" Name */
+        .glow-text {
+            font-size: 50px;
+            font-weight: bold;
             text-align: center;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00e6e6, 0 0 30px #00cccc, 0 0 40px #00b3b3;
+            margin-bottom: 20px;
         }
 
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* Glassmorphism Notification Box */
+        /* Glassmorphism Container */
         .container {
             max-width: 700px;
             background: rgba(255, 255, 255, 0.1);
@@ -41,6 +54,9 @@
             backdrop-filter: blur(15px);
             box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            position: relative;
+            z-index: 1;
             transition: transform 0.3s ease-in-out;
         }
 
@@ -48,21 +64,13 @@
             transform: scale(1.03);
         }
 
-        /* Title Styling */
-        h1 {
-            font-size: 42px;
-            font-weight: 600;
-            color: #ffcc00;
-            text-shadow: 0 0 15px #ffcc00;
-        }
-
-        /* Notification Message */
+        /* Notification Text */
         .beautified-text {
             font-size: 20px;
             font-weight: 400;
-            margin: 20px 0;
-            color: #fff;
+            color: #ffffff;
             text-shadow: 0 0 8px #ffffff;
+            margin-bottom: 20px;
         }
 
         .beautified-text span {
@@ -71,7 +79,7 @@
             text-shadow: 0 0 10px #00ff00;
         }
 
-        /* Social Media Icons */
+        /* Social Icons */
         .icons {
             margin-top: 25px;
         }
@@ -97,6 +105,7 @@
             margin-top: 20px;
             font-size: 16px;
             font-weight: bold;
+            color: #fff;
         }
 
         footer span {
@@ -107,8 +116,11 @@
 </head>
 <body>
 
+    <!-- Fireworks Canvas -->
+    <canvas id="fireworks"></canvas>
+
     <div class="container">
-        <h1>Notification</h1>
+        <div class="glow-text">VOX-MD</div>
         <p class="beautified-text">
             By seeing this message, it means you have <span>successfully</span> connected to 
             <span>VOX-MD WhatsApp Bot</span>. The bot is currently running and <span>ACTIVE</span>.
@@ -125,6 +137,80 @@
 
         <footer>&copy; 2025 <span>VOX-MD</span></footer>
     </div>
+
+    <script>
+        // Fireworks Animation
+        const canvas = document.getElementById('fireworks');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+
+        class Particle {
+            constructor(x, y, color, velocity, decay) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.velocity = velocity;
+                this.alpha = 1;
+                this.decay = decay;
+            }
+
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+
+            update() {
+                this.velocity.y += 0.02;
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= this.decay;
+            }
+        }
+
+        function createFirework(x, y) {
+            let colors = ['#00ffff', '#00ff00', '#ff00ff', '#ff4500', '#ffcc00'];
+            for (let i = 0; i < 50; i++) {
+                let angle = Math.random() * Math.PI * 2;
+                let speed = Math.random() * 5 + 2;
+                let velocity = { x: Math.cos(angle) * speed, y: Math.sin(angle) * speed };
+                let decay = Math.random() * 0.015 + 0.015;
+                particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)], velocity, decay));
+            }
+        }
+
+        function animateFireworks() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((particle, index) => {
+                particle.update();
+                particle.draw();
+                if (particle.alpha <= 0) {
+                    particles.splice(index, 1);
+                }
+            });
+
+            requestAnimationFrame(animateFireworks);
+        }
+
+        window.addEventListener('click', (event) => {
+            createFirework(event.clientX, event.clientY);
+        });
+
+        animateFireworks();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
 
 </body>
 </html>
