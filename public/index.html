@@ -79,7 +79,7 @@
             text-shadow: 0 0 10px #00ff00;
         }
 
-        /* Social Icons */
+        /* Contact & Social Icons */
         .icons {
             margin-top: 25px;
         }
@@ -110,6 +110,36 @@
             filter: grayscale(100%);
         }
 
+        /* Contact Section */
+        .contact {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .contact-icons img {
+            width: 30px;
+            height: 30px;
+            margin: 0 5px;
+            vertical-align: middle;
+        }
+
+        .contact span {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        /* Fork Repository Section */
+        .fork {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
         /* Footer */
         footer {
             margin-top: 20px;
@@ -136,12 +166,23 @@
             <span>VOX-MD WhatsApp Bot</span>. The bot is currently running and <span>ACTIVE</span>.
         </p>
 
+        <!-- Contact Section -->
+        <div class="contact">Contact us through:</div>
+        <div class="contact-icons">
+            <a href="https://wa.me/254114148625">
+                <img class="whatsapp-icon" src="https://cdn.jsdelivr.net/npm/simple-icons@v7/icons/whatsapp.svg" alt="WhatsApp">
+            </a>
+            <a href="tel:+254114148625">
+                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v7/icons/phone.svg" alt="Phone">
+            </a>
+            <span>+254114148625</span>
+        </div>
+
+        <!-- Fork Repository Section -->
+        <div class="fork">Fork Repository:</div>
         <div class="icons">
             <a href="https://github.com/Vox-Net/VOX-MD">
                 <img class="github-icon" src="https://cdn.jsdelivr.net/npm/simple-icons@v7/icons/github.svg" alt="GitHub">
-            </a>
-            <a href="https://wa.me/254114148625">
-                <img class="whatsapp-icon" src="https://cdn.jsdelivr.net/npm/simple-icons@v7/icons/whatsapp.svg" alt="WhatsApp">
             </a>
         </div>
 
@@ -210,20 +251,11 @@
             requestAnimationFrame(animateFireworks);
         }
 
-        // Automatically launch fireworks at random positions
         setInterval(() => {
-            createFirework(
-                Math.random() * canvas.width,
-                Math.random() * canvas.height / 2
-            );
+            createFirework(Math.random() * canvas.width, Math.random() * canvas.height / 2);
         }, 1000);
 
         animateFireworks();
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
     </script>
 
 </body>
