@@ -100,6 +100,16 @@
             filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.5));
         }
 
+        /* WhatsApp icon remains green */
+        .whatsapp-icon {
+            filter: none !important;
+        }
+
+        /* GitHub icon is black & white */
+        .github-icon {
+            filter: grayscale(100%);
+        }
+
         /* Footer */
         footer {
             margin-top: 20px;
@@ -128,10 +138,10 @@
 
         <div class="icons">
             <a href="https://github.com/Vox-Net/VOX-MD">
-                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v7/icons/github.svg" alt="GitHub">
+                <img class="github-icon" src="https://cdn.jsdelivr.net/npm/simple-icons@v7/icons/github.svg" alt="GitHub">
             </a>
             <a href="https://wa.me/254114148625">
-                <img src="https://cdn.jsdelivr.net/npm/simple-icons@v7/icons/whatsapp.svg" alt="WhatsApp">
+                <img class="whatsapp-icon" src="https://cdn.jsdelivr.net/npm/simple-icons@v7/icons/whatsapp.svg" alt="WhatsApp">
             </a>
         </div>
 
@@ -139,7 +149,7 @@
     </div>
 
     <script>
-        // Fireworks Animation
+        // Fireworks Animation - Automatically launches fireworks
         const canvas = document.getElementById('fireworks');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
@@ -200,9 +210,13 @@
             requestAnimationFrame(animateFireworks);
         }
 
-        window.addEventListener('click', (event) => {
-            createFirework(event.clientX, event.clientY);
-        });
+        // Automatically launch fireworks at random positions
+        setInterval(() => {
+            createFirework(
+                Math.random() * canvas.width,
+                Math.random() * canvas.height / 2
+            );
+        }, 1000);
 
         animateFireworks();
 
