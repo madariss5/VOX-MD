@@ -5,58 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notification</title>
     <style>
-        /* General Page Styling */
-        body {
-            background: linear-gradient(to right, #141E30, #243B55);
-            font-family: Arial, sans-serif;
-            color: white;
-            text-align: center;
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Animated Gradient Background */
+        body {
+            background: linear-gradient(-45deg, #001F3F, #00698f, #243B55, #004d40);
+            background-size: 300% 300%;
+            animation: gradientAnimation 8s ease infinite;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            text-align: center;
         }
 
-        /* Notification Box */
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Glassmorphism Notification Box */
         .container {
             max-width: 700px;
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.1);
             padding: 30px;
             border-radius: 15px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(15px);
+            box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease-in-out;
         }
 
-        /* Header Title */
+        .container:hover {
+            transform: scale(1.03);
+        }
+
+        /* Title Styling */
         h1 {
             font-size: 42px;
-            font-weight: bold;
+            font-weight: 600;
             color: #ffcc00;
-            text-shadow: 0 0 10px #ffcc00, 0 0 20px #ffcc00;
+            text-shadow: 0 0 15px #ffcc00;
         }
 
-        /* Beautified Notification Text */
+        /* Notification Message */
         .beautified-text {
             font-size: 20px;
             font-weight: 400;
             margin: 20px 0;
             color: #fff;
-            text-shadow: 0 0 5px #ffffff, 0 0 10px #ffffff;
+            text-shadow: 0 0 8px #ffffff;
         }
 
-        /* Highlighted Words */
         .beautified-text span {
             font-weight: bold;
             color: #00ff00;
-            text-shadow: 0 0 5px #00ff00, 0 0 15px #00ff00;
+            text-shadow: 0 0 10px #00ff00;
         }
 
         /* Social Media Icons */
         .icons {
-            margin-top: 20px;
+            margin-top: 25px;
         }
 
         .icons a {
@@ -79,11 +96,12 @@
         footer {
             margin-top: 20px;
             font-size: 16px;
+            font-weight: bold;
         }
 
         footer span {
             color: red;
-            font-weight: bold;
+            text-shadow: 0 0 10px red;
         }
     </style>
 </head>
@@ -105,7 +123,7 @@
             </a>
         </div>
 
-        <footer>&copy; 2025 <span>VOX-MD Bots</span></footer>
+        <footer>&copy; 2025 <span>VOX-MD</span></footer>
     </div>
 
 </body>
