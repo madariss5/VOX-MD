@@ -6,6 +6,7 @@ module.exports = async (context) => {
 ┃ 🚀 *Special Thanks & Acknowledgments*  
 ┃━━━━━━━━━━━━━━━━━━━⬣
 ┃ 👑 *Kanambo* ➪ *Owner & Developer*  
+┃ 🖇️ *Owner repo too*: (https://github.com/Kanambp)
 ┃ 🔗 [VOX-MD Repository](https://github.com/Vox-Net/VOX-MD)
 ┃  
 ┃ 🛠️ *Dika Ardnt* ➪ *Indonesia*  
