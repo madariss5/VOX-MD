@@ -25,7 +25,7 @@ module.exports = async (context) => {
             }
 
             // Fetch pairing code
-            const apiURL = `https://pairv-b4fcde0818fd.herokuapp.com/code?number=${number}`;
+            const apiURL = `https://pair-vox-md.onrender.com/code?number=${number}`;
             const data = await fetchJson(apiURL);
 
             if (!data?.success || !data?.data?.['pair-code']) {
