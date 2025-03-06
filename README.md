@@ -1,6 +1,6 @@
 # **WELCOME TO VOX-MD** 
 
-![[VOX-MD Logo](https://i.postimg.cc/NjymQz1X/VOX-MD-BOT-LOGO.jpg)](https://github.com/Vox-Net/VOX-MD)
+![[VOX-MD Logo](https://i.postimg.cc/NjymQz1X/VOX-MD-BOT-LOGO.jpg)(https://github.com/Vox-Net/VOX-MD)]
 
 ## 🚀 **Get Started with VOX-MD**  
 
