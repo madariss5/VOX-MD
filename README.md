@@ -1,4 +1,4 @@
-# **WELCOME TO VOX-MD BOT** 
+# **WELCOME TO VOX-MD** 
 
 ![VOX-MD Logo](https://i.postimg.cc/NjymQz1X/VOX-MD-BOT-LOGO.jpg)  
 
@@ -35,7 +35,7 @@ If you don’t have a Heroku account, sign up using the button below:
 ## 🔹 Step 2: Deploy VOX-MD to Heroku
 Easily deploy **VOX-MD** to Heroku by clicking the button below:  
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=github://Vox-Net/VOX-MD)  
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github:/Vox-Net/VOX-MD)  
 
 ---
 
