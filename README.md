@@ -14,6 +14,15 @@ Click the button below to generate your **VOX-MD session** and start using the b
 
 [![Get Session](https://img.shields.io/badge/🔥%20Get%20Session%20🔥-black?style=for-the-badge&logo=whatsapp)](https://pairv-b4fcde0818fd.herokuapp.com/)  
 
+### **Fork This Repository**  
+You MUST fork this repo before setting up the bot.  
+
+<p align="center">
+  <a href="https://github.com/Vox-Net/VOX-MD/fork">
+    <img src="https://img.shields.io/badge/⚡%20Fork%20VOX--MD%20⚡-blue?style=for-the-badge&logo=github" alt="Fork VOX-MD">
+  </a>
+</p>
+
 ---
 
 ## 🌟 **Features of VOX-MD**  
