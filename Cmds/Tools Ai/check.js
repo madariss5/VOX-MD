@@ -1,8 +1,8 @@
 module.exports = async (context) => {
     const { client, m, args } = context;
 
-    if (!args[0] || args[0].length < 4 || args[0].length > 6) {
-        return m.reply("⚠️ *Invalid Input!*\nPlease provide 4 to 6 digits to find matching numbers.\n\nExample: `.check 0712`");
+    if (!args[0] || args[0].length < 6 || args[0].length > 7) {
+        return m.reply("⚠️ *Invalid Input!*\nPlease provide 6 to 7 digits to find matching numbers.\n\nExample: `.check 0712`");
     }
 
     let prefix = args[0];
