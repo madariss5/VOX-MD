@@ -14,7 +14,7 @@ module.exports = async (context) => {
         });
 
         // API request
-        const apiUrl = `https://api.ryzendesu.vip/api/stalk/github?username=${encodeURIComponent(text)}`;
+        const apiUrl = `https://fastrestapis.fasturl.cloud/stalk/github?username=${encodeURIComponent(text)}`;
         const response = await axios.get(apiUrl);
 
         // Check if response is not 200
