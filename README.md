@@ -23,6 +23,24 @@ You MUST fork this repo before setting up the bot.
   </a>
 </p>
 
+# 🚀 Heroku Setup Guide
+
+## 🔹 Step 1: Create a Heroku Account
+If you don’t have a Heroku account, sign up using the button below:  
+
+[![SIGN UP](https://img.shields.io/badge/Signup-Heroku-6762A6?logo=heroku&style=for-the-badge)](https://signup.heroku.com/)  
+
+---
+
+## 🔹 Step 2: Deploy VOX-MD to Heroku
+Easily deploy **VOX-MD** to Heroku by clicking the button below:  
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=github://Vox-Net/VOX-MD)  
+
+---
+
+## 🔹 Step 3: Configuration  
+Once deployed, set up your **.env variables** as required:
 ---
 
 ## 🌟 **Features of VOX-MD**  
