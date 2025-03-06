@@ -35,7 +35,7 @@ If you don’t have a Heroku account, sign up using the button below:
 ## 🔹 Step 2: Deploy VOX-MD to Heroku
 Easily deploy **VOX-MD** to Heroku by clicking the button below:  
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github:/Vox-Net/VOX-MD)  
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://dashboard.heroku.com/new?template=https://github.com/Vox-Net/VOX-MD)  
 
 ---
 
