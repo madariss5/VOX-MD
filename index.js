@@ -1,6 +1,8 @@
 /* VOX-MD - The Modern WhatsApp Bot */
 
 const { default: VOXMDConnect, useMultiFileAuthState, DisconnectReason, makeInMemoryStore, downloadContentFromMessage, jidDecode } = require("@whiskeysockets/baileys");
+const events = require('events');
+events.defaultMaxListeners = 20; // Increase to 20 or any reasonable number
 const pino = require("pino");
 const { Boom } = require("@hapi/boom");
 const fs = require("fs");
