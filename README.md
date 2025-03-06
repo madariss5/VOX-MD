@@ -1,4 +1,4 @@
-# ✨ **WELCOME TO VOX-MD BOT** ✨  
+# **WELCOME TO VOX-MD BOT** 
 
 ![VOX-MD Logo](https://i.postimg.cc/NjymQz1X/VOX-MD-BOT-LOGO.jpg)  
 
