@@ -5,10 +5,10 @@ module.exports = async (context) => {
         const { client, m, groupMetadata } = context;
 
 await client.groupRevokeInvite(m.chat); 
-   await client.sendText(m.chat, 'Group link revoked!', m); 
+   await client.sendMessage(m.chat, 'Group link revoked!', m); 
    let response = await client.groupInviteCode(m.chat); 
- client.sendText(m.sender, `https://chat.whatsapp.com/${response}\n\nHere is the new group link for ${groupMetadata.subject}`, m, { detectLink: true }); 
- client.sendText(m.chat, `Sent you the new group link in private!`, m); 
+ client.sendMessage(m.sender, `https://chat.whatsapp.com/${response}\n\nHere is the new group link for ${groupMetadata.subject}`, m, { detectLink: true }); 
+ client.sendMessage(m.chat, `Sent you the new group link in private!`, m); 
 
 })
 
