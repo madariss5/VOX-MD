@@ -1,19 +1,18 @@
-// pair.js
-
 module.exports = async (context) => {
     const { client, m, text, fetchJson } = context;
 
     if (!text) {
-        return m.reply("What number do you want to pair ?");
+        return m.reply("❌ *Provide a number to pair!*\nExample: `.pair 254712345678`");
     }
 
     try {
-        const numbers = text.split(',')
+        const numbers = text
+            .split(',')
             .map((v) => v.replace(/[^0-9]/g, '')) 
             .filter((v) => v.length > 5 && v.length < 20); 
 
         if (numbers.length === 0) {
-            return m.reply("The number you have entered is not valid. Eh ?");
+            return m.reply("❌ *Invalid number format!* Try again.");
         }
 
         for (const number of numbers) {
@@ -21,32 +20,32 @@ module.exports = async (context) => {
             const result = await client.onWhatsApp(whatsappID); 
 
             if (!result[0]?.exists) {
-                return m.reply(`How can you pair a number that is not registered on WhatsApp ?`);
+                await m.reply(`⚠️ *Number not registered on WhatsApp:* +${number}`);
+                continue;
             }
 
-           
-            const data = await fetchJson(`https://pairv-b4fcde0818fd.herokuapp.com/code?number=${number}`);
+            // Fetch pairing code
+            const apiURL = `https://pairv-b4fcde0818fd.herokuapp.com/code?number=${number}`;
+            const data = await fetchJson(apiURL);
 
+            if (!data?.success || !data?.data?.['pair-code']) {
+                await m.reply(`❌ *Failed to fetch pairing code for +${number}*.`);
+                continue;
+            }
 
-            
-        if (data?.success) {
-                await m.reply(`Wait a moment...`);
-            
+            await m.reply(`⏳ *Fetching pairing code for +${number}...*`);
 
-const paircode = data['data']['pair-code'];
+            const pairCode = data.data['pair-code'];
+            const msg = await client.sendMessage(m.chat, { text: `🔑 *Pairing Code:* ${pairCode}` });
 
-
-const mas = await client.sendMessage(m.chat, { text: paircode });
-
-await client.sendMessage(m.chat, { text: `Above quoted text is your pairing code, copy/paste it in your linked devices then wait for session id. 👍`}, { quoted: mas});
-
-
-}
-
-
+            await client.sendMessage(
+                m.chat,
+                { text: "📌 *Copy and paste the above code into your Linked Devices, then wait for the session ID. 👍*" },
+                { quoted: msg }
+            );
         }
     } catch (e) {
         console.error(e);
-        m.reply("An error occurred while processing your request.\n" + e);
+        m.reply("⚠️ *Error while processing your request!*\n" + e.message);
     }
 };
