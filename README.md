@@ -12,7 +12,7 @@
 
 Click the button below to generate your **VOX-MD session** and start using the bot in minutes!  
 
-[![Get Session](https://img.shields.io/badge/🔥%20Get%20Session%20🔥-black?style=for-the-badge&logo=whatsapp)](https://pairv-b4fcde0818fd.herokuapp.com/)  
+[![Get Session](https://img.shields.io/badge/🔥%20Get%20Session%20🔥-black?style=for-the-badge&logo=whatsapp)](https://voxm-d75d85815be2.herokuapp.com/) 
 
 ### **Fork This Repository**  
 You MUST fork this repo before setting up the bot.  
