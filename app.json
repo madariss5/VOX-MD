@@ -1,10 +1,10 @@
 {
   "name": "VOX-MD",
-  "description": "This is a simple whatsapp bot built with nodejs and baileys with MD support.",
+  "description": "A modern WhatsApp bot built with Node.js and Baileys MD, featuring powerful automation and fun features.",
   "keywords": [
     "bot",
     "whatsapp",
-    "dreaded",
+    "VOX-MD",
     "whatsapp-stickers",
     "anime",
     "whatsapp-bot",
@@ -20,85 +20,82 @@
   "success_url": "/",
   "env": {
     "PREFIX": {
-      "description": "choose your prefix for dreaded. To prevent errors and confusion you must set a prefix",
+      "description": "Set the bot's command prefix to avoid errors and confusion.",
       "value": ".",
       "required": true
     },
     "DEV": {
-      "description": "Put any phone numbers you want to be bot owner without + or spaces \",\" Ex: 254114018035, 254741889898 ",
+      "description": "Enter the bot owner's phone numbers without + or spaces, separated by commas (e.g., 254114018035,254741889898).",
       "required": false
     },
     "CODE": {
-      "description": "Enter your country code without +. Example: 254 for Kenya. This will allow bot to detect and remove foreigners if commanded",
+      "description": "Enter your country code without + (e.g., 254 for Kenya). This enables the bot to detect and manage foreign numbers.",
       "required": true
     },
     "STICKER_AUTHOR": {
-      "description": "Put your sticker author data",
+      "description": "Set the author name for stickers.",
       "required": false
     },
     "STICKER_PACKNAME": {
-      "description": "Put your sticker packname data",
+      "description": "Set the sticker pack name.",
       "required": false
     },
     "BOTNAME": {
-      "description": "Enter name for your bot.",
+      "description": "Set the name of your bot.",
       "required": false
     },
     "GC_PRESENCE": {
-      "description": "Type true if you want bot to show fake recording/typing in group chats.",
+      "description": "Set to 'true' if you want the bot to show fake recording/typing in group chats.",
       "required": false
     },
     "SESSION": {
-      "description": "Paste the session id that you received in whatsapp after linking the bot. It's used for authentication.",
+      "description": "Paste your WhatsApp session ID obtained after linking the bot. Required for authentication.",
       "required": true
     },
     "AUTOVIEW_STATUS": {
-      "description": "Type true if you want bot to automatically read all status update",
+      "description": "Set to 'true' if you want the bot to automatically view all status updates.",
       "required": false
     },
-
- "AUTOLIKE_STATUS": {
-      "description": "Type true if you want bot to automatically like status updates, this will only work if AUTOVIEW_STATUS is true.",
+    "AUTOLIKE_STATUS": {
+      "description": "Set to 'true' if you want the bot to automatically like status updates. (Requires AUTOVIEW_STATUS to be 'true').",
       "required": false
     },
-
- "ANTIDELETE": {
-      "description": "Type true if you want bot to automatically forward deleted messages in groups. The deleted messages will be forwarded to the <message yourself chat>. We are yet to implement antidelete for private chats.",
+    "ANTIDELETE": {
+      "description": "Set to 'true' if you want the bot to forward deleted messages in groups to your private chat. (Private chats not supported yet).",
       "required": false
     },
- "ANTILINK": {
-      "description": "Type true if you want bot to automatically forward deleted messages in groups. The deleted messages will be forwarded to the <message yourself chat>. We are yet to implement antidelete for private chats.",
+    "ANTILINK": {
+      "description": "Set to 'true' if you want the bot to remove users who send links in groups.",
       "required": false
     },
-"EVENTS": {
-      "description": "choose whether to allow bot to detect events in groups such as promote, demote, remove and add. If set to true bot will send welcome/goodbye messages and signal when somebody is promoted or demoted.",
+    "EVENTS": {
+      "description": "Set to 'true' to allow the bot to detect group events like promotions, demotions, additions, and removals. It will send welcome and goodbye messages accordingly.",
       "value": "true",
       "required": true
     },
-"AUTOBIO": {
-      "description": "Type true if you want bot to autoupdate it's bio constantly",
+    "AUTOBIO": {
+      "description": "Set to 'true' if you want the bot to automatically update its bio.",
       "required": false
     },
-
-"ANTITAG": {
-      "description": "Type true if you want bot to automatically remove members who tagall or use hidetag.",
+    "ANTITAG": {
+      "description": "Set to 'true' if you want the bot to remove members who use '@everyone' or 'hidetag' excessively.",
       "required": false
     },
-"ANTIVIEWONCE": {
-      "description": "Type true if you want bot to automatically read viewonce media",
+    "ANTIVIEWONCE": {
+      "description": "Set to 'true' if you want the bot to automatically unlock view-once media.",
       "required": false
     },
     "AUTOREAD": {
-      "description": "Put here true if you want bot to automatically bluetick messages in private.",
+      "description": "Set to 'true' if you want the bot to automatically mark private messages as read.",
       "required": false
     },
     "WA_PRESENCE": {
-      "description": "This is your WhatsApp Presence Status: Here's how to set it up: Type *typing* if you want bot to show typing..., Type *recording* if you want bot to show recording..., Type *online* if you want bot to be always online, Leave this field blank if you want bot to show your actual presence.",
+      "description": "Set the bot's WhatsApp presence status: 'typing' (typing...), 'recording' (recording...), 'online' (always online), or leave blank for real presence status.",
       "value": "typing",
       "required": false
     },
     "MODE": {
-      "description": "Type private if you don't want other people to use the bot or public if you want everyone to access.",
+      "description": "Set to 'private' if you want only the owner to use the bot, or 'public' for everyone to access it.",
       "required": false
     }
   },
@@ -113,4 +110,4 @@
       "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest"
     }
   ]
-}
+    }
