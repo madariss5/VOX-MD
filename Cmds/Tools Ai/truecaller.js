@@ -1,42 +1,46 @@
 const axios = require("axios");
 
 module.exports = async (context) => {
-    const { client, m, args, text } = context;
+    const { client, m, args } = context;
+    
+    // API Key
+    const API_KEY = "1c5189a48c15fb72f6809daa2488596c";
 
-    if (!text) {
-        return m.reply("❌ *Provide a phone number to lookup!*\nExample: `.truecaller +254700123456`");
+    // Validate input
+    if (!args[0]) {
+        return m.reply("⚠️ *Usage:* `.truecaller <phone-number>`\n\n📌 *Example:* `.truecaller +14158586273`");
     }
 
-    const apiKey = "1c5189a48c15fb72f6809daa2488596c"; // Your API Key
-    const number = text.trim();
-
-    const apiUrl = `http://apilayer.net/api/validate?access_key=${apiKey}&number=${encodeURIComponent(number)}&format=1`;
+    const phoneNumber = args[0].replace(/[^0-9+]/g, ""); // Clean number input
+    const apiUrl = `http://apilayer.net/api/validate?access_key=${API_KEY}&number=${phoneNumber}`;
 
     try {
-        m.reply("🔍 *Fetching details... Please wait!*");
+        const response = await axios.get(apiUrl);
+        const data = response.data;
 
-        const { data } = await axios.get(apiUrl);
-
+        // Check if the number is valid
         if (!data.valid) {
-            return m.reply("❌ *Invalid phone number! Please check and try again.*");
+            return m.reply("❌ *Invalid phone number!* Please check and try again.");
         }
 
-        const network = data.carrier || "Unknown";
-        const country = `${data.country_name} (${data.country_code})`;
-        const lineType = data.line_type || "Unknown";
-        const registeredName = data.international_format || "Not Available";
+        // Formatted message output
+        const resultMsg = `📞 *Phone Lookup Result* 📞
 
-        const response = `╭───〔 *📞 Phone Lookup* 〕───╮\n` +
-            `│ *📌 Number:* ${registeredName}\n` +
-            `│ *🌍 Region:* ${country}\n` +
-            `│ *📡 Network:* ${network}\n` +
-            `│ *📶 Line Type:* ${lineType}\n` +
-            `╰──────────────────────╯`;
+🔹 *Number:* ${data.number}
+🔹 *Local Format:* ${data.local_format}
+🔹 *International Format:* ${data.international_format}
+🔹 *Country:* ${data.country_name} (${data.country_code})
+🔹 *Location:* ${data.location || "Unknown"}
+🔹 *Carrier:* ${data.carrier || "Unknown"}
+🔹 *Network Type:* ${data.line_type || "Unknown"}
 
-        await client.sendMessage(m.chat, { text: response }, { quoted: m });
+🟢 *Powered by VOX-MD*`;
+
+        // Send response
+        client.sendMessage(m.chat, { text: resultMsg }, { quoted: m });
 
     } catch (error) {
-        console.error(error);
-        m.reply("❌ *Error fetching details. Try again later!*");
+        console.error("Error fetching number details:", error);
+        m.reply("❌ *Error fetching phone details.* Please try again later.");
     }
 };
