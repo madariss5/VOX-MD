@@ -1,18 +1,22 @@
 const middleware = require('../../utility/botUtil/middleware');
 
-module.exports = async (m, { conn, args }) => {
-    try {
-        let group = m.chat;
-        let link = 'https://chat.whatsapp.com/' + await conn.groupInviteCode(group);
+module.exports = async (context) => {
+    await middleware(context, async () => {
+        try {
+            const { client, m } = context;
 
-        await conn.reply(m.chat, `🔗 *Group Invite Link:*\n${link}`, m, { detectLink: true });
+            if (!m.isGroup) {
+                return client.sendText(m.chat, '❌ This command only works in groups!', m);
+            }
 
-    } catch (err) {
-        console.error('Error fetching group link:', err);
-        await conn.reply(m.chat, '❌ Failed to fetch group link. Make sure I am an admin.', m);
-    }
+            let response = await client.groupInviteCode(m.chat);
+            let link = `🔗 *Group Invite Link:*\nhttps://chat.whatsapp.com/${response}`;
+
+            await client.sendText(m.chat, link, m, { detectLink: true });
+
+        } catch (error) {
+            console.error('Error fetching group link:', error);
+            await client.sendText(m.chat, '❌ Failed to fetch group link. Make sure I am an admin.', m);
+        }
+    });
 };
-
-module.exports.command = ['link', 'linkgroup'];
-module.exports.group = true;
-module.exports.botAdmin = true;
