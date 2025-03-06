@@ -1,10 +1,8 @@
 const middleware = require('../../utility/botUtil/middleware');
 
 module.exports = async (context) => {
-    await middleware(context, async () => {
+    await middleware(context, async (client, m) => {  // Fix: Pass client & m correctly
         try {
-            const { client, m } = context;
-
             if (!m.isGroup) {
                 return client.sendText(m.chat, '❌ This command only works in groups!', m);
             }
@@ -15,7 +13,7 @@ module.exports = async (context) => {
             await client.sendText(m.chat, link, m, { detectLink: true });
 
         } catch (error) {
-            console.error('Error fetching group link:', error);
+            console.error('❌ Error fetching group link:', error);
             await client.sendText(m.chat, '❌ Failed to fetch group link. Make sure I am an admin.', m);
         }
     });
