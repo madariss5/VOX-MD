@@ -14,7 +14,11 @@ module.exports = async (context) => {
                 return await client.sendMessage(m.chat, { text: '❌ This command only works in groups!' }, { quoted: m });
             }
 
-            if (!m.isBotAdmin) {
+            let groupMetadata = await client.groupMetadata(m.chat);
+            let botNumber = client.user.id.split(':')[0] + '@s.whatsapp.net';
+            let isBotAdmin = groupMetadata.participants.find(p => p.id === botNumber)?.admin;
+
+            if (!isBotAdmin) {
                 return await client.sendMessage(m.chat, { text: '⚠️ I need to be an *admin* to fetch the group link!' }, { quoted: m });
             }
 
@@ -25,7 +29,7 @@ module.exports = async (context) => {
 
         } catch (error) {
             console.error('❌ Error fetching group link:', error);
-            await context.client.sendMessage(context.m.chat, { text: '❌ Failed to fetch group link. Make sure I am an admin.' }, { quoted: context.m });
+            await context.client.sendMessage(context.m.chat, { text: '❌ Failed to fetch group link. Try again later.' }, { quoted: context.m });
         }
     });
 };
