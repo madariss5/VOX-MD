@@ -24,20 +24,27 @@ module.exports = async (context) => {
 
             // Use Render API instead of Heroku’s direct link
             const apiUrl = `https://heroku-eokh.onrender.com/code?number=${number}`;
-            const data = await fetchJson(apiUrl);
+            
+            try {
+                const data = await fetchJson(apiUrl);
+                console.log("API Response:", data); // Debugging step
 
-            if (data?.success) {
-                await m.reply("Wait a moment...");
+                if (data?.success && data?.data?.['pair-code']) {
+                    const paircode = data.data['pair-code'];
+                    
+                    await m.reply("Wait a moment...");
+                    const mas = await client.sendMessage(m.chat, { text: paircode });
 
-                const paircode = data['data']['pair-code'];
-
-                const mas = await client.sendMessage(m.chat, { text: paircode });
-
-                await client.sendMessage(m.chat, { 
-                    text: `Above quoted text is your pairing code, copy/paste it in your linked devices then wait for session ID. 👍` 
-                }, { quoted: mas });
-            } else {
-                m.reply("Failed to fetch pairing code for the number.");
+                    await client.sendMessage(m.chat, { 
+                        text: `Above quoted text is your pairing code, copy/paste it in your linked devices then wait for session ID. 👍` 
+                    }, { quoted: mas });
+                } else {
+                    console.error("Invalid API response:", data);
+                    m.reply("Failed to fetch pairing code for the number. Check logs.");
+                }
+            } catch (error) {
+                console.error("Error fetching from API:", error);
+                m.reply("Error contacting the pairing server. Try again later.");
             }
         }
     } catch (e) {
