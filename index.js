@@ -21,7 +21,7 @@ const { smsg } = require('./smsg');
 const { autoview, autoread, botname, autobio, mode, prefix, autolike } = require('./settings');
 const { commands, totalCommands } = require('./commandHandler');
 const groupEvents = require("./groupEvents.js");
-const { connectBot, disconnectBot, listBots } = require("./connect.js");
+
 
 authenticationn();
 
