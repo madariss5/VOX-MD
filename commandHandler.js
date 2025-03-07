@@ -92,7 +92,7 @@ commandFiles.forEach((file) => {
 
 module.exports = { commands, aliases, totalCommands };
 
-const { connectBot } = require("../connect.js");
+const { connectBot } = require(path.join(__dirname, "connect.js"));
 
 commands["connectbot"] = {
     name: "connectbot",
