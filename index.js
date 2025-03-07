@@ -154,7 +154,7 @@ startVOXMD();
 let file = require.resolve(__filename);
 fs.watchFile(file, () => {
 fs.unwatchFile(file);
-console.log(chalk.redBright(♻️ Updating ${__filename}));
+console.log(chalk.redBright("♻️ Updating" + __filename));
 delete require.cache[file];
 require(file);
 });
