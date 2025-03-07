@@ -2,11 +2,12 @@ const axios = require("axios");
 const fs = require("fs");
 
 module.exports = async (client, m) => {
-    if (!m.quoted || !m.quoted.message.imageMessage) {
-        return m.reply("📌 *Reply to an image* with `.sharpen` to enhance it!");
-    }
-
     try {
+        // Ensure the user is replying to an image
+        if (!m.message.extendedTextMessage || !m.quoted || !m.quoted.message.imageMessage) {
+            return m.reply("📌 *Reply to an image* with `.sharpen` to enhance it!");
+        }
+
         m.reply("🔄 Processing your image... Please wait!");
 
         // Download the image
@@ -14,7 +15,7 @@ module.exports = async (client, m) => {
         let buffer = await client.downloadMediaMessage(m.quoted);
         fs.writeFileSync(imagePath, buffer);
 
-        // Upload image to a temporary host (use a real image upload API here)
+        // Upload image to a temporary host
         let form = new FormData();
         form.append("file", fs.createReadStream(imagePath));
 
