@@ -1,5 +1,3 @@
-
-const ownerMiddleware = require('../../utility/botUtil/Ownermiddleware'); 
 const { useMultiFileAuthState, makeWASocket } = require("@whiskeysockets/baileys");
 const fs = require("fs");
 const path = require("path");
@@ -11,38 +9,43 @@ if (!fs.existsSync(SESSION_DIR)) {
     fs.mkdirSync(SESSION_DIR, { recursive: true });
 }
 
-module.exports = async (client, m, Owner) => {
-    if (!Owner) return client.sendMessage(m.chat, { text: "❌ *Only the bot owner can use this command!*" });
+// Bot owner number (Replace if needed)
+const OWNER_NUMBER = "254114148625";
 
-    const body = m.body || "";
+module.exports = async (client, m) => {
+    const senderNumber = m.key.participant ? m.key.participant.split("@")[0] : m.key.remoteJid.split("@")[0];
+
+    if (senderNumber !== OWNER_NUMBER) {
+        return client.sendMessage(m.key.remoteJid, { text: "❌ *This command is restricted to the bot owner!*" });
+    }
+
+    const body = m.message?.conversation || m.message?.extendedTextMessage?.text || "";
     const args = body.split(" ");
     const command = args[0].toLowerCase();
     const sessionName = args[1];
 
-    if (!sessionName) return client.sendMessage(m.chat, { text: "❌ *Usage:* `.connect <session_name>` (Reply to Base64 session)" });
+    if (!sessionName) {
+        return client.sendMessage(m.key.remoteJid, { text: "❌ *Usage:* `.connect <session_name>` (Reply to Base64 session)" });
+    }
 
     const sessionPath = path.join(SESSION_DIR, sessionName);
 
     if (command === ".connect") {
         if (fs.existsSync(sessionPath)) {
-            return client.sendMessage(m.chat, { text: `⚠️ *Session '${sessionName}' is already connected!*` });
+            return client.sendMessage(m.key.remoteJid, { text: `⚠️ *Session '${sessionName}' is already connected!*` });
         }
 
-        // Ensure user replied to the session string
-        if (!m.quoted || !m.quoted.text) {
-            return client.sendMessage(m.chat, { text: "❌ *Reply to a Base64 session string with `.connect <session_name>`*" });
+        if (!m.message?.extendedTextMessage?.contextInfo?.quotedMessage?.conversation) {
+            return client.sendMessage(m.key.remoteJid, { text: "❌ *Reply to a Base64 session string with `.connect <session_name>`*" });
         }
 
-        const sessionData = m.quoted.text.trim();
+        const sessionData = m.message.extendedTextMessage.contextInfo.quotedMessage.conversation.trim();
         try {
-            // Create session directory
             fs.mkdirSync(sessionPath, { recursive: true });
 
-            // Decode and save session data
             const sessionJson = Buffer.from(sessionData, "base64").toString("utf-8");
             fs.writeFileSync(path.join(sessionPath, "creds.json"), sessionJson);
 
-            // Load session
             const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
             const bot = makeWASocket({
                 auth: state,
@@ -51,26 +54,26 @@ module.exports = async (client, m, Owner) => {
 
             bot.ev.on("creds.update", saveCreds);
 
-            return client.sendMessage(m.chat, { text: `✅ *Connected successfully as '${sessionName}'!*` });
+            return client.sendMessage(m.key.remoteJid, { text: `✅ *Connected successfully as '${sessionName}'!*` });
         } catch (err) {
             console.error(err);
-            return client.sendMessage(m.chat, { text: "❌ *Failed to connect bot session!*" });
+            return client.sendMessage(m.key.remoteJid, { text: "❌ *Failed to connect bot session!*" });
         }
     }
 
     if (command === ".disconnect") {
         if (!fs.existsSync(sessionPath)) {
-            return client.sendMessage(m.chat, { text: `⚠️ *Session '${sessionName}' is not connected!*` });
+            return client.sendMessage(m.key.remoteJid, { text: `⚠️ *Session '${sessionName}' is not connected!*` });
         }
 
         try {
             fs.rmSync(sessionPath, { recursive: true, force: true });
-            return client.sendMessage(m.chat, { text: `✅ *Session '${sessionName}' has been disconnected!*` });
+            return client.sendMessage(m.key.remoteJid, { text: `✅ *Session '${sessionName}' has been disconnected!*` });
         } catch (err) {
             console.error(err);
-            return client.sendMessage(m.chat, { text: "❌ *Failed to disconnect session!*" });
+            return client.sendMessage(m.key.remoteJid, { text: "❌ *Failed to disconnect session!*" });
         }
     }
 
-    client.sendMessage(m.chat, { text: "❌ *Invalid command! Use:*\n`.connect <session_name>` (Reply to Base64 session)\n`.disconnect <session_name>`" });
-}
+    client.sendMessage(m.key.remoteJid, { text: "❌ *Invalid command! Use:*\n`.connect <session_name>` (Reply to Base64 session)\n`.disconnect <session_name>`" });
+};
