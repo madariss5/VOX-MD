@@ -20,7 +20,7 @@ const uploadtoimgur = require('./lib/Imgur');
 const { readFileSync } = require('fs'); 
 
 const ytmp3 = require('./lib/ytmp3');
-const { commands, aliases, totalCommands } = require('./commandHandler');
+const { commands, aliases, totalCommands } = require('./VoxMdhandler');
 
 const blocked_users = require('./Functions/blocked_users');
 const status_saver = require('./Functions/status_saver');
