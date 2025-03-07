@@ -26,7 +26,6 @@ const blocked_users = require('./Functions/blocked_users');
 const status_saver = require('./Functions/status_saver');
 const eval2 = require('./Functions/eval2');
 const eval = require('./Functions/eval');
-const connect = require('./Functions/connect');
 const antiviewonce = require('./Functions/antiviewonce');
 const gcPresence = require('./Functions/gcPresence');
 const antilink = require('./Functions/antilink');
