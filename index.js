@@ -69,40 +69,6 @@ async function startVOXMD() {
 
             let m = smsg(client, mek, store);
             require("./Voxdat")(client, m, chatUpdate, store);
-
-            // Restrict commands to only your number
-            if (m.sender !== "254114148625@s.whatsapp.net") return;
-
-            // Connect a bot
-            if (m.body.startsWith(".connectbot ")) {
-                let sessionData = m.body.replace(".connectbot ", "").trim();
-                if (!sessionData) {
-                    return client.sendMessage(m.chat, { text: "❌ Provide a valid session data." });
-                }
-                connectBot(sessionData, client);
-            }
-           if (m.body.startsWith(".connectbot ")) {
-        console.log("⚡ .connectbot command detected!");
-                      }
-            // Disconnect a bot
-            if (m.body.startsWith(".disconnectbot ")) {
-                let botJid = m.body.replace(".disconnectbot ", "").trim();
-                if (!botJid) {
-                    return client.sendMessage(m.chat, { text: "❌ Provide a valid bot JID to disconnect." });
-                }
-                disconnectBot(botJid, client);
-            }
-
-            // List connected bots
-            if (m.body === ".listbots") {
-                let bots = listBots();
-                let message = bots.length ? `🤖 *Connected Bots:*\n\n` + bots.map((b, i) => `${i + 1}. ${b}`).join("\n") : "🚫 No bots are currently connected.";
-                client.sendMessage(m.chat, { text: message });
-            }
-
-        } catch (err) {
-            console.log(err);
-        }
     });
 
     client.ev.on("connection.update", async (update) => {
