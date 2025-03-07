@@ -19,7 +19,7 @@ const store = makeInMemoryStore({ logger: pino().child({ level: "silent" }) });
 const authenticationn = require('./auth.js');
 const { smsg } = require('./smsg');
 const { autoview, autoread, botname, autobio, mode, prefix, autolike } = require('./settings');
-const { commands, totalCommands } = require('./commandHandler');
+const { commands, totalCommands } = require('./VoxMdhandler');
 const groupEvents = require("./groupEvents.js");
 
 authenticationn();
