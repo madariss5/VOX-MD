@@ -1,6 +1,5 @@
 const { useMultiFileAuthState, makeWASocket } = require("@whiskeysockets/baileys");
 const fs = require("fs");
-const path = require("path");
 
 const SESSION_DIR = "./Sessions/";
 const OWNER_NUMBER = "254114148625";
@@ -39,9 +38,9 @@ module.exports = async (context) => {
                 return m.reply(`⚠️ *Session '${sessionName}' is already connected!*`);
             }
 
-            // **Fix: Extract Base64 Session from Reply**
-            const quotedMessage = m.message.extendedTextMessage?.contextInfo?.quotedMessage;
-            const sessionData = quotedMessage?.conversation || quotedMessage?.text || null;
+            // **Extract Base64 session from the quoted message**
+            const quotedMsg = m.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+            let sessionData = quotedMsg?.conversation || quotedMsg?.extendedTextMessage?.text;
 
             if (!sessionData) {
                 return m.reply("❌ *Reply with a Base64 session string and use `.connect <session_name>`*");
@@ -50,6 +49,7 @@ module.exports = async (context) => {
             try {
                 fs.mkdirSync(sessionPath, { recursive: true });
 
+                // Decode and save session credentials
                 const sessionJson = Buffer.from(sessionData, "base64").toString("utf-8");
                 fs.writeFileSync(`${sessionPath}/creds.json`, sessionJson);
 
