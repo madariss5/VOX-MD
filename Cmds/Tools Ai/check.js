@@ -1,51 +1,59 @@
+const axios = require("axios");
+
 module.exports = async (context) => {
-    const { client, m, args } = context;
+    const { client, m, text } = context;
 
-    if (!args[0] || args[0].length < 7 || !args[0].includes("xxx")) {
-        return m.reply(
-            "⚠️ *Invalid Input!*\n\n✅ Use format: `.onwa <country-code><prefix>xxx`\n\nExample: `.onwa 25414148xxx`"
-        );
+    if (!text || !text.includes("xxx")) {
+        m.reply("⚠️ *Incorrect format!*\nUse: `.check <countrycode+first6digitsxxx>`\nExample: `.onwa 25414148xxx`");
+        return;
     }
 
-    let input = args[0];
-    let countryCode = input.match(/^\d+/)[0]; // Extract country code
-    let prefix = input.replace("xxx", "").replace(countryCode, ""); // Extract prefix without country code
-
-    let generatedNumbers = new Set();
-
-    // **Generate 100 numbers within the same country code**
-    while (generatedNumbers.size < 100) {
-        let randomLast3 = Math.floor(100 + Math.random() * 900); // Random 3 digits
-        generatedNumbers.add(`${countryCode}${prefix}${randomLast3}`);
+    const baseDigits = text.replace("xxx", "");
+    if (isNaN(baseDigits) || baseDigits.length < 6) {
+        m.reply("⚠️ *Invalid input!*\nEnter a valid country code and 6 digits before 'xxx'.");
+        return;
     }
 
-    let message = `🕵️ *Scanning Numbers Matching:* *${args[0]}*\n\n`;
-    let counter = 1;
+    m.reply("⏳ *Fetching WhatsApp numbers... Please wait.*");
 
-    for (let num of generatedNumbers) {
+    const numList = [];
+    for (let i = 0; i < 200; i++) {
+        let randomDigits = Math.floor(100 + Math.random() * 899); // Random 3-digit suffix
+        numList.push(baseDigits + randomDigits);
+    }
+
+    let registeredNumbers = [];
+    for (let num of numList) {
         try {
-            let waCheck = await client.onWhatsApp(num + "@s.whatsapp.net");
-
-            if (waCheck.length > 0) {
-                let about;
+            let response = await axios.get(`https://api.numlookupapi.com/v1/validate/${num}?apikey=num_live_R7RgZmSuj7CO8ZeWJRgslk8BV63pa50c5r7IBtJJ`);
+            
+            if (response.data.valid && response.data.is_prepaid === true) {
+                let status;
                 try {
-                    let status = await client.fetchStatus(num + "@s.whatsapp.net");
-                    about = status.status || "No About Set.";
+                    status = await client.fetchStatus(num + "@s.whatsapp.net");
                 } catch {
-                    about = "About not accessible due to privacy settings.";
+                    status = { status: "No About info" };
                 }
 
-                message += `\n🌍 *${counter}. +${num}*\n✅ *Registered on WhatsApp!*\n📝 *About:* ${about}\n`;
-            } else {
-                message += `\n❌ *${counter}. +${num}* - *Not on WhatsApp*\n`;
+                registeredNumbers.push({
+                    number: num,
+                    status: status.status
+                });
             }
         } catch (error) {
-            console.log(`Error checking ${num}:`, error);
-            message += `\n⚠️ *${counter}. +${num}* - *Check Failed*\n`;
+            console.log(`Error checking number ${num}:`, error);
         }
-
-        counter++;
     }
 
-    await client.sendMessage(m.chat, { text: message }, { quoted: m });
+    if (registeredNumbers.length === 0) {
+        m.reply("❌ *No registered WhatsApp numbers found!*");
+        return;
+    }
+
+    let msg = "✅ *Registered WhatsApp Numbers Found!*\n\n";
+    registeredNumbers.forEach((data, index) => {
+        msg += `*${index + 1}.* 📞 +${data.number}\n📌 *About:* ${data.status}\n\n`;
+    });
+
+    client.sendMessage(m.chat, { text: msg }, { quoted: m });
 };
