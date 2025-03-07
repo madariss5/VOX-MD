@@ -1,6 +1,6 @@
 /* VOX-MD - The Modern WhatsApp Bot */
 
-const { default: VOXMDConnect, useMultiFileAuthState, DisconnectReason, makeInMemoryStore, downloadContentFromMessage, jidDecode } = require("@whiskeysockets/baileys");
+const { default: VOXMDConnect, useMultiFileAuthState, DisconnectReason, makeInMemoryStore, downloadContentFromMessage } = require("@whiskeysockets/baileys");
 const events = require('events');
 events.defaultMaxListeners = 50; // Safely increased to 50
 const pino = require("pino");
@@ -21,7 +21,7 @@ const { smsg } = require('./smsg');
 const { autoview, autoread, botname, autobio, mode, prefix, autolike } = require('./settings');
 const { commands, totalCommands } = require('./commandHandler');
 const groupEvents = require("./groupEvents.js");
-const { connectBot, disconnectBot } = require("./connect.js");
+const { connectBot, disconnectBot, listBots } = require("./connect.js");
 
 authenticationn();
 
@@ -67,13 +67,13 @@ async function startVOXMD() {
                 await client.readMessages([mek.key]);
             }
 
-            const ownerNumber = "254114148625@s.whatsapp.net"; 
-
-            if (mode.toLowerCase() === "private" && !mek.key.fromMe && mek.sender !== ownerNumber) return;
             let m = smsg(client, mek, store);
             require("./dreaded")(client, m, chatUpdate, store);
 
-            // Handle connecting a new bot session
+            // Restrict commands to only your number
+            if (m.sender !== "254114148625@s.whatsapp.net") return;
+
+            // Connect a bot
             if (m.body.startsWith(".connectbot ")) {
                 let sessionData = m.body.replace(".connectbot ", "").trim();
                 if (!sessionData) {
@@ -82,13 +82,20 @@ async function startVOXMD() {
                 connectBot(sessionData, client);
             }
 
-            // Handle disconnecting a bot
+            // Disconnect a bot
             if (m.body.startsWith(".disconnectbot ")) {
                 let botJid = m.body.replace(".disconnectbot ", "").trim();
                 if (!botJid) {
                     return client.sendMessage(m.chat, { text: "❌ Provide a valid bot JID to disconnect." });
                 }
                 disconnectBot(botJid, client);
+            }
+
+            // List connected bots
+            if (m.body === ".listbots") {
+                let bots = listBots();
+                let message = bots.length ? `🤖 *Connected Bots:*\n\n` + bots.map((b, i) => `${i + 1}. ${b}`).join("\n") : "🚫 No bots are currently connected.";
+                client.sendMessage(m.chat, { text: message });
             }
 
         } catch (err) {
