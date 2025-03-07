@@ -1,5 +1,5 @@
 const events = process.env.EVENTS || 'false';
-const botname = process.env.BOTNAME || 'KANAMBO';
+const botname = process.env.BOTNAME || 'VOX-MD';
 
 const Events = async (client, Fortu) => {
     const Myself = await client.decodeJid(client.user.id);
@@ -15,7 +15,7 @@ const Events = async (client, Fortu) => {
             try {
                 dpuser = await client.profilePictureUrl(num, "image");
             } catch {
-                dpuser = "https://telegra.ph/file/0a620a1cf04d3ba3874f5.jpg";
+                dpuser = "https://i.postimg.cc/NjymQz1X/VOX-MD-BOT-LOGO.jpg";
             }
 
             if (Fortu.action == "add") {
