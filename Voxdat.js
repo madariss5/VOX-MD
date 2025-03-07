@@ -62,7 +62,7 @@ module.exports = dreaded = async (client, m, chatUpdate, store) => {
     const timestamp = speed();
     const dreadedspeed = speed() - timestamp;
 
-    const pict = await fs.readFileSync('./dreaded.jpg');
+    const pict = await fs.readFileSync('../../Voxmdgall/VOX-MD-BOT.jpg');
 
     const cmd = body.startsWith(prefix);
     const args = body.trim().split(/ +/).slice(1);
