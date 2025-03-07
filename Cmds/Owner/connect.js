@@ -39,11 +39,13 @@ module.exports = async (context) => {
                 return m.reply(`⚠️ *Session '${sessionName}' is already connected!*`);
             }
 
-            if (!m.message.extendedTextMessage?.contextInfo?.quotedMessage?.conversation) {
+            // **Fix: Extract Base64 Session from Reply**
+            const quotedMessage = m.message.extendedTextMessage?.contextInfo?.quotedMessage;
+            const sessionData = quotedMessage?.conversation || quotedMessage?.text || null;
+
+            if (!sessionData) {
                 return m.reply("❌ *Reply with a Base64 session string and use `.connect <session_name>`*");
             }
-
-            const sessionData = m.message.extendedTextMessage.contextInfo.quotedMessage.conversation.trim();
 
             try {
                 fs.mkdirSync(sessionPath, { recursive: true });
