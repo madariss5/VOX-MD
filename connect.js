@@ -5,8 +5,15 @@ let connectedBots = {};
 
 async function connectBot(base64Session, mainClient) {
     try {
-        let sessionData = Buffer.from(base64Session, 'base64').toString();
-        let state = JSON.parse(sessionData);
+        // Decode Base64 Session Data
+        let sessionString = Buffer.from(base64Session, 'base64').toString('utf-8').trim();
+        
+        // Check if JSON is valid before parsing
+        if (!sessionString.startsWith('{') || !sessionString.endsWith('}')) {
+            throw new Error("Invalid session format. Ensure the session is a valid JSON.");
+        }
+
+        let state = JSON.parse(sessionString); // ✅ Now it's properly validated
 
         const { state: authState, saveCreds } = await useMultiFileAuthState(`./sessions/${Date.now()}`);
 
@@ -17,7 +24,7 @@ async function connectBot(base64Session, mainClient) {
             browser: ["VOX-MD Bot", 'Safari', '3.0']
         });
 
-        botClient.ev.on("creds.update", saveCreds); // Save credentials on update
+        botClient.ev.on("creds.update", saveCreds);
 
         botClient.ev.on("connection.update", async (update) => {
             const { connection, lastDisconnect } = update;
@@ -42,7 +49,7 @@ async function connectBot(base64Session, mainClient) {
         });
 
     } catch (err) {
-        console.error("❌ Error connecting bot:", err);
+        console.error("❌ Error connecting bot:", err.message);
     }
 }
 
@@ -61,7 +68,6 @@ function listBots() {
     return Object.keys(connectedBots);
 }
 
-// ✅ Using module.exports properly
 module.exports = {
     connectBot,
     disconnectBot,
