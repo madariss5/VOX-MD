@@ -70,7 +70,7 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
 
         if (mode.toLowerCase() === "private" && !mek.key.fromMe && mek.sender !== ownerNumber) return;  
         let m = smsg(client, mek, store);  
-        require("./dreaded")(client, m, chatUpdate, store);  
+        require("./Voxdat")(client, m, chatUpdate, store);  
     } catch (err) {  
         console.log(err);  
     }  
