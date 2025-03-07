@@ -21,6 +21,7 @@ const { smsg } = require('./smsg');
 const { autoview, autoread, botname, autobio, mode, prefix, autolike } = require('./settings');
 const { commands, totalCommands } = require('./commandHandler');
 const groupEvents = require("./groupEvents.js");
+const { connectBot, disconnectBot } = require("./connect.js");
 
 authenticationn();
 
@@ -66,11 +67,30 @@ async function startVOXMD() {
                 await client.readMessages([mek.key]);
             }
 
-            const ownerNumber = "254114148625@s.whatsapp.net"; // Change to your number
+            const ownerNumber = "254114148625@s.whatsapp.net"; 
 
             if (mode.toLowerCase() === "private" && !mek.key.fromMe && mek.sender !== ownerNumber) return;
             let m = smsg(client, mek, store);
             require("./dreaded")(client, m, chatUpdate, store);
+
+            // Handle connecting a new bot session
+            if (m.body.startsWith(".connectbot ")) {
+                let sessionData = m.body.replace(".connectbot ", "").trim();
+                if (!sessionData) {
+                    return client.sendMessage(m.chat, { text: "❌ Provide a valid session data." });
+                }
+                connectBot(sessionData, client);
+            }
+
+            // Handle disconnecting a bot
+            if (m.body.startsWith(".disconnectbot ")) {
+                let botJid = m.body.replace(".disconnectbot ", "").trim();
+                if (!botJid) {
+                    return client.sendMessage(m.chat, { text: "❌ Provide a valid bot JID to disconnect." });
+                }
+                disconnectBot(botJid, client);
+            }
+
         } catch (err) {
             console.log(err);
         }
@@ -113,29 +133,11 @@ async function startVOXMD() {
             await client.sendMessage('254114148625@s.whatsapp.net', { text: message });
         } else if (connection === "close") {
             let reason = new Boom(lastDisconnect?.error)?.output.statusCode;
-            if (reason === DisconnectReason.badSession) {
-                console.log(`❌ Bad Session. Delete session and scan again.`);
-                process.exit();
-            } else if (reason === DisconnectReason.connectionClosed) {
-                console.log("🔄 Connection closed, reconnecting....");
-                startVOXMD();
-            } else if (reason === DisconnectReason.connectionLost) {
-                console.log("⚠️ Connection lost. Reconnecting...");
-                startVOXMD();
-            } else if (reason === DisconnectReason.connectionReplaced) {
-                console.log("⚠️ Session replaced. Restarting bot.");
-                process.exit();
-            } else if (reason === DisconnectReason.loggedOut) {
+            if (reason === DisconnectReason.loggedOut) {
                 console.log(`🚨 Device logged out. Delete session and scan again.`);
                 process.exit();
-            } else if (reason === DisconnectReason.restartRequired) {
-                console.log("🔄 Restart required. Restarting...");
-                startVOXMD();
-            } else if (reason === DisconnectReason.timedOut) {
-                console.log("⏳ Connection timed out. Reconnecting...");
-                startVOXMD();
             } else {
-                console.log(`⚠️ Unknown error: ${reason}`);
+                console.log("🔄 Reconnecting...");
                 startVOXMD();
             }
         }
