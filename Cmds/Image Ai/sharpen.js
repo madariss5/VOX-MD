@@ -2,15 +2,17 @@ const axios = require("axios");
 const fs = require("fs");
 const FormData = require("form-data");
 
-module.exports = async (client, m) => {
+module.exports = async (client, message) => {
     try {
-        if (!m.quoted || !m.quoted.mimetype || !m.quoted.mimetype.includes("image")) {
-            return await client.sendMessage(m.chat, { text: "📌 *Reply to an image* with `.sharpen` to enhance it!" }, { quoted: m });
+        let { mtype, quoted, chat } = message;
+
+        if (!quoted || !quoted.mtype || !quoted.mtype.includes("image")) {
+            return await client.sendMessage(chat, { text: "📌 *Reply to an image* with `.sharpen` to enhance it!" }, { quoted: message });
         }
 
-        await client.sendMessage(m.chat, { text: "🔄 Processing your image... Please wait!" }, { quoted: m });
+        await client.sendMessage(chat, { text: "🔄 Processing your image... Please wait!" }, { quoted: message });
 
-        let buffer = await m.quoted.download();
+        let buffer = await quoted.download();
         let imagePath = "./temp/sharpen.jpg";
         fs.writeFileSync(imagePath, buffer);
 
@@ -22,7 +24,7 @@ module.exports = async (client, m) => {
         });
 
         if (!upload.data || !upload.data.url) {
-            return await client.sendMessage(m.chat, { text: "❌ Failed to upload image for processing!" }, { quoted: m });
+            return await client.sendMessage(chat, { text: "❌ Failed to upload image for processing!" }, { quoted: message });
         }
 
         let imageUrl = upload.data.url;
@@ -34,12 +36,12 @@ module.exports = async (client, m) => {
         let outputPath = "./temp/sharpened.jpg";
         fs.writeFileSync(outputPath, sharpened.data);
 
-        await client.sendMessage(m.chat, { image: { url: outputPath }, caption: "✅ *Image Sharpened Successfully!*" });
+        await client.sendMessage(chat, { image: { url: outputPath }, caption: "✅ *Image Sharpened Successfully!*" });
 
         fs.unlinkSync(imagePath);
         fs.unlinkSync(outputPath);
     } catch (error) {
         console.error(error);
-        await client.sendMessage(m.chat, { text: "❌ Failed to sharpen image! Please try again." }, { quoted: m });
+        await client.sendMessage(message.chat, { text: "❌ Failed to sharpen image! Please try again." }, { quoted: message });
     }
 };
