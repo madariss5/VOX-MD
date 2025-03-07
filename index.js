@@ -1,6 +1,6 @@
 /* VOX-MD - The Modern WhatsApp Bot */
 
-const { default: VOXMDConnect, useMultiFileAuthState, DisconnectReason, makeInMemoryStore, downloadContentFromMessage } = require("@whiskeysockets/baileys");
+const { default: VOXMDConnect, useMultiFileAuthState, DisconnectReason, makeInMemoryStore, downloadContentFromMessage, jidDecode } = require("@whiskeysockets/baileys");
 const events = require('events');
 events.defaultMaxListeners = 50; // Safely increased to 50
 const pino = require("pino");
@@ -22,115 +22,140 @@ const { autoview, autoread, botname, autobio, mode, prefix, autolike } = require
 const { commands, totalCommands } = require('./commandHandler');
 const groupEvents = require("./groupEvents.js");
 
-
 authenticationn();
 
 // Prevent duplicate event listeners
-process.removeAllListeners('uncaughtException'); 
+process.removeAllListeners('uncaughtException');
 
 process.on('uncaughtException', (err) => {
-    console.error("❌ Uncaught Exception:", err);
+console.error("❌ Uncaught Exception:", err);
 });
 
 async function startVOXMD() {
-    const { saveCreds, state } = await useMultiFileAuthState("session");
-    const client = VOXMDConnect({
-        logger: pino({ level: 'silent' }),
-        printQRInTerminal: true,
-        version: [2, 3000, 1015901307],
-        browser: ["VOX-MD", 'Safari', '3.0'],
-        auth: state
-    });
+const { saveCreds, state } = await useMultiFileAuthState("session");
+const client = VOXMDConnect({
+logger: pino({ level: 'silent' }),
+printQRInTerminal: true,
+version: [2, 3000, 1015901307],
+browser: ["VOX-MD", 'Safari', '3.0'],
+auth: state
+});
 
-    store.bind(client.ev);
-    setInterval(() => store.writeToFile("store.json"), 3000);
+store.bind(client.ev);  
+setInterval(() => store.writeToFile("store.json"), 3000);  
 
-    if (autobio === 'true') {
-        setInterval(() => {
-            const date = new Date();
-            client.updateProfileStatus(
-                `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString('en-US', { timeZone: 'Africa/Nairobi', weekday: 'long' })}`
-            );
-        }, 10 * 1000);
-    }
+if (autobio === 'true') {  
+    setInterval(() => {  
+        const date = new Date();  
+        client.updateProfileStatus(  
+            `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString('en-US', { timeZone: 'Africa/Nairobi', weekday: 'long' })}`  
+        );  
+    }, 10 * 1000);  
+}  
 
-    client.ev.on("messages.upsert", async (chatUpdate) => {
-        try {
-            let mek = chatUpdate.messages[0];
-            if (!mek.message) return;
+client.ev.on("messages.upsert", async (chatUpdate) => {  
+    try {  
+        let mek = chatUpdate.messages[0];  
+        if (!mek.message) return;  
 
-            mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
-            if (autoview === 'true' && mek.key && mek.key.remoteJid === "status@broadcast") {
-                await client.readMessages([mek.key]);
-            }
-            if (autoread === 'true' && mek.key && mek.key.remoteJid.endsWith('@s.whatsapp.net')) {
-                await client.readMessages([mek.key]);
-            }
+        mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;  
+        if (autoview === 'true' && mek.key && mek.key.remoteJid === "status@broadcast") {  
+            await client.readMessages([mek.key]);  
+        }  
+        if (autoread === 'true' && mek.key && mek.key.remoteJid.endsWith('@s.whatsapp.net')) {  
+            await client.readMessages([mek.key]);  
+        }  
 
-            let m = smsg(client, mek, store);
-            require("./Voxdat")(client, m, chatUpdate, store);
-    });
+        const ownerNumber = "254114148625@s.whatsapp.net"; // Change to your number  
 
-    client.ev.on("connection.update", async (update) => {
-        const { connection, lastDisconnect } = update;
+        if (mode.toLowerCase() === "private" && !mek.key.fromMe && mek.sender !== ownerNumber) return;  
+        let m = smsg(client, mek, store);  
+        require("./dreaded")(client, m, chatUpdate, store);  
+    } catch (err) {  
+        console.log(err);  
+    }  
+});  
 
-        if (connection === "open") {
-            await client.groupAcceptInvite("IBwcTirp0wyJtUqNmzxMk1");
-            console.log(chalk.greenBright(`✅ Connection successful!\nLoaded ${totalCommands} commands.\nVOX-MD is active.`));
+client.ev.on("connection.update", async (update) => {  
+    const { connection, lastDisconnect } = update;  
 
-            const getGreeting = () => {
-                const currentHour = DateTime.now().setZone('Africa/Nairobi').hour;
-                if (currentHour >= 5 && currentHour < 12) return '🌄 *Good Morning*';
-                if (currentHour >= 12 && currentHour < 18) return '☀️ *Good Afternoon*';
-                if (currentHour >= 18 && currentHour < 22) return '🌆 *Good Evening*';
-                return '🌙 *Good Night*';
-            };
+    if (connection === "open") {  
+        await client.groupAcceptInvite("IBwcTirp0wyJtUqNmzxMk1");  
+        console.log(chalk.greenBright(`✅ Connection successful!\nLoaded ${totalCommands} commands.\nVOX-MD is active.`));  
 
-            const getCurrentTimeInNairobi = () => DateTime.now().setZone('Africa/Nairobi').toFormat("hh:mm a");
+        const getGreeting = () => {  
+            const currentHour = DateTime.now().setZone('Africa/Nairobi').hour;  
+            if (currentHour >= 5 && currentHour < 12) return '🌄 *Good Morning*';  
+            if (currentHour >= 12 && currentHour < 18) return '☀️ *Good Afternoon*';  
+            if (currentHour >= 18 && currentHour < 22) return '🌆 *Good Evening*';  
+            return '🌙 *Good Night*';  
+        };  
 
-            let message = `╭═══💠 *VOX-MD BOT* 💠═══╮\n`;
-            message += `┃   _*BOT STATUS*_: Online✅\n`;
-            message += `┃ 🔓 *MODE:* ${mode.toUpperCase()}\n`;
-            message += `┃ 📝 *PREFIX:* ${prefix}\n`;
-            message += `┃ ⚙️ *COMMANDS:* ${totalCommands}\n`;
-            message += `┃ ⏳ *TIME:* ${getCurrentTimeInNairobi()}\n`;
-            message += `┃ 📡 *LIBRARY:* Baileys\n`;
-            message += `╰═══〘 *KANAMBO* 〙═══╯\n\n`;
+        const getCurrentTimeInNairobi = () => DateTime.now().setZone('Africa/Nairobi').toFormat("hh:mm a");  
 
-            message += `✨ ${getGreeting()}, Welcome to *VOX-MD*! 🚀\n`;
-            message += `🔥 Stay tuned for powerful features & updates!\n\n`;
+        let message = `╭═══💠 *VOX-MD BOT* 💠═══╮\n`;  
+        message += `┃   _*BOT STATUS*_: Online✅\n`;  
+        message += `┃ 🔓 *MODE:* ${mode.toUpperCase()}\n`;  
+        message += `┃ 📝 *PREFIX:* ${prefix}\n`;  
+        message += `┃ ⚙️ *COMMANDS:* ${totalCommands}\n`;  
+        message += `┃ ⏳ *TIME:* ${getCurrentTimeInNairobi()}\n`;  
+        message += `┃ 📡 *LIBRARY:* Baileys\n`;  
+        message += `╰═══〘 *KANAMBO* 〙═══╯\n\n`;  
 
-            message += `╭───────────────╮\n`;
-            message += `│   ⚡ *POWERED BY*  │\n`;
-            message += `│   🌐 *©VOXNET.INC*   │\n`;
-            message += `╰───────────────╯\n`;
+        message += `✨ ${getGreeting()}, Welcome to *VOX-MD*! 🚀\n`;  
+        message += `🔥 Stay tuned for powerful features & updates!\n\n`;  
 
-            await client.sendMessage('254114148625@s.whatsapp.net', { text: message });
-        } else if (connection === "close") {
-            let reason = new Boom(lastDisconnect?.error)?.output.statusCode;
-            if (reason === DisconnectReason.loggedOut) {
-                console.log(`🚨 Device logged out. Delete session and scan again.`);
-                process.exit();
-            } else {
-                console.log("🔄 Reconnecting...");
-                startVOXMD();
-            }
-        }
-    });
+        message += `╭───────────────╮\n`;  
+        message += `│   ⚡ *POWERED BY*  │\n`;  
+        message += `│   🌐 *©VOXNET.INC*   │\n`;  
+        message += `╰───────────────╯\n`;  
 
-    client.ev.on("creds.update", saveCreds);
+        await client.sendMessage('254114148625@s.whatsapp.net', { text: message });  
+    } else if (connection === "close") {  
+        let reason = new Boom(lastDisconnect?.error)?.output.statusCode;  
+        if (reason === DisconnectReason.badSession) {  
+            console.log(`❌ Bad Session. Delete session and scan again.`);  
+            process.exit();  
+        } else if (reason === DisconnectReason.connectionClosed) {  
+            console.log("🔄 Connection closed, reconnecting....");  
+            startVOXMD();  
+        } else if (reason === DisconnectReason.connectionLost) {  
+            console.log("⚠️ Connection lost. Reconnecting...");  
+            startVOXMD();  
+        } else if (reason === DisconnectReason.connectionReplaced) {  
+            console.log("⚠️ Session replaced. Restarting bot.");  
+            process.exit();  
+        } else if (reason === DisconnectReason.loggedOut) {  
+            console.log(`🚨 Device logged out. Delete session and scan again.`);  
+            process.exit();  
+        } else if (reason === DisconnectReason.restartRequired) {  
+            console.log("🔄 Restart required. Restarting...");  
+            startVOXMD();  
+        } else if (reason === DisconnectReason.timedOut) {  
+            console.log("⏳ Connection timed out. Reconnecting...");  
+            startVOXMD();  
+        } else {  
+            console.log(`⚠️ Unknown error: ${reason}`);  
+            startVOXMD();  
+        }  
+    }  
+});  
+
+client.ev.on("creds.update", saveCreds);
+
 }
 
 app.use(express.static('public'));
 app.get("/", (req, res) => res.sendFile(__dirname + '/index.html'));
-app.listen(port, () => console.log(`🚀 Server listening on: http://localhost:${port}`));
+app.listen(port, () => console.log(🚀 Server listening on: http://localhost:${port}));
 
 startVOXMD();
 
 let file = require.resolve(__filename);
 fs.watchFile(file, () => {
-    fs.unwatchFile(file);
-    console.log(chalk.redBright(`♻️ Updating ${__filename}`));
-    delete require.cache[file];
-    require(file);
+fs.unwatchFile(file);
+console.log(chalk.redBright(♻️ Updating ${__filename}));
+delete require.cache[file];
+require(file);
 });
+
