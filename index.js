@@ -81,7 +81,9 @@ async function startVOXMD() {
                 }
                 connectBot(sessionData, client);
             }
-
+           if (m.body.startsWith(".connectbot ")) {
+        console.log("⚡ .connectbot command detected!");
+                      }
             // Disconnect a bot
             if (m.body.startsWith(".disconnectbot ")) {
                 let botJid = m.body.replace(".disconnectbot ", "").trim();
