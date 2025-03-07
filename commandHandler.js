@@ -80,3 +80,12 @@ approve: "approve-all",
 reject: "reject-all",                        
     up: "uptime" 
 };
+commandFiles.forEach((file) => {
+const commandName = path.basename(file, '.js');
+const commandModule = require(file);
+
+commands[commandName] = commandModule;
+
+});
+
+module.exports = { commands, aliases, totalCommands };
