@@ -14,7 +14,8 @@ module.exports = async (context) => {
 
     try {
         if (!m || !m.key || !m.key.remoteJid) {
-            return console.error("❌ Message object is undefined.");
+            console.error("❌ Message object is undefined.");
+            return;
         }
 
         const senderNumber = m.key.participant ? m.key.participant.split("@")[0] : m.key.remoteJid.split("@")[0];
@@ -42,6 +43,8 @@ module.exports = async (context) => {
             const quotedMsg = m.message?.extendedTextMessage?.contextInfo?.quotedMessage;
             let sessionData = quotedMsg?.conversation || quotedMsg?.extendedTextMessage?.text;
 
+            console.log("🔍 Extracted session data:", sessionData);
+
             if (!sessionData) {
                 return m.reply("❌ *Reply with a Base64 session string and use `.connect <session_name>`*");
             }
@@ -51,9 +54,13 @@ module.exports = async (context) => {
 
                 // Decode and save session credentials
                 const sessionJson = Buffer.from(sessionData, "base64").toString("utf-8");
+                console.log("📂 Decoded session JSON:", sessionJson);
+
                 fs.writeFileSync(`${sessionPath}/creds.json`, sessionJson);
 
                 const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
+                console.log("🔄 Session state loaded successfully!");
+
                 const bot = makeWASocket({
                     auth: state,
                     printQRInTerminal: false
@@ -63,7 +70,7 @@ module.exports = async (context) => {
 
                 return m.reply(`✅ *Connected successfully as '${sessionName}'!*`);
             } catch (err) {
-                console.error(err);
+                console.error("❌ Error connecting session:", err);
                 return m.reply("❌ *Failed to connect bot session!*");
             }
         }
@@ -77,7 +84,7 @@ module.exports = async (context) => {
                 fs.rmSync(sessionPath, { recursive: true, force: true });
                 return m.reply(`✅ *Session '${sessionName}' has been disconnected!*`);
             } catch (err) {
-                console.error(err);
+                console.error("❌ Error disconnecting session:", err);
                 return m.reply("❌ *Failed to disconnect session!*");
             }
         }
