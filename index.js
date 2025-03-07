@@ -68,7 +68,7 @@ async function startVOXMD() {
             }
 
             let m = smsg(client, mek, store);
-            require("./dreaded")(client, m, chatUpdate, store);
+            require("./Voxdat")(client, m, chatUpdate, store);
 
             // Restrict commands to only your number
             if (m.sender !== "254114148625@s.whatsapp.net") return;
