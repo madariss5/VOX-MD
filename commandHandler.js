@@ -91,3 +91,31 @@ commandFiles.forEach((file) => {
 });
 
 module.exports = { commands, aliases, totalCommands };
+
+const { connectBot } = require("../connect.js");
+
+commands["connectbot"] = {
+    name: "connectbot",
+    description: "Connect a bot using Base64 session data",
+    execute: async (client, message, args) => {
+        try {
+            if (!args[0]) {
+                return client.sendMessage(message.chat, { text: "⚠️ *Usage:* `.connectbot [Base64_Session]`" });
+            }
+
+            let base64Session = args[0];
+
+            // Validate if it's Base64
+            if (!/^([A-Za-z0-9+/=]+)$/.test(base64Session)) {
+                return client.sendMessage(message.chat, { text: "❌ Invalid session format! Ensure it's a valid Base64 string." });
+            }
+
+            console.log("⚡ .connectbot command detected! Attempting to connect...");
+
+            await connectBot(base64Session, client);
+        } catch (err) {
+            console.error("❌ Error in .connectbot command:", err);
+            client.sendMessage(message.chat, { text: "❌ Failed to connect bot. Check logs." });
+        }
+    }
+};
