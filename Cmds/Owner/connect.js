@@ -73,4 +73,4 @@ module.exports = async (client, m, Owner) => {
     }
 
     client.sendMessage(m.chat, { text: "❌ *Invalid command! Use:*\n`.connect <session_name>` (Reply to Base64 session)\n`.disconnect <session_name>`" });
-};
+}
