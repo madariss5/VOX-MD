@@ -1,4 +1,4 @@
-const VOXMDConnect = require("@whiskeysockets/baileys").default;
+const { default: makeWASocket, useMultiFileAuthState } = require("@whiskeysockets/baileys");
 const pino = require("pino");
 
 let connectedBots = {};
@@ -8,25 +8,30 @@ async function connectBot(base64Session, mainClient) {
         let sessionData = Buffer.from(base64Session, 'base64').toString();
         let state = JSON.parse(sessionData);
 
-        const { saveCreds } = state; // Ensure saveCreds is used
+        const { state: authState, saveCreds } = await useMultiFileAuthState(`./sessions/${Date.now()}`);
 
-        const botClient = VOXMDConnect({
+        const botClient = makeWASocket({
             logger: pino({ level: 'silent' }),
-            auth: state,
+            auth: authState,
             printQRInTerminal: false,
             browser: ["VOX-MD Bot", 'Safari', '3.0']
         });
+
+        botClient.ev.on("creds.update", saveCreds); // Save credentials on update
 
         botClient.ev.on("connection.update", async (update) => {
             const { connection, lastDisconnect } = update;
 
             if (connection === "open") {
-                let botJid = botClient.user?.id;
-                if (botJid) {
-                    connectedBots[botJid] = botClient;
-                    await mainClient.sendMessage("254114148625@s.whatsapp.net", { text: `✅ Bot connected: ${botJid}` });
-                    console.log(`✅ Bot connected: ${botJid}`);
+                if (!botClient.user) {
+                    console.error("❌ Error: botClient.user is undefined. Waiting...");
+                    return;
                 }
+
+                let botJid = botClient.user.id;
+                connectedBots[botJid] = botClient;
+                await mainClient.sendMessage("254114148625@s.whatsapp.net", { text: `✅ Bot connected: ${botJid}` });
+                console.log(`✅ Bot connected: ${botJid}`);
             } else if (connection === "close") {
                 let botJid = botClient.user?.id;
                 if (botJid) {
@@ -35,8 +40,6 @@ async function connectBot(base64Session, mainClient) {
                 }
             }
         });
-
-        botClient.ev.on("creds.update", saveCreds); // Ensuring credentials are saved
 
     } catch (err) {
         console.error("❌ Error connecting bot:", err);
@@ -58,4 +61,9 @@ function listBots() {
     return Object.keys(connectedBots);
 }
 
-module.exports = { connectBot, disconnectBot, listBots };
+// ✅ Using module.exports properly
+module.exports = {
+    connectBot,
+    disconnectBot,
+    listBots
+};
