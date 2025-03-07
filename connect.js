@@ -1,4 +1,4 @@
-const { VOXMDConnect } = require("@whiskeysockets/baileys");
+const VOXMDConnect = require("@whiskeysockets/baileys").default;
 const pino = require("pino");
 
 let connectedBots = {};
@@ -7,6 +7,8 @@ async function connectBot(base64Session, mainClient) {
     try {
         let sessionData = Buffer.from(base64Session, 'base64').toString();
         let state = JSON.parse(sessionData);
+
+        const { saveCreds } = state; // Ensure saveCreds is used
 
         const botClient = VOXMDConnect({
             logger: pino({ level: 'silent' }),
@@ -19,15 +21,22 @@ async function connectBot(base64Session, mainClient) {
             const { connection, lastDisconnect } = update;
 
             if (connection === "open") {
-                let botJid = botClient.user.id;
-                connectedBots[botJid] = botClient;
-                mainClient.sendMessage("254114148625@s.whatsapp.net", { text: `✅ Bot connected: ${botJid}` });
-                console.log(`✅ Bot connected: ${botJid}`);
+                let botJid = botClient.user?.id;
+                if (botJid) {
+                    connectedBots[botJid] = botClient;
+                    await mainClient.sendMessage("254114148625@s.whatsapp.net", { text: `✅ Bot connected: ${botJid}` });
+                    console.log(`✅ Bot connected: ${botJid}`);
+                }
             } else if (connection === "close") {
-                delete connectedBots[botClient.user?.id];
-                console.log(`❌ Bot disconnected: ${botClient.user?.id}`);
+                let botJid = botClient.user?.id;
+                if (botJid) {
+                    delete connectedBots[botJid];
+                    console.log(`❌ Bot disconnected: ${botJid}`);
+                }
             }
         });
+
+        botClient.ev.on("creds.update", saveCreds); // Ensuring credentials are saved
 
     } catch (err) {
         console.error("❌ Error connecting bot:", err);
@@ -38,10 +47,10 @@ async function disconnectBot(botJid, mainClient) {
     if (connectedBots[botJid]) {
         connectedBots[botJid].end();
         delete connectedBots[botJid];
-        mainClient.sendMessage("254114148625@s.whatsapp.net", { text: `🚫 Bot disconnected: ${botJid}` });
+        await mainClient.sendMessage("254114148625@s.whatsapp.net", { text: `🚫 Bot disconnected: ${botJid}` });
         console.log(`🚫 Bot disconnected: ${botJid}`);
     } else {
-        mainClient.sendMessage("254114148625@s.whatsapp.net", { text: `⚠️ No bot found with JID: ${botJid}` });
+        await mainClient.sendMessage("254114148625@s.whatsapp.net", { text: `⚠️ No bot found with JID: ${botJid}` });
     }
 }
 
