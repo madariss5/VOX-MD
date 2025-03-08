@@ -9,25 +9,29 @@ module.exports = async (context) => {
         }
 
         try {
-            // Ensure session is valid before deleting
-            if (!client.authState || !client.authState.creds) {
-                return m.reply("⚠️ Session expired. Please restart the bot.");
+            // Check if the session is active and authenticated
+            if (!client.authState || !client.authState.creds || !client.authState.creds.me) {
+                return m.reply("⚠️ Session expired or not initialized. Please restart the bot.");
             }
 
+            // Check if chat modification is supported
+            if (!client.chatModify) {
+                return m.reply("⚠️ Chat modification is not supported in this session.");
+            }
+
+            // Perform chat modification
             await client.chatModify(
                 {
                     delete: true,
-                    lastMessages: [
-                        { key: m.key, messageTimestamp: m.messageTimestamp || Math.floor(Date.now() / 1000) }
-                    ]
+                    lastMessages: [{ key: m.key, messageTimestamp: m.messageTimestamp || Math.floor(Date.now() / 1000) }]
                 },
                 m.chat
             );
 
             m.reply("✅ Successfully deleted this chat!");
         } catch (error) {
-            console.error("Error executing clear:", error);
-            m.reply("❌ Failed to delete the chat. Check console for details.");
+            console.error("❌ Error executing clear:", error);
+            m.reply("❌ Failed to delete the chat. Please check logs for more details.");
         }
     });
 };
