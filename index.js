@@ -38,7 +38,6 @@ async function authenticateSession() {
 
 // Run authentication
 authenticateSession();
-authenticationn();
 
 // Prevent duplicate event listeners
 process.removeAllListeners('uncaughtException');
