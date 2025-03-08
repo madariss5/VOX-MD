@@ -9,15 +9,20 @@ module.exports = async (context) => {
         }
 
         try {
-            // Check if the session is active and authenticated
+            // Check if session is authenticated
             if (!client.authState || !client.authState.creds || !client.authState.creds.me) {
-                return m.reply("⚠️ Session expired or not initialized. Please restart the bot.");
+                return m.reply("⚠️ Session expired or not initialized. Restart the bot.");
             }
 
-            // Check if chat modification is supported
-            if (!client.chatModify) {
+            // Validate if chatModify function exists
+            if (typeof client.chatModify !== "function") {
                 return m.reply("⚠️ Chat modification is not supported in this session.");
             }
+
+            // Debugging: Log chat details before attempting modification
+            console.log("Attempting to modify chat:", m.chat);
+            console.log("Message Key:", m.key);
+            console.log("Timestamp:", m.messageTimestamp);
 
             // Perform chat modification
             await client.chatModify(
@@ -31,7 +36,7 @@ module.exports = async (context) => {
             m.reply("✅ Successfully deleted this chat!");
         } catch (error) {
             console.error("❌ Error executing clear:", error);
-            m.reply("❌ Failed to delete the chat. Please check logs for more details.");
+            m.reply(`❌ Failed to delete chat: ${error.message || "Unknown error"}`);
         }
     });
 };
