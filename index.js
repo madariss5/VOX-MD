@@ -21,14 +21,19 @@ const { autoview, autoread, botname, autobio, mode, prefix, autolike } = require
 const { commands, totalCommands } = require('./VoxMdhandler');
 const groupEvents = require("./groupEvents.js");
 
-// Authentication function added
+// ✅ Corrected Base64 session decoding
 async function authenticateSession() {
     try {
-        if (!fs.existsSync("./session/creds.json")) {
+        const sessionPath = "./session/creds.json";
+
+        if (!fs.existsSync("./session")) {
+            fs.mkdirSync("./session");
+        }
+
+        if (!fs.existsSync(sessionPath) && session !== "zokk") {
             console.log("📡 Connecting...");
-            await fs.writeFileSync("./session/creds.json", atob(session), "utf8");
-        } else if (fs.existsSync("./session/creds.json") && session !== "zokk") {
-            await fs.writeFileSync("./session/creds.json", atob(session), "utf8");
+            const sessionData = Buffer.from(session, "base64").toString("utf8");
+            fs.writeFileSync(sessionPath, sessionData, "utf8");
         }
     } catch (e) {
         console.log("❌ Session is invalid: " + e);
@@ -36,7 +41,6 @@ async function authenticateSession() {
     }
 }
 
-// Run authentication
 authenticateSession();
 
 // Prevent duplicate event listeners
