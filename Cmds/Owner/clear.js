@@ -4,6 +4,11 @@ module.exports = async (context) => {
     await ownerMiddleware(context, async () => {
         const { client, m } = context;
 
+        // Check if the session is active
+        if (!client.user) {
+            return m.reply("❌ Session is not active! Please restart and re-authenticate.");
+        }
+
         if (!m || !m.key) {
             return m.reply("❌ Cannot delete an empty chat.");
         }
