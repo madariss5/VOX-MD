@@ -2,7 +2,7 @@
 
 const { default: VOXMDConnect, useMultiFileAuthState, DisconnectReason, makeInMemoryStore, downloadContentFromMessage, jidDecode } = require("@whiskeysockets/baileys");
 const events = require('events');
-events.defaultMaxListeners = 50; // Safely increased to 50
+events.defaultMaxListeners = 100; // Safely increased to 50
 const pino = require("pino");
 const { Boom } = require("@hapi/boom");
 const fs = require("fs");
