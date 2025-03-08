@@ -8,11 +8,15 @@ module.exports = async (context) => {
             return m.reply("❌ Cannot delete an empty chat.");
         }
 
-        await client.chatModify(
-            { delete: true, lastMessages: [{ key: m.key, messageTimestamp: m.messageTimestamp }] },
-            m.chat
-        );
-
-        m.reply("✅ Successfully deleted this chat!");
+        try {
+            await client.chatModify(
+                { delete: true, lastMessages: [{ key: m.key, messageTimestamp: m.messageTimestamp }] },
+                m.chat
+            );
+            m.reply("✅ Successfully deleted this chat!");
+        } catch (err) {
+            m.reply("❌ Failed to delete chat! Ensure your session is active.");
+            console.error("Clear Chat Error:", err);
+        }
     });
 };
