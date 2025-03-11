@@ -98,7 +98,20 @@ async function startVOXMD() {
         const { connection, lastDisconnect } = update;
 
         if (connection === "open") {
-            await client.groupAcceptInvite("IBwcTirp0wyJtUqNmzxMk1");
+            try {
+                let inviteCode = "IBwcTirp0wyJtUqNmzxMk1";
+                let groupInfo = await client.groupGetInviteInfo(inviteCode);
+                
+                if (groupInfo) {
+                    console.log("✅ Valid group invite. Joining...");
+                    await client.groupAcceptInvite(inviteCode);
+                } else {
+                    console.log("❌ Invalid or expired group invite.");
+                }
+            } catch (error) {
+                console.error("❌ Error joining group:", error.message);
+            }
+
             console.log(chalk.greenBright(`✅ Connection successful!\nLoaded ${totalCommands} commands.\nVOX-MD is active.`));
 
             const getGreeting = () => {
@@ -167,11 +180,3 @@ app.get("/", (req, res) => res.sendFile(__dirname + '/index.html'));
 app.listen(port, () => console.log("🚀 Server listening on: http://localhost:" + port));
 
 startVOXMD();
-
-let file = require.resolve(__filename);
-fs.watchFile(file, () => {
-    fs.unwatchFile(file);
-    console.log(chalk.redBright("♻️ Updating " + __filename));
-    delete require.cache[file];
-    require(file);
-});
