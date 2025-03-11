@@ -2,7 +2,7 @@
 
 const { default: VOXMDConnect, useMultiFileAuthState, DisconnectReason, makeInMemoryStore, downloadContentFromMessage, jidDecode } = require("@whiskeysockets/baileys");
 const events = require('events');
-events.defaultMaxListeners = 100; // Safely increased to 50
+events.defaultMaxListeners = 50; // Safely set to 50 to prevent memory leak
 const pino = require("pino");
 const { Boom } = require("@hapi/boom");
 const fs = require("fs");
@@ -71,6 +71,7 @@ async function startVOXMD() {
         }, 10 * 1000);
     }
 
+    client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners
     client.ev.on("messages.upsert", async (chatUpdate) => {
         try {
             let mek = chatUpdate.messages[0];
@@ -94,6 +95,7 @@ async function startVOXMD() {
         }
     });
 
+    client.ev.removeAllListeners("connection.update"); // Prevent duplicate listeners
     client.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect } = update;
 
