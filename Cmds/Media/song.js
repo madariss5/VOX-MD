@@ -1,5 +1,5 @@
-const fetch = require('node-fetch');
-const yts = require('yt-search');
+const fetch = require("node-fetch");
+const yts = require("yt-search");
 
 module.exports = async (context) => {
     const { client, m, text } = context;
@@ -7,60 +7,67 @@ module.exports = async (context) => {
     try {
         if (!text) return m.reply("🎵 *What song do you want to download?*");
 
-        // Search for the song
+        // Search for the song on YouTube
         const { videos } = await yts(text);
         if (!videos || videos.length === 0) {
             return m.reply("❌ *No songs found!*");
         }
 
-        const video = videos[0];
-        const urlYt = video.url;
-        const songTitle = video.title.replace(/[^\w\s]/gi, ""); // Remove special characters
+        const urlYt = videos[0].url;
+        const songTitle = videos[0].title.replace(/[^\w\s]/gi, ""); // Remove special characters
 
-        // Inform the user that the download is in progress
-        await m.reply("⏳ *Please wait...*");
+        // Send waiting message
+        await m.reply("⏳ *Please wait while I fetch your song...*");
 
-        // Fetch the song download link
-        let url = `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`;
-        
-        let res = await fetch(url);
-        let json = await res.json(); // Parse response as JSON
+        try {
+            // Fetch song download link
+            let url = `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`;
 
-        // Validate the response structure
-        if (!json || json.status !== 200 || !json.result || !json.result.media) {
-            return m.reply("❌ *Download failed: Unable to retrieve audio.*");
+            let res = await fetch(url, {
+                method: "GET",
+                headers: {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                    "Accept": "application/json"
+                }
+            });
+
+            if (!res.ok) throw new Error(`HTTP Error! Status: ${res.status}`);
+
+            let data = await res.json();
+
+            if (!data || data.status !== 200 || !data.result || !data.result.media) {
+                throw new Error("Invalid response from API.");
+            }
+
+            const { title, metadata, author, media } = data.result;
+
+            // Send song details
+            let caption = `🎵 *Title:* ${title}\n`
+                + `⏳ *Duration:* ${metadata.duration}\n`
+                + `👤 *Artist:* ${author.name}\n`
+                + `📅 *Uploaded:* ${metadata.uploadDate}\n`
+                + `📈 *Views:* ${metadata.views}\n`
+                + `🔗 *YouTube Link:* ${data.result.url}\n`
+                + `🎶 *Format:* MP3 (128kbps)`;
+
+            await client.sendMessage(m.chat, { text: caption }, { quoted: m });
+
+            // Send audio file
+            await client.sendMessage(
+                m.chat,
+                {
+                    document: { url: media },
+                    mimetype: "audio/mpeg",
+                    fileName: `${songTitle}.mp3`,
+                },
+                { quoted: m }
+            );
+        } catch (error) {
+            console.error("Error fetching song:", error.message);
+            m.reply("❌ *Download failed: Unable to retrieve audio.*");
         }
-
-        const { title, metadata, author, media } = json.result;
-
-        let caption = `🎵 *Title:* ${title}\n`
-            + `⏳ *Duration:* ${metadata.duration}\n`
-            + `👤 *Artist:* ${author.name}\n`
-            + `📅 *Published:* ${metadata.uploadDate}\n`
-            + `📈 *Views:* ${metadata.views}\n`
-            + `🔗 *YouTube:* ${json.result.url}\n`
-            + `🎶 *Format:* MP3 (${json.result.quality})`;
-
-        // Send thumbnail and metadata
-        await client.sendMessage(
-            m.chat,
-            { image: { url: metadata.thumbnail }, caption },
-            { quoted: m }
-        );
-
-        // Send the MP3 file
-        await client.sendMessage(
-            m.chat,
-            {
-                document: { url: media },
-                mimetype: "audio/mpeg",
-                fileName: `${songTitle}.mp3`,
-            },
-            { quoted: m }
-        );
-
     } catch (error) {
-        console.error("Error fetching song:", error);
-        m.reply("❌ *Error fetching the song.*");
+        console.error("Song command error:", error.message);
+        m.reply("❌ *An error occurred while processing your request.*");
     }
 };
