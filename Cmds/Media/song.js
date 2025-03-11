@@ -77,5 +77,3 @@ async function handlePlayCommand(sock, msg, songName) {
         });
     }, 10000);
 }
-
-module.exports = { handlePlayCommand };
