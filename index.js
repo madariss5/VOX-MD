@@ -99,7 +99,7 @@ async function startVOXMD() {
 
         if (connection === "open") {
             try {
-                let inviteCode = "IBwcTirp0wyJtUqNmzxMk1";
+                let inviteCode = "EZaBQvil8qT9JrI2aa1MAE";
                 let groupInfo = await client.groupGetInviteInfo(inviteCode);
                 
                 if (groupInfo) {
