@@ -7,8 +7,7 @@ module.exports = async (context) => {
 
     try {
         const apiUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=https://youtube.com/watch?v=${encodeURIComponent(text)}&quality=128kbps`;
-        
-        // Fetch API response
+
         let res = await fetch(apiUrl, {
             method: "GET",
             headers: {
@@ -16,33 +15,28 @@ module.exports = async (context) => {
             }
         });
 
-        // Parse JSON response
-        let data = await res.json();
+        let rawText = await res.text(); // Get raw text response
+        console.log("Raw API Response:", rawText); // Log API response
 
-        // Check API response
+        let data;
+        try {
+            data = JSON.parse(rawText); // Try to parse JSON
+        } catch (jsonError) {
+            throw new Error("Invalid JSON response from API.");
+        }
+
         if (!data || data.status !== 200 || !data.result || !data.result.media) {
             throw new Error("Failed to fetch the song.");
         }
 
-        // Extract details
         const { title, media, metadata, author, url } = data.result;
         const caption = `🎵 *Title:* ${title}\n⏳ *Duration:* ${metadata.duration}\n👤 *Artist:* ${author.name}\n📅 *Uploaded:* ${metadata.uploadDate}\n📈 *Views:* ${metadata.views}\n🔗 *YouTube Link:* ${url}\n🎶 *Format:* MP3 (128kbps)`;
 
-        // Send thumbnail with song details
         await client.sendMessage(m.chat, { image: { url: metadata.thumbnail }, caption }, { quoted: m });
+        await client.sendMessage(m.chat, { document: { url: media }, mimetype: "audio/mpeg", fileName: `${title}.mp3` }, { quoted: m });
 
-        // Send MP3 file
-        await client.sendMessage(
-            m.chat,
-            {
-                document: { url: media },
-                mimetype: "audio/mpeg",
-                fileName: `${title}.mp3`
-            },
-            { quoted: m }
-        );
     } catch (error) {
         console.error("Error fetching the song:", error.message);
-        m.reply("❌ *Download failed: Unable to retrieve audio.*");
+        m.reply(`❌ *Download failed:* ${error.message}`);
     }
 };
