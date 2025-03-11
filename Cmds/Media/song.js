@@ -22,27 +22,29 @@ module.exports = async (context) => {
 
         // Fetch the song download link
         let url = `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`;
+        
         let res = await fetch(url);
-        let json = await res.json();
+        let json = await res.json(); // Parse response as JSON
 
-        if (!json || json.status !== 200 || !json.result?.media) {
+        // Validate the response structure
+        if (!json || json.status !== 200 || !json.result || !json.result.media) {
             return m.reply("❌ *Download failed: Unable to retrieve audio.*");
         }
 
-        const { media } = json.result;
+        const { title, metadata, author, media } = json.result;
 
-        let caption = `🎵 *Title:* ${video.title}\n`
-            + `⏳ *Duration:* ${video.timestamp}\n`
-            + `👤 *Artist:* ${video.author.name}\n`
-            + `📅 *Published:* ${video.ago}\n`
-            + `📈 *Views:* ${video.views}\n`
-            + `🔗 *YouTube:* ${video.url}\n`
-            + `🎶 *Format:* MP3 (128kbps)`;
+        let caption = `🎵 *Title:* ${title}\n`
+            + `⏳ *Duration:* ${metadata.duration}\n`
+            + `👤 *Artist:* ${author.name}\n`
+            + `📅 *Published:* ${metadata.uploadDate}\n`
+            + `📈 *Views:* ${metadata.views}\n`
+            + `🔗 *YouTube:* ${json.result.url}\n`
+            + `🎶 *Format:* MP3 (${json.result.quality})`;
 
         // Send thumbnail and metadata
         await client.sendMessage(
             m.chat,
-            { image: { url: video.image }, caption },
+            { image: { url: metadata.thumbnail }, caption },
             { quoted: m }
         );
 
@@ -56,6 +58,7 @@ module.exports = async (context) => {
             },
             { quoted: m }
         );
+
     } catch (error) {
         console.error("Error fetching song:", error);
         m.reply("❌ *Error fetching the song.*");
