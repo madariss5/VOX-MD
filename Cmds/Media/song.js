@@ -1,79 +1,63 @@
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
+const fetch = require('node-fetch');
 const yts = require('yt-search');
 
-async function searchYouTube(query) {
-    try {
-        const results = await yts(query);
-        if (!results.videos.length) return null;
-        return results.videos[0].url; // Get the first video result
-    } catch (error) {
-        console.error("YouTube Search Error:", error);
-        return null;
-    }
-}
+module.exports = async (context) => {
+    const { client, m, text } = context;
 
-async function downloadMP3(videoUrl) {
     try {
-        const apiUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(videoUrl)}&quality=128kbps`;
-        const response = await axios.get(apiUrl);
+        if (!text) return m.reply("🎵 *What song do you want to download?*");
 
-        if (!response.data || !response.data.result || !response.data.result.url) {
-            throw new Error("Failed to fetch MP3 download link.");
+        // Search for the song
+        const { videos } = await yts(text);
+        if (!videos || videos.length === 0) {
+            return m.reply("❌ *No songs found!*");
         }
 
-        const mp3Url = response.data.result.url;
-        const fileName = `${Date.now()}.mp3`;
-        const filePath = path.join(__dirname, 'temp', fileName);
+        const video = videos[0];
+        const urlYt = video.url;
+        const songTitle = video.title.replace(/[^\w\s]/gi, ""); // Remove special characters
 
-        const writer = fs.createWriteStream(filePath);
-        const mp3Response = await axios({
-            url: mp3Url,
-            method: 'GET',
-            responseType: 'stream'
-        });
+        // Inform the user that the download is in progress
+        await m.reply("⏳ *Please wait...*");
 
-        mp3Response.data.pipe(writer);
+        // Fetch the song download link
+        let url = `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`;
+        let res = await fetch(url);
+        let json = await res.json();
 
-        return new Promise((resolve, reject) => {
-            writer.on('finish', () => resolve(filePath));
-            writer.on('error', reject);
-        });
+        if (!json || json.status !== 200 || !json.result?.media) {
+            return m.reply("❌ *Download failed: Unable to retrieve audio.*");
+        }
 
+        const { media } = json.result;
+
+        let caption = `🎵 *Title:* ${video.title}\n`
+            + `⏳ *Duration:* ${video.timestamp}\n`
+            + `👤 *Artist:* ${video.author.name}\n`
+            + `📅 *Published:* ${video.ago}\n`
+            + `📈 *Views:* ${video.views}\n`
+            + `🔗 *YouTube:* ${video.url}\n`
+            + `🎶 *Format:* MP3 (128kbps)`;
+
+        // Send thumbnail and metadata
+        await client.sendMessage(
+            m.chat,
+            { image: { url: video.image }, caption },
+            { quoted: m }
+        );
+
+        // Send the MP3 file
+        await client.sendMessage(
+            m.chat,
+            {
+                document: { url: media },
+                mimetype: "audio/mpeg",
+                fileName: `${songTitle}.mp3`,
+            },
+            { quoted: m }
+        );
     } catch (error) {
-        console.error("Download MP3 Error:", error);
-        return null;
+        console.error("Error fetching song:", error);
+        m.reply("❌ *Error fetching the song.*");
     }
-}
-
-async function handlePlayCommand(sock, msg, songName) {
-    const chatId = msg.key.remoteJid;
-
-    // Step 1: Search YouTube for the song
-    const videoUrl = await searchYouTube(songName);
-    if (!videoUrl) {
-        return sock.sendMessage(chatId, { text: "Sorry, I couldn't find that song." });
-    }
-
-    // Step 2: Convert to MP3
-    const filePath = await downloadMP3(videoUrl);
-    if (!filePath) {
-        return sock.sendMessage(chatId, { text: "Failed to download the song. Please try again later." });
-    }
-
-    // Step 3: Send as document
-    await sock.sendMessage(chatId, {
-        document: { url: filePath },
-        mimetype: 'audio/mpeg',
-        fileName: `${songName}.mp3`,
-        caption: `Here is your requested song: ${songName}`
-    });
-
-    // Step 4: Delete file after sending
-    setTimeout(() => {
-        fs.unlink(filePath, (err) => {
-            if (err) console.error("File Deletion Error:", err);
-        });
-    }, 10000);
-}
+};
