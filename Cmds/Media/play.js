@@ -17,7 +17,7 @@ module.exports = async (context) => {
         await m.reply("⏳ *Please wait...*");
 
         try {
-            let data = await fetchJson(`https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps&apikey=c85d8cd99e55ad019bac35fd7877c28d`);
+            let data = await fetchJson(`https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`);
 
             if (!data || data.status !== 200 || !data.result || !data.result.media) {
                 throw new Error("Failed to fetch the song.");
