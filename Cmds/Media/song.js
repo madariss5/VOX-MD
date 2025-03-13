@@ -1,46 +1,57 @@
-// play.js
+const axios = require("axios");
 
 module.exports = async (context) => {
-    const { client, m, text, fetchJson } = context;
-    const yts = require("yt-search");
+    const { client, m, text } = context;
+
+    if (!text) {
+        return m.reply("🎵 *Enter the song name to download as MP3!*\n\nExample:\n`.song Alan Walker Faded`");
+    }
 
     try {
-        if (!text) return m.reply("🎵 *What song do you want to download?*");
+        // Notify user that search is in progress
+        await client.sendMessage(m.chat, {
+            text: "🔍 *Searching for your song... Please wait!* ⏳"
+        });
 
-        const { videos } = await yts(text);
-        if (!videos || videos.length === 0) {
-            return m.reply("❌ *No songs found!*");
+        // API request to search for the song
+        const searchUrl = `https://fastrestapis.fasturl.cloud/downup/ytsearch?query=${encodeURIComponent(text)}`;
+        const searchResponse = await axios.get(searchUrl, { headers: { accept: "application/json" } });
+
+        if (searchResponse.data.status !== 200 || !searchResponse.data.result || searchResponse.data.result.length === 0) {
+            return m.reply("❌ *Song not found!* Please try again with a different name.");
         }
 
-        const urlYt = videos[0].url;
-        const songTitle = videos[0].title.replace(/[^\w\s]/gi, ""); // Remove special characters
+        // Extract first search result
+        const songData = searchResponse.data.result[0];  
+        const videoUrl = songData.url;  
 
-        // Show "Please wait..." message immediately
-        await m.reply("⏳ *Please wait...*");
+        // Notify user that the song is being processed
+        await client.sendMessage(m.chat, {
+            text: `🎶 *Found:* ${songData.title}\n⏳ *Downloading MP3... Please wait!*`
+        });
 
-        try {
-            let data = await fetchJson(`https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`);
+        // API request to download MP3 from the found video
+        const downloadUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(videoUrl)}&quality=128kbps`;
+        const downloadResponse = await axios.get(downloadUrl, { headers: { accept: "application/json" } });
 
-            if (!data || data.status !== 200 || !data.result || !data.result.media) {
-                throw new Error("Failed to fetch the song.");
-            }
-
-            const audioUrl = data.result.media;
-
-            await client.sendMessage(
-                m.chat,
-                {
-                    document: { url: audioUrl },
-                    mimetype: "audio/mpeg",
-                    fileName: `${songTitle}.mp3`, // Cleaned song title as filename
-                },
-                { quoted: m }
-            );
-        } catch (error) {
-            console.error("API request failed:", error.message);
-            m.reply("❌ *Download failed: Unable to retrieve audio.*");
+        if (downloadResponse.data.status !== 200 || !downloadResponse.data.result.url) {
+            return m.reply("❌ *Failed to fetch the song!* Please try again later.");
         }
+
+        // Extract MP3 download details
+        const { url, title, thumbnail } = downloadResponse.data.result;
+
+        // Construct song download message
+        const songMessage = {
+            caption: `🎶 *Song Downloaded Successfully!*\n\n🎵 *Title:* ${title}\n🔗 *Download:* [Click Here](${url})\n\n✨ _Powered by VOX-MD_`,
+            image: { url: thumbnail }
+        };
+
+        // Send song details with the thumbnail
+        await client.sendMessage(m.chat, songMessage, { quoted: m });
+
     } catch (error) {
-        m.reply("❌ *Download failed:*\n" + error.message);
+        console.error("Song download error:", error.message);
+        m.reply("❌ *Failed to fetch the song!* Please try again later.");
     }
 };
