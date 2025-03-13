@@ -1,3 +1,5 @@
+// play.js
+
 module.exports = async (context) => {
     const { client, m, text, fetchJson } = context;
     const yts = require("yt-search");
@@ -28,9 +30,9 @@ module.exports = async (context) => {
             await client.sendMessage(
                 m.chat,
                 {
-                    audio: { url: audioUrl },
+                    document: { url: audioUrl },
                     mimetype: "audio/mpeg",
-                    ptt: false, // Set to true if you want it as a voice note
+                    fileName: `${songTitle}.mp3`, // Cleaned song title as filename
                 },
                 { quoted: m }
             );
