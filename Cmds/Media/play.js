@@ -1,3 +1,6 @@
+
+
+
 module.exports = async (context) => {
     const { client, m, text } = context;
     const yts = require("yt-search");
@@ -25,14 +28,15 @@ module.exports = async (context) => {
 
             console.log("API Response:", response.data);
 
-            // Adjust based on API response structure
-            const audioUrl = response.data.media; // Changed from `response.data.url` to `response.data.media`
-            if (!audioUrl) {
+            const result = response.data.result;
+            if (!result || !result.media) {
                 console.log("Error: Invalid API response structure");
                 return m.reply("Download failed: No valid audio URL found.");
             }
 
-            const title = videos[0].title;
+            const audioUrl = result.media;
+            const title = result.title || "Unknown Title";
+
             await m.reply(`_Downloading ${title}_`);
 
             await client.sendMessage(
