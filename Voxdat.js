@@ -38,7 +38,7 @@ const {
   dev, gcpresence, antionce, antitag, antidelete
 } = require('./settings');
 
-module.exports = dreaded = async (client, m, chatUpdate, store) => {
+module.exports = Vox-Md = async (client, m, chatUpdate, store) => {
   try {
     if (!m || !m.message) return; // Prevent bot from crashing if m is undefined
 
