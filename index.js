@@ -85,7 +85,8 @@ async function startVOXMD() {
                 await client.readMessages([mek.key]);
             }
 
-            
+            console.log(`📩 New Message from: ${mek.sender}`);
+console.log(`🤖 Bot Mode: ${mode}`);
            const ownerNumber = "254114148625"; // Owner's WhatsApp number without @s.whatsapp.net
 
 if (mode.toLowerCase() === "private") {
