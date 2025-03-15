@@ -205,7 +205,6 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
     });
 
     client.ev.on("creds.update", saveCreds);
-}
 
 app.use(express.static('public'));
 app.get("/", (req, res) => res.sendFile(__dirname + '/index.html'));
