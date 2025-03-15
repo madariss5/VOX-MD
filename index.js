@@ -103,7 +103,7 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
 
         // ✅ Owner & Developer Check
         const ownerNumber = "254114148625"; // Owner's WhatsApp number
-        const dev = process.env.DEV || ; // Developer number from .env
+        
 
         if (mode.toLowerCase() === "private") {
             const allowedUsers = [
