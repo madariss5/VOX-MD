@@ -84,24 +84,45 @@ async function startVOXMD() {
             if (autoread === 'true' && mek.key && mek.key.remoteJid.endsWith('@s.whatsapp.net')) {
                 await client.readMessages([mek.key]);
             }
+client.ev.on("messages.upsert", async (chatUpdate) => {
+    try {
+        let mek = chatUpdate.messages[0];
+        if (!mek.message) return;
 
-            console.log(`📩 New Message from: ${mek.sender}`);
-console.log(`🤖 Bot Mode: ${mode}`);
-           const ownerNumber = "254114148625"; // Owner's WhatsApp number without @s.whatsapp.net
+        mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
 
-if (mode.toLowerCase() === "private") {
-    // Allow only the owner and developer
-    if (!mek.key.fromMe && mek.sender !== `${ownerNumber}@s.whatsapp.net` && mek.sender !== `${dev}@s.whatsapp.net`) {
-        return;
-    }
-}
+        // ✅ Ensure sender's number is correctly extracted
+        let sender = mek.key.remoteJid || mek.participant || mek.key.participant;
+        console.log(`📩 New Message from: ${sender}`);
+        console.log(`🤖 Bot Mode: ${mode}`);
 
-            let m = smsg(client, mek, store);
-            require("./Voxdat")(client, m, chatUpdate, store);
-        } catch (error) {
-            console.error("❌ Error processing message:", error);
+        if (!sender) {
+            console.log("⚠️ Sender is undefined. Possible issue with message format.");
+            return;
         }
-    });
+
+        // ✅ Owner & Developer Check
+        const ownerNumber = "254114148625"; // Owner's WhatsApp number
+        const dev = process.env.DEV || ; // Developer number from .env
+
+        if (mode.toLowerCase() === "private") {
+            const allowedUsers = [
+                `${ownerNumber}@s.whatsapp.net`,
+                `${dev}@s.whatsapp.net`
+            ];
+
+            if (!mek.key.fromMe && !allowedUsers.includes(sender)) {
+                console.log(`⛔ Ignoring message from: ${sender} (Not allowed in private mode)`);
+                return;
+            }
+        }
+
+        let m = smsg(client, mek, store);
+        require("./Voxdat")(client, m, chatUpdate, store);
+    } catch (error) {
+        console.error("❌ Error processing message:", error);
+    }
+});
 
    
     client.ev.removeAllListeners("connection.update"); // Prevent duplicate listeners
