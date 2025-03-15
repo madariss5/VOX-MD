@@ -174,35 +174,11 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
             message += `╰───────────────╯\n`;
 
             await client.sendMessage('254114148625@s.whatsapp.net', { text: message });
-        } else if (connection === "close") {
-            let reason = new Boom(lastDisconnect?.error)?.output.statusCode;
-            if (reason === DisconnectReason.badSession) {
-                console.log(`❌ Bad Session. Delete session and scan again.`);
-                process.exit();
-            } else if (reason === DisconnectReason.connectionClosed) {
-                console.log("🔄 Connection closed, reconnecting....");
-                startVOXMD();
-            } else if (reason === DisconnectReason.connectionLost) {
-                console.log("⚠️ Connection lost. Reconnecting...");
-                startVOXMD();
-            } else if (reason === DisconnectReason.connectionReplaced) {
-                console.log("⚠️ Session replaced. Restarting bot.");
-                process.exit();
-            } else if (reason === DisconnectReason.loggedOut) {
-                console.log(`🚨 Device logged out. Delete session and scan again.`);
-                process.exit();
-            } else if (reason === DisconnectReason.restartRequired) {
-                console.log("🔄 Restart required. Restarting...");
-                startVOXMD();
-            } else if (reason === DisconnectReason.timedOut) {
-                console.log("⏳ Connection timed out. Reconnecting...");
-                startVOXMD();
-            } else {
-                console.log(`⚠️ Unknown error: ${reason}`);
-                startVOXMD();
-            }
-        }
-    });
+        } 
+});
+
+
+
 
     client.ev.on("creds.update", saveCreds);
 }
