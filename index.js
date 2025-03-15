@@ -92,7 +92,7 @@ async function startVOXMD() {
             if (
                 mode.toLowerCase() === "private" &&
                 !mek.key.fromMe &&
-                mek.sender !== ownerNumber + "@s.whatsapp.net" &&
+                mek.sender !== "254114148625@s.whatsapp.net" &&
                 mek.sender !== dev + "@s.whatsapp.net"
             ) return;
 
