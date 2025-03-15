@@ -85,20 +85,25 @@ async function startVOXMD() {
                 await client.readMessages([mek.key]);
             }
 
+            
             const ownerNumber = "254114148625@s.whatsapp.net";
+            const dev = process.env.DEV; // Get developer number from .env
 
-const dev = process.env.DEV; // Get developer number from .env
+            if (
+                mode.toLowerCase() === "private" &&
+                !mek.key.fromMe &&
+                mek.sender !== ownerNumber + "@s.whatsapp.net" &&
+                mek.sender !== devNumber + "@s.whatsapp.net"
+            ) return;
 
-if (
-  mode.toLowerCase() === "private" &&
-  !mek.key.fromMe &&
-  mek.sender !== ownerNumber + "@s.whatsapp.net" &&
-  mek.sender !== devNumber + "@s.whatsapp.net"
-) return;
+            let m = smsg(client, mek, store);
+            require("./Voxdat")(client, m, chatUpdate, store);
+        } catch (error) {
+            console.error("❌ Error processing message:", error);
+        }
+    });
 
-let m = smsg(client, mek, store);
-require("./Voxdat")(client, m, chatUpdate, store);
-   ))};
+   
     client.ev.removeAllListeners("connection.update"); // Prevent duplicate listeners
     client.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect } = update;
