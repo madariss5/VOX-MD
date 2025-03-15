@@ -98,7 +98,7 @@ if (
 
 let m = smsg(client, mek, store);
 require("./Voxdat")(client, m, chatUpdate, store);
-   
+   ))};
     client.ev.removeAllListeners("connection.update"); // Prevent duplicate listeners
     client.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect } = update;
