@@ -87,14 +87,18 @@ async function startVOXMD() {
 
             const ownerNumber = "254114148625@s.whatsapp.net";
 
-            if (mode.toLowerCase() === "private" && !mek.key.fromMe && mek.sender !== ownerNumber) return;
-            let m = smsg(client, mek, store);
-            require("./Voxdat")(client, m, chatUpdate, store);
-        } catch (err) {
-            console.log(err);
-        }
-    });
+const dev = process.env.DEV; // Get developer number from .env
 
+if (
+  mode.toLowerCase() === "private" &&
+  !mek.key.fromMe &&
+  mek.sender !== ownerNumber + "@s.whatsapp.net" &&
+  mek.sender !== devNumber + "@s.whatsapp.net"
+) return;
+
+let m = smsg(client, mek, store);
+require("./Voxdat")(client, m, chatUpdate, store);
+   
     client.ev.removeAllListeners("connection.update"); // Prevent duplicate listeners
     client.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect } = update;
