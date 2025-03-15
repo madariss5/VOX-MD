@@ -1,71 +1,25 @@
-const fetch = require('node-fetch');
-const yts = require('yt-search');
-const fs = require('fs');
-const path = require('path');
+module.exports = async (context) => {
+    const { client, m, text, botname, fetchJson } = context;
 
-async function playMusic(sock, chatId, query) {
+    if (!text) return m.reply("Provide a song name to download.\nExample: `.play Alan Walker Faded`");
+
     try {
-        console.log(`🎵 Searching YouTube for: ${query}`);
+        const data = await fetchJson(`https://fastrestapis.fasturl.cloud/downup/ytmp3?url=https://www.youtube.com/results?search_query=${encodeURIComponent(text)}&quality=128kbps`);
 
-        // Search YouTube for the song
-        const searchResults = await yts(query);
-        if (!searchResults.videos.length) {
-            return sock.sendMessage(chatId, { text: "❌ No results found." });
+        if (!data || data.status !== 200 || !data.result || !data.result.media) {
+            return m.reply("❌ Sorry, couldn't fetch the song. Try another one.");
         }
 
-        const video = searchResults.videos[0];
-        const mp3Url = await getMp3DownloadLink(video.url);
+        const audioUrl = data.result.media;
 
-        if (!mp3Url) {
-            return sock.sendMessage(chatId, { text: "❌ Failed to fetch audio." });
-        }
-
-        const filePath = await downloadAudio(mp3Url, `${video.title}.mp3`);
-        if (!filePath) {
-            return sock.sendMessage(chatId, { text: "❌ Error downloading file." });
-        }
-
-        await sock.sendMessage(chatId, {
-            document: fs.readFileSync(filePath),
+        await client.sendMessage(m.chat, {
+            document: { url: audioUrl },
             mimetype: "audio/mpeg",
-            fileName: `${video.title}.mp3`,
-        });
+            fileName: `${text}.mp3`,
+            caption: `🎵 Downloaded by ${botname}`
+        }, { quoted: m });
 
-        console.log("✅ Sent audio file:", filePath);
-        fs.unlinkSync(filePath);
-    } catch (error) {
-        console.error("❌ Error in playMusic:", error);
-        sock.sendMessage(chatId, { text: "❌ Something went wrong." });
+    } catch (e) {
+        m.reply("❌ An error occurred. API might be down.\n" + e);
     }
-}
-
-// Fetch MP3 download link from API
-async function getMp3DownloadLink(videoUrl) {
-    try {
-        const apiUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(videoUrl)}&quality=128kbps`;
-        const response = await fetch(apiUrl);
-        const data = await response.json();
-        return data.result?.media || null;
-    } catch (error) {
-        console.error("❌ Error fetching MP3 URL:", error);
-        return null;
-    }
-}
-
-// Download MP3 file
-async function downloadAudio(mp3Url, fileName) {
-    try {
-        const response = await fetch(mp3Url);
-        const filePath = path.join(__dirname, "downloads", fileName);
-        const fileStream = fs.createWriteStream(filePath);
-
-        return new Promise((resolve, reject) => {
-            response.body.pipe(fileStream);
-            response.body.on("error", reject);
-            fileStream.on("finish", () => resolve(filePath));
-        });
-    } catch (error) {
-        console.error("❌ Error downloading audio:", error);
-        return null;
-    }
-}
+};
