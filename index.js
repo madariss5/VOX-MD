@@ -17,7 +17,7 @@ const port = process.env.PORT || 10000;
 const store = makeInMemoryStore({ logger: pino().child({ level: "silent" }) });
 const { session } = require('./settings'); // Added session import
 const { smsg } = require('./smsg');
-const { autoview, autoread, botname, autobio, mode, prefix, autolike } = require('./settings');
+const { autoview, autoread, botname, autobio, mode, prefix, dev, autolike } = require('./settings');
 const { commands, totalCommands } = require('./VoxMdhandler');
 const groupEvents = require("./groupEvents.js");
 
