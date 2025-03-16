@@ -1,6 +1,7 @@
 const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
 const path = require("path");
+const fetch = require("node-fetch");
 
 module.exports = async (context) => {
     const { client, m, text, fetchJson } = context;
@@ -27,9 +28,9 @@ module.exports = async (context) => {
             const tempFile = path.join(__dirname, `${title}.mp3`);
             const convertedFile = path.join(__dirname, `converted_${title}.mp3`);
 
-            // Download the audio file
+            // Fetch and save the audio file
             const response = await fetch(audioUrl);
-            const buffer = await response.buffer();
+            const buffer = Buffer.from(await response.arrayBuffer());
             fs.writeFileSync(tempFile, buffer);
 
             // Convert using FFmpeg
