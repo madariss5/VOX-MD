@@ -1,4 +1,4 @@
-const { generateTextProImage } = require("../../functions/textpro");
+const { generateTextProImage } = require("../../textpro");
 
 module.exports = async (context) => {
     const { client, m, args } = context;
