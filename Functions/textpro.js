@@ -7,22 +7,33 @@ const path = require("path");
 const textproPath = path.join(__dirname, "../../textpro.json");
 const textProEffects = JSON.parse(fs.readFileSync(textproPath, "utf8"));
 
-async function generateTextProImage(effect, text) {
-    if (!textProEffects[effect]) return null;
+async function generateTextProImage(effect, texts) {
+    if (!textProEffects[effect]) {
+        console.error(`❌ Error: Effect '${effect}' not found in textpro.json`);
+        return null;
+    }
 
     const url = textProEffects[effect];
     const form = new FormData();
-    form.append("text[]", text);
+
+    // Ensure 'texts' is always an array (some effects need two text inputs)
+    if (!Array.isArray(texts)) texts = [texts];
+
+    // Add all text inputs to the form dynamically
+    texts.forEach((text, index) => {
+        form.append(`text[${index}]`, text);
+    });
 
     try {
+        // Make the request to TextPro
         const response = await axios.post(url, form, {
             headers: form.getHeaders(),
-            responseType: "arraybuffer"
+            responseType: "arraybuffer" // Get image as Buffer
         });
 
-        return response.data; // Return image buffer
+        return Buffer.from(response.data); // Return image buffer
     } catch (error) {
-        console.error(`Error fetching ${effect} effect:`, error);
+        console.error(`❌ Error fetching ${effect} effect:`, error);
         return null;
     }
 }
