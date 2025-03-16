@@ -1,3 +1,7 @@
+const ffmpeg = require("fluent-ffmpeg");
+const fs = require("fs");
+const path = require("path");
+
 module.exports = async (context) => {
     const { client, m, text, fetchJson } = context;
     const yts = require("yt-search");
@@ -20,23 +24,39 @@ module.exports = async (context) => {
             }
 
             const { title, url: audioUrl } = data.result;
+            const tempFile = path.join(__dirname, `${title}.mp3`);
+            const convertedFile = path.join(__dirname, `converted_${title}.mp3`);
 
-            if (!audioUrl.startsWith("http")) {
-                return m.reply("Error: Invalid audio URL.");
-            }
+            // Download the audio file
+            const response = await fetch(audioUrl);
+            const buffer = await response.buffer();
+            fs.writeFileSync(tempFile, buffer);
 
-            await m.reply(`_Downloading **${title}**..._`);
+            // Convert using FFmpeg
+            ffmpeg(tempFile)
+                .output(convertedFile)
+                .audioCodec("libmp3lame")
+                .toFormat("mp3")
+                .on("end", async () => {
+                    await client.sendMessage(
+                        m.chat,
+                        {
+                            audio: fs.readFileSync(convertedFile),
+                            mimetype: "audio/mpeg",
+                            fileName: `${title}.mp3`,
+                        },
+                        { quoted: m }
+                    );
 
-            await client.sendMessage(
-                m.chat,
-                {
-                    audio: { url: audioUrl },
-                    mimetype: "audio/mpeg", // Changed from 'audio/mp4' to 'audio/mpeg' for compatibility
-                    fileName: `${title}.mp3`,
-                    ptt: false, // Ensures it's sent as normal audio, not voice note
-                },
-                { quoted: m }
-            );
+                    // Cleanup files
+                    fs.unlinkSync(tempFile);
+                    fs.unlinkSync(convertedFile);
+                })
+                .on("error", (err) => {
+                    console.error("FFmpeg conversion error:", err.message);
+                    m.reply("Error: Failed to process audio.");
+                })
+                .run();
         } catch (error) {
             console.error("API request failed:", error.message);
             m.reply("Download failed: Unable to retrieve audio.");
