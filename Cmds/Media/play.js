@@ -15,14 +15,14 @@ module.exports = async (context) => {
         try {
             let data = await fetchJson(`https://kanambo.voxnet2025.workers.dev/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`);
 
-            // Ensure the API response contains a valid URL
+            // Ensure valid API response
             if (!data || !data.result || !data.result.url) {
                 return m.reply("Error: Invalid audio file received.");
             }
 
             const { title, url: audioUrl } = data.result;
 
-            // Check if the URL is accessible before sending
+            // Validate the URL
             if (!audioUrl.startsWith("http")) {
                 return m.reply("Error: Invalid audio URL.");
             }
@@ -32,9 +32,9 @@ module.exports = async (context) => {
             await client.sendMessage(
                 m.chat,
                 {
-                    document: { url: audioUrl },
-                    mimetype: "audio/mp3", // Ensuring correct MIME type
-                    fileName: `${title}.mp3`, // Explicitly naming the file
+                    audio: { url: audioUrl },
+                    mimetype: "audio/mp4", // Correct MIME type for WhatsApp audio
+                    fileName: `${title}.mp3`,
                 },
                 { quoted: m }
             );
