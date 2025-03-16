@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 // Load TextPro URLs from textpro.json
-const textproPath = path.join(__dirname, "textpro.json"); // Fixed the path
+const textproPath = path.join(__dirname, "textpro.json");  // FIXED path issue
 const textProEffects = JSON.parse(fs.readFileSync(textproPath, "utf8"));
 
 async function generateTextProImage(effect, texts) {
@@ -16,19 +16,24 @@ async function generateTextProImage(effect, texts) {
     const url = textProEffects[effect];
     const form = new FormData();
 
-    // Ensure 'texts' is always an array (some effects need two text inputs)
+    // Ensure 'texts' is an array
     if (!Array.isArray(texts)) texts = [texts];
 
-    // Add all text inputs to the form dynamically
+    // Add text inputs to the form
     texts.forEach((text, index) => {
         form.append(`text[${index}]`, text);
     });
 
     try {
-        // Make the request to TextPro
+        // Send request with headers to bypass Cloudflare
         const response = await axios.post(url, form, {
-            headers: form.getHeaders(),
-            responseType: "arraybuffer", // Get image as Buffer
+            headers: {
+                ...form.getHeaders(),
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
+                "Referer": "https://textpro.me/",
+                "Origin": "https://textpro.me/"
+            },
+            responseType: "arraybuffer" // Get image as Buffer
         });
 
         return Buffer.from(response.data); // Return image buffer
