@@ -17,7 +17,8 @@ module.exports = async (context) => {
         const urlYt = videos[0].url;
         console.log(`YouTube URL: ${urlYt}`);
 
-        const apiUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`;
+        // API for MP3 download
+        let apiUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`;
         console.log(`API URL: ${apiUrl}`);
 
         let data;
@@ -29,7 +30,7 @@ module.exports = async (context) => {
             return m.reply("Failed to connect to the download server.");
         }
 
-        if (!data || data.status !== 200 || !data.result || !data.result.url) {
+        if (!data || !data.result || !data.result.url) {
             return m.reply("Error: Failed to retrieve a valid audio file.");
         }
 
@@ -44,53 +45,38 @@ module.exports = async (context) => {
         try {
             const response = await axios.get(audioUrl, { responseType: "arraybuffer" });
 
-            if (response.status !== 200 || response.data.length < 100000) { // ✅ Ensure file >100KB
-                return m.reply("Download failed: Invalid or corrupted audio file.");
-            }
+            console.log(`Downloaded file size: ${response.data.length} bytes`);
 
-            const fileSize = Buffer.byteLength(response.data) / (1024 * 1024);
-            if (fileSize > 5) {
-                return m.reply("The file is too large to send on WhatsApp (Max 5MB).");
+            if (response.status !== 200 || response.data.length < 100000) { 
+                return m.reply("Download failed: Invalid or corrupted audio file.");
             }
 
             await fs.writeFile(filePath, Buffer.from(response.data));
             console.log(`File saved: ${filePath}`);
 
-            // ✅ Verify MP3 is playable before sending
-            const checkFile = await fs.readFile(filePath);
-            if (!checkFile || checkFile.length < 100000) {
-                return m.reply("Sorry, this song can't be played. Try again later.");
-            }
-
-        } catch (error) {
-            console.error("Download Error:", error.message);
-            return m.reply("Download failed: Unable to retrieve the audio file.");
-        }
-
-        try {
             await client.sendMessage(
                 m.chat,
                 {
                     audio: await fs.readFile(filePath),
-                    mimetype: "audio/mp4", // ✅ Fix: WhatsApp prefers audio/mp4
+                    mimetype: "audio/mpeg",
                     fileName: `${sanitizedTitle}.mp3`,
                 },
                 { quoted: m }
             );
             console.log(`Sent file: ${sanitizedTitle}.mp3`);
-        } catch (error) {
-            console.error("Send Error:", error.message);
-            return m.reply("Error sending the file.");
-        }
 
-        setTimeout(async () => {
-            try {
-                await fs.unlink(filePath);
-                console.log(`Deleted file: ${filePath}`);
-            } catch (error) {
-                console.error("File Delete Error:", error.message);
-            }
-        }, 5000);
+            setTimeout(async () => {
+                try {
+                    await fs.unlink(filePath);
+                    console.log(`Deleted file: ${filePath}`);
+                } catch (error) {
+                    console.error("File Delete Error:", error.message);
+                }
+            }, 5000);
+        } catch (error) {
+            console.error("Download Error:", error.message);
+            return m.reply("Download failed: Unable to retrieve the audio file.");
+        }
     } catch (error) {
         console.error("General Error:", error.message);
         m.reply("Download failed: " + error.message);
