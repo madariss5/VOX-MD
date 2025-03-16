@@ -1,4 +1,5 @@
 const axios = require("axios");
+const FormData = require("form-data");
 const fs = require("fs");
 const path = require("path");
 
@@ -13,20 +14,23 @@ async function generateTextProImage(effect, texts) {
     }
 
     const url = textProEffects[effect];
+    const form = new FormData();
 
-    // Ensure texts is an array
-    if (!Array.isArray(texts)) texts = [texts];
-
-    // Convert text array to URL parameters
-    const formattedText = texts.map(t => encodeURIComponent(t.trim())).join("&text[]=");
+    if (!Array.isArray(texts)) texts = [texts]; // Ensure texts is an array
+    texts.forEach((text, index) => {
+        form.append(`text[${index}]`, text.trim()); // Trim spaces to avoid issues
+    });
 
     try {
-        // Send request with headers to bypass Cloudflare
-        const response = await axios.get(`${url}?text[]=${formattedText}`, {
+        const response = await axios.post(url, form, {
             headers: {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
+                ...form.getHeaders(),
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/110.0",
                 "Referer": "https://textpro.me/",
-                "Origin": "https://textpro.me/"
+                "Origin": "https://textpro.me/",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Connection": "keep-alive",
+                "Upgrade-Insecure-Requests": "1"
             },
             responseType: "arraybuffer"
         });
