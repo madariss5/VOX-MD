@@ -1,5 +1,4 @@
 const axios = require("axios");
-const FormData = require("form-data");
 const fs = require("fs");
 const path = require("path");
 
@@ -14,21 +13,17 @@ async function generateTextProImage(effect, texts) {
     }
 
     const url = textProEffects[effect];
-    const form = new FormData();
 
-    // Ensure 'texts' is always an array (some effects need two inputs)
+    // Ensure texts is an array
     if (!Array.isArray(texts)) texts = [texts];
 
-    // Format text properly to match TextPro's expected structure
-    texts.forEach((text, index) => {
-        form.append(`text[${index}]`, text.trim()); // Trim spaces to avoid issues
-    });
+    // Convert text array to URL parameters
+    const formattedText = texts.map(t => encodeURIComponent(t.trim())).join("&text[]=");
 
     try {
         // Send request with headers to bypass Cloudflare
-        const response = await axios.post(url, form, {
+        const response = await axios.get(`${url}?text[]=${formattedText}`, {
             headers: {
-                ...form.getHeaders(),
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0",
                 "Referer": "https://textpro.me/",
                 "Origin": "https://textpro.me/"
