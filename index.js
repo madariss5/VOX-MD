@@ -106,42 +106,40 @@ async function startVOXMD() {
             );
         }, 10 * 1000);
     }
-// Middleware for JSON parsing
-app.use(express.json());
+store.bind(client.ev);
+    setInterval(() => store.writeToFile("store.json"), 3000);
 
-// Route to test TextPro
-app.post("/textpro", async (req, res) => {
-    const { effect, text } = req.body;
+    client.ev.on("messages.upsert", async (chatUpdate) => {
+        try {
+            let mek = chatUpdate.messages[0];
+            if (!mek.message) return;
 
-    if (!effect || !text) {
-        return res.status(400).json({ error: "Missing effect or text parameter." });
-    }
+            let sender = mek.key.remoteJid || mek.participant || mek.key.participant;
+            if (!sender) return;
 
-    try {
-        const imageBuffer = await generateTextProImage(effect, text);
-        if (!imageBuffer) {
-            return res.status(500).json({ error: "Failed to generate image." });
-        }
+            console.log(`📩 New Message from: ${sender}`);
 
-        // Save the image temporarily
-        const filePath = path.join(__dirname, "output.png");
-        fs.writeFileSync(filePath, imageBuffer);
+            let m = mek.message.extendedTextMessage?.text || mek.message.conversation;
+            if (m.toLowerCase().startsWith("!textpro")) {
+                let args = m.split(" ");
+                let effect = args[1];
+                let text = args.slice(2).join(" ");
 
-        // Send the image
-        res.sendFile(filePath, (err) => {
-            if (err) {
-                console.error("❌ Error sending file:", err);
-                res.status(500).json({ error: "Failed to send image." });
+                if (!effect || !text) {
+                    return client.sendMessage(sender, { text: "Usage: !textpro [effect] [text]" });
+                }
+
+                let imageBuffer = await generateTextProImage(effect, text);
+                if (!imageBuffer) {
+                    return client.sendMessage(sender, { text: "⚠️ Failed to generate image." });
+                }
+
+                await client.sendMessage(sender, { image: imageBuffer, caption: `✨ *TextPro - ${effect}*` });
             }
-
-            // Delete the file after sending
-            setTimeout(() => fs.unlinkSync(filePath), 5000);
-        });
-    } catch (error) {
-        console.error("❌ Error:", error.message);
-        res.status(500).json({ error: "Internal Server Error." });
-    }
-});
+        } catch (error) {
+            console.error("❌ Error processing message:", error);
+        }
+    });
 
     client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners
     client.ev.on("messages.upsert", async (chatUpdate) => {
