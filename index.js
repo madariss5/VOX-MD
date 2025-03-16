@@ -11,7 +11,7 @@ const express = require("express");
 const { execSync } = require("child_process");
 const { DateTime } = require('luxon');
 const chalk = require("chalk");
-
+comst { generateTextProImage } = require("./textpro");
 const app = express();
 const port = process.env.PORT || 10000;
 const store = makeInMemoryStore({ logger: pino().child({ level: "silent" }) });
@@ -70,6 +70,42 @@ async function startVOXMD() {
             );
         }, 10 * 1000);
     }
+// Middleware for JSON parsing
+app.use(express.json());
+
+// Route to test TextPro
+app.post("/textpro", async (req, res) => {
+    const { effect, text } = req.body;
+
+    if (!effect || !text) {
+        return res.status(400).json({ error: "Missing effect or text parameter." });
+    }
+
+    try {
+        const imageBuffer = await generateTextProImage(effect, text);
+        if (!imageBuffer) {
+            return res.status(500).json({ error: "Failed to generate image." });
+        }
+
+        // Save the image temporarily
+        const filePath = path.join(__dirname, "output.png");
+        fs.writeFileSync(filePath, imageBuffer);
+
+        // Send the image
+        res.sendFile(filePath, (err) => {
+            if (err) {
+                console.error("❌ Error sending file:", err);
+                res.status(500).json({ error: "Failed to send image." });
+            }
+
+            // Delete the file after sending
+            setTimeout(() => fs.unlinkSync(filePath), 5000);
+        });
+    } catch (error) {
+        console.error("❌ Error:", error.message);
+        res.status(500).json({ error: "Internal Server Error." });
+    }
+});
 
     client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners
     client.ev.on("messages.upsert", async (chatUpdate) => {
