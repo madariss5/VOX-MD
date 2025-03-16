@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 // Load TextPro URLs from textpro.json
-const textproPath = path.join(__dirname, "../../textpro.json");
+const textproPath = path.join(__dirname, "textpro.json"); // Fixed the path
 const textProEffects = JSON.parse(fs.readFileSync(textproPath, "utf8"));
 
 async function generateTextProImage(effect, texts) {
@@ -28,12 +28,12 @@ async function generateTextProImage(effect, texts) {
         // Make the request to TextPro
         const response = await axios.post(url, form, {
             headers: form.getHeaders(),
-            responseType: "arraybuffer" // Get image as Buffer
+            responseType: "arraybuffer", // Get image as Buffer
         });
 
         return Buffer.from(response.data); // Return image buffer
     } catch (error) {
-        console.error(`❌ Error fetching ${effect} effect:`, error);
+        console.error(`❌ Error fetching '${effect}' effect:`, error.message);
         return null;
     }
 }
