@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 // Load TextPro URLs from textpro.json
-const textproPath = path.join(__dirname, "textpro.json");  // FIXED path issue
+const textproPath = path.join(__dirname, "textpro.json");
 const textProEffects = JSON.parse(fs.readFileSync(textproPath, "utf8"));
 
 async function generateTextProImage(effect, texts) {
@@ -16,12 +16,12 @@ async function generateTextProImage(effect, texts) {
     const url = textProEffects[effect];
     const form = new FormData();
 
-    // Ensure 'texts' is an array
+    // Ensure 'texts' is always an array (some effects need two inputs)
     if (!Array.isArray(texts)) texts = [texts];
 
-    // Add text inputs to the form
+    // Format text properly to match TextPro's expected structure
     texts.forEach((text, index) => {
-        form.append(`text[${index}]`, text);
+        form.append(`text[${index}]`, text.trim()); // Trim spaces to avoid issues
     });
 
     try {
@@ -33,7 +33,7 @@ async function generateTextProImage(effect, texts) {
                 "Referer": "https://textpro.me/",
                 "Origin": "https://textpro.me/"
             },
-            responseType: "arraybuffer" // Get image as Buffer
+            responseType: "arraybuffer"
         });
 
         return Buffer.from(response.data); // Return image buffer
