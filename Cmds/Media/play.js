@@ -13,7 +13,7 @@ module.exports = async (context) => {
         const urlYt = videos[0].url;
 
         try {
-            let data = await fetchJson(`https://kanambo.voxnet2025.workers.dev/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`);
+            let data = await fetchJson(`https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`);
 
             const { title, url: audioUrl } = data.result;
 
