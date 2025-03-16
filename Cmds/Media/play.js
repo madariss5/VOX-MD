@@ -9,53 +9,83 @@ module.exports = async (context) => {
     try {
         if (!text) return m.reply("What song do you want to download?");
 
-        // Search for the song on YouTube
+        // Step 1: Search YouTube
         const { videos } = await yts(text);
         if (!videos || videos.length === 0) {
             return m.reply("No songs found!");
         }
 
         const urlYt = videos[0].url;
+        console.log(`YouTube URL: ${urlYt}`);
 
-        // Fetch MP3 download link from API
+        // Step 2: Get MP3 Download Link
         const apiUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`;
-        let data = await fetchJson(apiUrl);
+        console.log(`API URL: ${apiUrl}`);
+
+        let data;
+        try {
+            data = await fetchJson(apiUrl);
+            console.log("API Response:", data);
+        } catch (error) {
+            console.error("API Fetch Error:", error.message);
+            return m.reply("Failed to connect to the download server.");
+        }
 
         if (!data || data.status !== 200 || !data.result || !data.result.url) {
+            console.error("Invalid API response:", data);
             return m.reply("Error: Failed to retrieve a valid audio file.");
         }
 
         const { title, url: audioUrl } = data.result;
-        const sanitizedTitle = title.replace(/[\/\\:*?"<>|]/g, ""); // Remove invalid filename characters
+        console.log(`Downloading: ${title} from ${audioUrl}`);
+
+        const sanitizedTitle = title.replace(/[\/\\:*?"<>|]/g, "");
         const filePath = path.join(__dirname, `${sanitizedTitle}.mp3`);
 
         await m.reply(`_Downloading ${title}_ 🎶`);
 
-        // Download the MP3 file
-        const response = await axios.get(audioUrl, { responseType: "arraybuffer" });
+        // Step 3: Download MP3 File
+        try {
+            const response = await axios.get(audioUrl, { responseType: "arraybuffer" });
 
-        if (response.status !== 200 || response.data.length < 10000) {
-            return m.reply("Download failed: Invalid audio file.");
+            if (response.status !== 200 || response.data.length < 10000) {
+                console.error("Download failed. File too small.");
+                return m.reply("Download failed: Invalid audio file.");
+            }
+
+            await fs.writeFile(filePath, Buffer.from(response.data));
+            console.log(`File saved: ${filePath}`);
+        } catch (error) {
+            console.error("Download Error:", error.message);
+            return m.reply("Download failed: Unable to retrieve the audio file.");
         }
 
-        // Save the file
-        await fs.writeFile(filePath, Buffer.from(response.data));
+        // Step 4: Send MP3 File
+        try {
+            await client.sendMessage(
+                m.chat,
+                {
+                    audio: await fs.readFile(filePath),
+                    mimetype: "audio/mp3",
+                    fileName: `${sanitizedTitle}.mp3`,
+                },
+                { quoted: m }
+            );
+            console.log(`Sent file: ${sanitizedTitle}.mp3`);
+        } catch (error) {
+            console.error("Send Error:", error.message);
+            return m.reply("Error sending the file.");
+        }
 
-        // Send audio file
-        await client.sendMessage(
-            m.chat,
-            {
-                audio: await fs.readFile(filePath),
-                mimetype: "audio/mp3",
-                fileName: `${sanitizedTitle}.mp3`,
-            },
-            { quoted: m }
-        );
-
-        // Delete the file after sending
-        await fs.unlink(filePath);
+        // Step 5: Delete File After Sending
+        try {
+            await fs.unlink(filePath);
+            console.log(`Deleted file: ${filePath}`);
+        } catch (error) {
+            console.error("File Delete Error:", error.message);
+        }
     } catch (error) {
-        console.error("Error:", error.message);
+        console.error("General Error:", error.message);
         m.reply("Download failed: " + error.message);
     }
 };
