@@ -1,10 +1,6 @@
-
-
-
 module.exports = async (context) => {
-    const { client, m, text } = context;
+    const { client, m, text, fetchJson } = context;
     const yts = require("yt-search");
-    const axios = require("axios");
 
     try {
         if (!text) return m.reply("What song do you want to download?");
@@ -15,27 +11,11 @@ module.exports = async (context) => {
         }
 
         const urlYt = videos[0].url;
-        console.log("Searching for:", text);
-        console.log("YouTube URL:", urlYt);
 
         try {
-            const apiUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`;
-            console.log("Fetching from API:", apiUrl);
+            let data = await fetchJson(`https://kanambo.voxnet2025.workers.dev/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`);
 
-            const response = await axios.get(apiUrl, {
-                headers: { "Accept": "application/json" },
-            });
-
-            console.log("API Response:", response.data);
-
-            const result = response.data.result;
-            if (!result || !result.media) {
-                console.log("Error: Invalid API response structure");
-                return m.reply("Download failed: No valid audio URL found.");
-            }
-
-            const audioUrl = result.media;
-            const title = result.title || "Unknown Title";
+            const { title, url: audioUrl } = data.result;
 
             await m.reply(`_Downloading ${title}_`);
 
@@ -49,12 +29,10 @@ module.exports = async (context) => {
                 { quoted: m }
             );
         } catch (error) {
-            console.error("API request failed:", error.response ? error.response.status : error.message);
-            console.log("Error details:", error.response ? error.response.data : "No response data");
+            console.error("API request failed:", error.message);
             m.reply("Download failed: Unable to retrieve audio.");
         }
     } catch (error) {
-        console.error("General error:", error.message);
         m.reply("Download failed\n" + error.message);
     }
 };
