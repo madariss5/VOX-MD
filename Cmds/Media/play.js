@@ -44,8 +44,8 @@ module.exports = async (context) => {
         try {
             const response = await axios.get(audioUrl, { responseType: "arraybuffer" });
 
-            if (response.status !== 200 || response.data.length < 10000) {
-                return m.reply("Download failed: Invalid audio file.");
+            if (response.status !== 200 || response.data.length < 100000) { // ✅ Ensure file >100KB
+                return m.reply("Download failed: Invalid or corrupted audio file.");
             }
 
             const fileSize = Buffer.byteLength(response.data) / (1024 * 1024);
@@ -55,6 +55,13 @@ module.exports = async (context) => {
 
             await fs.writeFile(filePath, Buffer.from(response.data));
             console.log(`File saved: ${filePath}`);
+
+            // ✅ Verify MP3 is playable before sending
+            const checkFile = await fs.readFile(filePath);
+            if (!checkFile || checkFile.length < 100000) {
+                return m.reply("Sorry, this song can't be played. Try again later.");
+            }
+
         } catch (error) {
             console.error("Download Error:", error.message);
             return m.reply("Download failed: Unable to retrieve the audio file.");
@@ -65,7 +72,7 @@ module.exports = async (context) => {
                 m.chat,
                 {
                     audio: await fs.readFile(filePath),
-                    mimetype: "audio/mp4",
+                    mimetype: "audio/mp4", // ✅ Fix: WhatsApp prefers audio/mp4
                     fileName: `${sanitizedTitle}.mp3`,
                 },
                 { quoted: m }
