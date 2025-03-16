@@ -18,7 +18,7 @@ module.exports = async (context) => {
         try {
             // Fetch audio download link from the new API
             let response = await axios.get(
-                `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`,
+                `https://kanambo.voxnet2025.workers.dev/downup/ytmp3?url=${encodeURIComponent(urlYt)}&quality=128kbps`,
                 { headers: { accept: "application/json" } }
             );
             
