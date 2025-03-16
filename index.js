@@ -48,6 +48,42 @@ process.removeAllListeners('uncaughtException');
 process.on('uncaughtException', (err) => {
     console.error("❌ Uncaught Exception:", err);
 });
+// Middleware for JSON parsing
+app.use(express.json());
+
+// ✅ Fixed TextPro Route
+app.post("/textpro", async (req, res) => {
+    const { effect, text } = req.body;
+
+    if (!effect || !text) {
+        return res.status(400).json({ error: "Missing effect or text parameter." });
+    }
+
+    try {
+        const imageBuffer = await generateTextProImage(effect, text);
+        if (!imageBuffer) {
+            return res.status(500).json({ error: "Failed to generate image." });
+        }
+
+        // Save image temporarily
+        const filePath = path.join(__dirname, "output.png");
+        fs.writeFileSync(filePath, imageBuffer);
+
+        // Send image
+        res.sendFile(filePath, (err) => {
+            if (err) {
+                console.error("❌ Error sending file:", err);
+                res.status(500).json({ error: "Failed to send image." });
+            }
+
+            // Delete the file after sending
+            setTimeout(() => fs.unlinkSync(filePath), 5000);
+        });
+    } catch (error) {
+        console.error("❌ Error:", error.message);
+        res.status(500).json({ error: "Internal Server Error." });
+    }
+});
 
 async function startVOXMD() {
     const { saveCreds, state } = await useMultiFileAuthState("session");
