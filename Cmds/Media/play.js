@@ -1,5 +1,5 @@
 const axios = require("axios");
-const fs = require("fs");
+const fs = require("fs").promises;
 const path = require("path");
 const yts = require("yt-search");
 
@@ -28,23 +28,30 @@ module.exports = async (context) => {
 
             await m.reply(`_Downloading ${title}_ 🎶`);
 
-            // Download MP3 and save it locally
+            // Download MP3 file
             const response = await axios({ url: audioUrl, responseType: "arraybuffer" });
-            fs.writeFileSync(filePath, response.data);
+
+            // Check if file is too small (indicating an error)
+            if (response.data.length < 10000) {
+                return m.reply("Download failed: The file is too small.");
+            }
+
+            // Save the file correctly
+            await fs.writeFile(filePath, Buffer.from(response.data));
 
             // Send audio file
             await client.sendMessage(
                 m.chat,
                 {
-                    audio: fs.readFileSync(filePath),
-                    mimetype: "audio/mpeg",
+                    audio: await fs.readFile(filePath),
+                    mimetype: "audio/mp3",
                     fileName: `${title}.mp3`,
                 },
                 { quoted: m }
             );
 
             // Delete file after sending
-            fs.unlinkSync(filePath);
+            await fs.unlink(filePath);
         } catch (error) {
             console.error("API request failed:", error.message);
             m.reply("Download failed: Unable to retrieve audio.");
