@@ -34,13 +34,11 @@ module.exports = async (context) => {
 🔮 *English:*
 ${translatedEnglish.text}
 
-🌍 *Kiswahili:*
+💡 *Kiswahili:*
 ${translatedSwahili.text}
 
 🔮 *Hindi:*
 ${translatedHindi.text}
-
-🙏 *Powered by Silva MD Bot*`;
 
         await m.reply(bibleMessage);
     } catch (error) {
