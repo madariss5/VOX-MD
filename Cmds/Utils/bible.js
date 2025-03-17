@@ -38,7 +38,7 @@ ${translatedEnglish.text}
 ${translatedSwahili.text}
 
 🔮 *Hindi:*
-${translatedHindi.text};
+${translatedHindi.text}`;
 
         await m.reply(bibleMessage);
     } catch (error) {
