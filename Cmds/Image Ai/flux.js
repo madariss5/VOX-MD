@@ -5,7 +5,7 @@ module.exports = async (context) => {
 
     if (!text) return m.reply("❌ Please provide a prompt. Example: _-flux dog_");
 
-    let apiUrl = `https://apis.davidcyriltech.my.id/flux?prompt=${encodeURIComponent(text)}`;
+    let apiUrl = `https://apis.davidcyriltech.my.id/flux?prompt=${text}`;
 
     await m.reply("🎨 *Generating Flux AI image... Please wait...*");
 
