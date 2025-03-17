@@ -17,7 +17,13 @@ module.exports = async (context) => {
     await m.reply("⏳ *Please wait...* Fetching song lyrics...");
 
     try {
-        let { data } = await axios.get(`https://fastrestapis.fasturl.cloud/music/songlyrics-v2?name=${encodeURIComponent(teks)}`);
+        // Extract song name and artist (if provided)
+        let [songTitle, artist] = teks.split("|").map(t => t.trim());
+        if (!artist) artist = ""; // If no artist is provided, keep it empty
+
+        let apiUrl = `https://apis.davidcyriltech.my.id/lyrics2?t=${encodeURIComponent(songTitle)}&a=${encodeURIComponent(artist)}`;
+
+        let { data } = await axios.get(apiUrl);
 
         if (data.status !== 200 || !data.result || !data.result.lyrics) {
             await client.sendMessage(m.chat, { 
@@ -28,7 +34,7 @@ module.exports = async (context) => {
             return;
         }
 
-        let { title, artist, lyrics, thumbnail } = data.result;
+        let { title, artist: songArtist, lyrics, thumbnail } = data.result;
 
         // **Fix: Convert lyrics from objects to text**
         let formattedLyrics = "";
@@ -40,7 +46,7 @@ module.exports = async (context) => {
             formattedLyrics = lyrics; // Use as is if already a string
         }
 
-        let caption = `🎶 *Lyrics Found!*\n\n📌 *Title:* _${title}_\n👤 *Artist:* _${artist}_\n\n📜 *Lyrics:*\n${formattedLyrics}\n\n⚡ _Powered by VOX-MD_`;
+        let caption = `🎶 *Lyrics Found!*\n\n📌 *Title:* _${title}_\n👤 *Artist:* _${songArtist}_\n\n📜 *Lyrics:*\n${formattedLyrics}\n\n⚡ _Powered by VOX-MD_`;
 
         if (thumbnail) {
             await client.sendMessage(m.chat, { 
