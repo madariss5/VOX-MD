@@ -10,7 +10,7 @@ module.exports = async (context) => {
     try {
         // Notify user that the process has started
         await client.sendMessage(m.chat, { 
-            text: "🎨 *Generating your AI image... Please wait!* ⏳" 
+            text: "🎨 *VOXMD Generating your AI image... Please wait!* ⏳" 
         });
 
         // Construct API URL
