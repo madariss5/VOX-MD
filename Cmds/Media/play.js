@@ -1,5 +1,4 @@
 const axios = require("axios");
-const yts = require("yt-search");
 const fs = require("fs").promises;
 const path = require("path");
 
@@ -9,12 +8,25 @@ module.exports = async (context) => {
     try {
         if (!text) return m.reply("What song do you want to download?");
 
-        const { videos } = await yts(text);
-        if (!videos || videos.length === 0) {
+        // New API for YouTube search
+        const searchUrl = `https://www.guruapi.tech/api/ytsearch?text=${encodeURIComponent(text)}`;
+        console.log(`Search API URL: ${searchUrl}`);
+
+        let searchData;
+        try {
+            searchData = await fetchJson(searchUrl);
+            console.log("Search API Response:", searchData);
+        } catch (error) {
+            console.error("Search API Error:", error.message);
+            return m.reply("Failed to connect to the search server.");
+        }
+
+        if (!searchData || !searchData.results || searchData.results.length === 0) {
             return m.reply("No songs found!");
         }
 
-        const urlYt = videos[0].url;
+        const video = searchData.results[0];
+        const urlYt = video.videoUrl;
         console.log(`YouTube URL: ${urlYt}`);
 
         // API for MP3 download
@@ -47,7 +59,7 @@ module.exports = async (context) => {
 
             console.log(`Downloaded file size: ${response.data.length} bytes`);
 
-            if (response.status !== 200 || response.data.length < 100000) { 
+            if (response.status !== 200 || response.data.length < 100000) {
                 return m.reply("Download failed: Invalid or corrupted audio file.");
             }
 
