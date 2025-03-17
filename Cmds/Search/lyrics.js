@@ -4,7 +4,7 @@ module.exports = async (context) => {
     const { client, m, text } = context;
 
     if (!text) {
-        return m.reply("❌ *Please provide a song title and artist!*\n\nExample usage:\n`.lyrics Faded Alan Walker`");
+        return m.reply("❌ *Please provide a song title and artist!*\n\nExample usage:\n`.lyrics Faded - Alan Walker`");
     }
 
     try {
@@ -13,8 +13,14 @@ module.exports = async (context) => {
             text: "🎵 *Fetching song lyrics... Please wait!* ⏳" 
         });
 
+        // Extract title and artist from text
+        let [title, artist] = text.split(" - ");
+        if (!artist) {
+            return m.reply("⚠️ *Please provide both song title and artist!*\n\nExample:\n`.lyrics Faded - Alan Walker`");
+        }
+
         // Construct API URL
-        const apiUrl = `https://apis.davidcyriltech.my.id/lyrics2?t=${encodeURIComponent(text)}`;
+        const apiUrl = `https://apis.davidcyriltech.my.id/lyrics2?t=${encodeURIComponent(title)}&a=${encodeURIComponent(artist)}`;
 
         // Fetch lyrics
         const { data } = await axios.get(apiUrl);
@@ -23,19 +29,19 @@ module.exports = async (context) => {
             return m.reply("❌ *Lyrics not found!*\n\n💡 Try searching for another song.");
         }
 
-        let { title, artist, lyrics } = data;
+        let { title: songTitle, artist: songArtist, lyrics } = data;
 
-        // Fix lyrics formatting
+        // Format lyrics properly
         let formattedLyrics = lyrics
-            .replace(/&gt;/g, ">") // Fix encoded characters
-            .replace(/\\n/g, "\n") // Convert new lines
+            .replace(/&gt;/g, ">")
+            .replace(/\\n/g, "\n")
             .trim();
 
         // Send lyrics response
         await client.sendMessage(
             m.chat,
             {
-                text: `🎶 *Lyrics Found!*\n\n📌 *Title:* _${title}_\n👤 *Artist:* _${artist}_\n\n📜 *Lyrics:*\n${formattedLyrics}\n\n⚡ _Powered by VOX-MD_`,
+                text: `🎶 *Lyrics Found!*\n\n📌 *Title:* _${songTitle}_\n👤 *Artist:* _${songArtist}_\n\n📜 *Lyrics:*\n${formattedLyrics}\n\n⚡ _Powered by VOX-MD_`,
             },
             { quoted: m }
         );
