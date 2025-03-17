@@ -12,8 +12,10 @@ module.exports = async (context) => {
     try {
         let response = await axios.get(apiUrl);
 
+        console.log("API Response:", response.data); // Debugging log
+
         if (!response.data || !response.data.url) {
-            return m.reply("⚠️ No image generated. The API may be down or the prompt is invalid.");
+            return m.reply("⚠️ No image generated. The API response is invalid or empty.");
         }
 
         await client.sendMessage(
@@ -25,7 +27,7 @@ module.exports = async (context) => {
             { quoted: m }
         );
     } catch (error) {
-        console.error("Flux API Error:", error.message);
-        m.reply("❌ Failed to generate the image. The API may be down.");
+        console.error("Flux API Error:", error); // Full error details
+        m.reply("❌ Failed to generate the image. The API might be down or returning an invalid response.");
     }
 };
