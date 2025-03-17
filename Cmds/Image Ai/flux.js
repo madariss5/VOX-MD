@@ -10,22 +10,22 @@ module.exports = async (context) => {
     await m.reply("🎨 *Generating Flux AI image... Please wait...*");
 
     try {
-        let { data } = await axios.get(apiUrl);
+        let response = await axios.get(apiUrl);
 
-        if (!data || !data.url) {
-            return m.reply("⚠️ No image generated. Try a different prompt.");
+        if (!response.data || !response.data.url) {
+            return m.reply("⚠️ No image generated. The API may be down or the prompt is invalid.");
         }
 
         await client.sendMessage(
             m.chat,
             {
-                image: { url: data.url },
+                image: { url: response.data.url },
                 caption: `🖼️ *Flux AI Image Generated* \n🔍 *Prompt:* ${text}\n🚀 *Powered by Flux AI*`
             },
             { quoted: m }
         );
     } catch (error) {
         console.error("Flux API Error:", error.message);
-        m.reply("❌ Failed to generate the image. Please try again later.");
+        m.reply("❌ Failed to generate the image. The API may be down.");
     }
 };
