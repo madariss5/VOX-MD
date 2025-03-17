@@ -20,7 +20,7 @@ module.exports = async (context) => {
             m.chat,
             {
                 image: { url: data.url },
-                caption: `🖼️ *VOXMD Image Generated* \n🔍 *Prompt:* ${text}\n🚀 *Powered by VOX-MD*`
+                caption: `🖼️ *Flux AI Image Generated* \n🔍 *Prompt:* ${text}\n🚀 *Powered by Flux AI*`
             },
             { quoted: m }
         );
