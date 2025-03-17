@@ -22,14 +22,17 @@ module.exports = async (context) => {
         // Construct API URL
         const apiUrl = `https://apis.davidcyriltech.my.id/lyrics2?t=${encodeURIComponent(title)}&a=${encodeURIComponent(artist)}`;
 
-        // Fetch lyrics
-        const { data } = await axios.get(apiUrl);
+        console.log("Requesting URL:", apiUrl); // Debugging
 
-        if (data.status !== 200 || !data.lyrics) {
+        // Fetch lyrics
+        const response = await axios.get(apiUrl);
+        console.log("API Response:", response.data); // Debugging
+
+        if (!response.data || !response.data.lyrics) {
             return m.reply("❌ *Lyrics not found!*\n\n💡 Try searching for another song.");
         }
 
-        let { title: songTitle, artist: songArtist, lyrics } = data;
+        let { title: songTitle, artist: songArtist, lyrics } = response.data;
 
         // Format lyrics properly
         let formattedLyrics = lyrics
@@ -46,7 +49,14 @@ module.exports = async (context) => {
             { quoted: m }
         );
     } catch (error) {
-        console.error("Lyrics fetch error:", error.message);
-        m.reply("❌ *Failed to fetch lyrics! Please try again later.*");
+        console.error("Lyrics fetch error:", error);
+
+        // If API error, send user-friendly message
+        if (error.response) {
+            console.error("API Error Response:", error.response.data);
+            return m.reply(`❌ *Error fetching lyrics!*\n\n📌 *API Error:* ${error.response.data.message || "Unknown error"}`);
+        } else {
+            return m.reply("❌ *Failed to fetch lyrics! Please try again later.*");
+        }
     }
 };
