@@ -1,14 +1,17 @@
 const fetch = require('node-fetch');
 
-module.exports = async (m, { conn, text }) => {
-  if (!text) throw 'Please provide a prompt! Example: *flux dog*';
-  
+module.exports = async function flux(client, m, text) {
+  if (!text) {
+    return client.sendMessage(m.chat, '❌ Error: Missing prompt. Usage: *flux dog*', { quoted: m });
+  }
+
   let url = `https://apis.davidcyriltech.my.id/flux?prompt=${encodeURIComponent(text)}`;
 
   try {
-    await conn.sendFile(m.chat, url, 'flux.jpg', `Here is your Flux image for: *${text}*`, m);
+    await client.sendMessage(m.chat, `Generating Flux image for: *${text}*...`, { quoted: m });
+    await client.sendMessage(m.chat, { image: { url }, caption: `Here is your Flux image for: *${text}*` }, { quoted: m });
   } catch (err) {
-    console.error(err);
-    m.reply('Failed to generate image. Please try again.');
+    console.error('❌ Error executing flux:', err);
+    client.sendMessage(m.chat, '❌ Failed to generate image. Please try again later.', { quoted: m });
   }
 };
