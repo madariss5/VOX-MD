@@ -7,6 +7,7 @@ const pino = require("pino");
 const { Boom } = require("@hapi/boom");
 const fs = require("fs");
 const FileType = require("file-type");
+const path = require("path");
 const express = require("express");
 const { execSync } = require("child_process");
 const { DateTime } = require('luxon');
