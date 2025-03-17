@@ -3,55 +3,44 @@ const axios = require("axios");
 module.exports = async (context) => {
     const { client, m, text } = context;
 
-    let teks = text ? text : m.quoted && m.quoted.text ? m.quoted.text : '';
-    if (!teks) {
-        await client.sendMessage(m.chat, { 
-            text: `✳️ *Enter the song name!*\n\n🔎 Example: *.lyrics Faded Alan Walker*`, 
-            footer: "🚀 Powered by VOX-MD",
-            quoted: m 
-        });
-        return;
+    if (!text) {
+        return m.reply("❌ *Please provide a song title and artist!*\n\nExample usage:\n`.lyrics Faded Alan Walker`");
     }
 
-    // Notify the user that lyrics are being fetched
-    await m.reply("⏳ *Fetching song lyrics...*");
-
     try {
-        let apiUrl = `https://apis.davidcyriltech.my.id/lyrics2?t=${encodeURIComponent(teks)}`;
+        // Notify user that lyrics are being fetched
+        await client.sendMessage(m.chat, { 
+            text: "🎵 *Fetching song lyrics... Please wait!* ⏳" 
+        });
 
-        let { data } = await axios.get(apiUrl);
+        // Construct API URL
+        const apiUrl = `https://apis.davidcyriltech.my.id/lyrics2?t=${encodeURIComponent(text)}`;
+
+        // Fetch lyrics
+        const { data } = await axios.get(apiUrl);
 
         if (data.status !== 200 || !data.lyrics) {
-            await client.sendMessage(m.chat, { 
-                text: `❌ *Lyrics not found!*\n\n💡 Try searching for another song.`, 
-                footer: "🎵 VOX-MD Music", 
-                quoted: m 
-            });
-            return;
+            return m.reply("❌ *Lyrics not found!*\n\n💡 Try searching for another song.");
         }
 
         let { title, artist, lyrics } = data;
 
-        // **Fix lyrics formatting**
+        // Fix lyrics formatting
         let formattedLyrics = lyrics
             .replace(/&gt;/g, ">") // Fix encoded characters
             .replace(/\\n/g, "\n") // Convert new lines
             .trim();
 
-        let caption = `🎶 *Lyrics Found!*\n\n📌 *Title:* _${title}_\n👤 *Artist:* _${artist}_\n\n📜 *Lyrics:*\n${formattedLyrics}\n\n⚡ _Powered by VOX-MD_`;
-
-        await client.sendMessage(m.chat, { text: caption, quoted: m });
-
-        await client.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
-
-    } catch (e) {
-        console.error('Error fetching lyrics:', e);
-
-        await client.sendMessage(m.chat, { 
-            text: `⚠️ *Error fetching lyrics!*\n\nPlease try again later.`, 
-            footer: "🚀 VOX-MD Support", 
-            quoted: m 
-        });
-        await client.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
+        // Send lyrics response
+        await client.sendMessage(
+            m.chat,
+            {
+                text: `🎶 *Lyrics Found!*\n\n📌 *Title:* _${title}_\n👤 *Artist:* _${artist}_\n\n📜 *Lyrics:*\n${formattedLyrics}\n\n⚡ _Powered by VOX-MD_`,
+            },
+            { quoted: m }
+        );
+    } catch (error) {
+        console.error("Lyrics fetch error:", error.message);
+        m.reply("❌ *Failed to fetch lyrics! Please try again later.*");
     }
 };
