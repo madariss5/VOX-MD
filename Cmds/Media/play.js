@@ -6,7 +6,7 @@ module.exports = async (context) => {
 
     if (!text) return m.reply("❌ What song do you want to download?");
 
-    await m.reply("🔄 *Silva MD Bot is fetching your audio... Please wait...*");
+    await m.reply("🔄 *VOX MD Bot is fetching your audio just a moment😚... Please wait...*");
 
     try {
         let search = await ytSearch(text);
@@ -38,13 +38,13 @@ module.exports = async (context) => {
                         m.chat,
                         {
                             image: { url: songData.thumbnail },
-                            caption: `SYLIVANUS THE SILVA MD BOT
+                            caption: `KANAMBO THE VOX MD BOT
 ╭═════════════════⊷
 ║ 🎶 *Title:* ${songData.title}
 ║ 🎤 *Artist:* ${songData.artist}
 ║ 🔗 THANK YOU, SORRY NO URL TO BE SHARED
 ╰═════════════════⊷
-*Powered by SILVA MD BOT*`
+*Powered by VOX MD BOT*`
                         },
                         { quoted: m }
                     );
@@ -75,7 +75,7 @@ module.exports = async (context) => {
                     );
 
                     // Send success message
-                    await m.reply("✅ *Silva MD – World-class bot just successfully sent you what you requested! 🎶*");
+                    await m.reply("✅ *VOX MD🎧 – World-class bot just successfully sent you what you requested! 🎶*");
 
                     return; // Stop execution if successful
                 }
