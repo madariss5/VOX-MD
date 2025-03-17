@@ -38,6 +38,7 @@
     "youtube-yts": "^1.5.1",
     "mime-types": "^2.1.35",
     "@shineiichijo/marika": "^3.0.0",
+    "@vitalets/google-translate-api": "^9.2.0",
     "@google/generative-ai":"^0.1.3",
     "canvacord": "^5.4.9",
     "fluent-ffmpeg": "^2.1.3",
