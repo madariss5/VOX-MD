@@ -1,29 +1,34 @@
 const axios = require("axios");
 
 module.exports = async (context) => {
-    const { client, m, text, fetchJson } = context;
+    const { client, m, text } = context;
 
     try {
         let urls = text.match(/(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch\?v=|v\/|embed\/|shorts\/|playlist\?list=)?)([a-zA-Z0-9_-]{11})/gi);
         if (!urls) return m.reply("❌ Please provide a valid YouTube link.");
 
         try {
-            const primaryUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp4?url=${encodeURIComponent(text)}&quality=720`;
-            const primaryData = await fetchJson(primaryUrl);
+            const apiUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp4?url=${encodeURIComponent(text)}&quality=720`;
+            const response = await axios.get(apiUrl, { headers: { Accept: "application/json" } });
 
-            if (!primaryData || !primaryData.success || !primaryData.result || !primaryData.result.url) {
-                throw new Error("Invalid response from primary API.");
+            console.log("🔍 API Response:", JSON.stringify(response.data, null, 2)); // Log response for debugging
+
+            if (response.data?.status !== 200 || !response.data?.result?.media) {
+                throw new Error("Invalid response structure from API.");
             }
 
-            const { title, url: videoUrl } = primaryData.result;
+            // Extract video info
+            const videoUrl = response.data.result.media;
+            const title = response.data.result.title || "YouTube Video";
 
             await m.reply(`📥 Downloading *${title}*...`);
+
             await client.sendMessage(
                 m.chat,
                 {
                     video: { url: videoUrl },
                     mimetype: "video/mp4",
-                    caption: title,
+                    caption: `🎬 *Title:* ${title}`,
                     fileName: `${title}.mp4`,
                 },
                 { quoted: m }
@@ -34,18 +39,18 @@ module.exports = async (context) => {
                 {
                     document: { url: videoUrl },
                     mimetype: "video/mp4",
-                    caption: title,
+                    caption: `🎬 *Title:* ${title}`,
                     fileName: `${title}.mp4`,
                 },
                 { quoted: m }
             );
 
-        } catch (primaryError) {
-            console.error("Primary API failed:", primaryError.message);
-            m.reply("⚠️ Download failed: Unable to retrieve video.");
+        } catch (apiError) {
+            console.error("❌ API Error:", apiError.message);
+            m.reply("⚠️ Download failed: The API response was not valid.");
         }
     } catch (error) {
-        console.error(error);
+        console.error("❌ Unexpected Error:", error.message);
         m.reply("❌ Download failed: " + error.message);
     }
 };
