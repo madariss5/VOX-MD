@@ -95,12 +95,14 @@ m.reply = (text, chatId = m.chat, options = {}) => {
               `┃ ⚡ *𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗕𝘆:* 𝘾𝗼𝗿𝙥. 𝘝𝙊𝙓𝙉𝙀𝙏.𝙄𝙉𝘾\n` +
               `╰═════════════════╯`,
         contextInfo: {
-          externalAdReply: {
-            title: `✨ 𝗩𝗢𝗫-𝗠𝗗 𝗕𝗢𝗧 ✨`,
-            body: `By KANAMBO 💠`,
-            previewType: "PHOTO",
-            thumbnail: getRandomImage(), // Set a random image
-            sourceUrl: "https://chat.whatsapp.com/JXIs0m622UHJtN1HoXSnQ3"
+    externalAdReply: {
+        title: `✨ 𝗩𝗢𝗫-𝗠𝗗 𝗕𝗢𝗧 ✨`,
+        body: `By KANAMBO 💠`,
+        previewType: "PHOTO",
+        thumbnailUrl: "https://chat.whatsapp.com/JXIs0m622UHJtN1HoXSnQ3", // WhatsApp link as thumbnail
+        sourceUrl: "https://chat.whatsapp.com/JXIs0m622UHJtN1HoXSnQ3" // Clickable link
+    }
+}"
           }
         }
       }, 
