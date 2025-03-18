@@ -12,7 +12,6 @@ const express = require("express");
 const { execSync } = require("child_process");
 const { DateTime } = require('luxon');
 const chalk = require("chalk");
-const { generateTextProImage } = require("./textpro");
 const app = express();
 const port = process.env.PORT || 10000;
 const store = makeInMemoryStore({ logger: pino().child({ level: "silent" }) });
@@ -49,42 +48,7 @@ process.removeAllListeners('uncaughtException');
 process.on('uncaughtException', (err) => {
     console.error("❌ Uncaught Exception:", err);
 });
-// Middleware for JSON parsing
-app.use(express.json());
 
-// ✅ Fixed TextPro Route
-app.post("/textpro", async (req, res) => {
-    const { effect, text } = req.body;
-
-    if (!effect || !text) {
-        return res.status(400).json({ error: "Missing effect or text parameter." });
-    }
-
-    try {
-        const imageBuffer = await generateTextProImage(effect, text);
-        if (!imageBuffer) {
-            return res.status(500).json({ error: "Failed to generate image." });
-        }
-
-        // Save image temporarily
-        const filePath = path.join(__dirname, "output.png");
-        fs.writeFileSync(filePath, imageBuffer);
-
-        // Send image
-        res.sendFile(filePath, (err) => {
-            if (err) {
-                console.error("❌ Error sending file:", err);
-                res.status(500).json({ error: "Failed to send image." });
-            }
-
-            // Delete the file after sending
-            setTimeout(() => fs.unlinkSync(filePath), 5000);
-        });
-    } catch (error) {
-        console.error("❌ Error:", error.message);
-        res.status(500).json({ error: "Internal Server Error." });
-    }
-});
 
 async function startVOXMD() {
     const { saveCreds, state } = await useMultiFileAuthState("session");
@@ -103,46 +67,15 @@ async function startVOXMD() {
         setInterval(() => {
             const date = new Date();
             client.updateProfileStatus(
-                `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString('en-US', { timeZone: 'Africa/Nairobi', weekday: 'long' })}`
+                `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString('en-US', { timeZone: 'Africa/Naiobi', weekday: 'long' })}`
             );
         }, 10 * 1000);
     }
 store.bind(client.ev);
     setInterval(() => store.writeToFile("store.json"), 3000);
 
-    client.ev.on("messages.upsert", async (chatUpdate) => {
-        try {
-            let mek = chatUpdate.messages[0];
-            if (!mek.message) return;
 
-            let sender = mek.key.remoteJid || mek.participant || mek.key.participant;
-            if (!sender) return;
-
-            console.log(`📩 New Message from: ${sender}`);
-
-            let m = mek.message.extendedTextMessage?.text || mek.message.conversation;
-            if (m.toLowerCase().startsWith("!textpro")) {
-                let args = m.split(" ");
-                let effect = args[1];
-                let text = args.slice(2).join(" ");
-
-                if (!effect || !text) {
-                    return client.sendMessage(sender, { text: "Usage: !textpro [effect] [text]" });
-                }
-
-                let imageBuffer = await generateTextProImage(effect, text);
-                if (!imageBuffer) {
-                    return client.sendMessage(sender, { text: "⚠️ Failed to generate image." });
-                }
-
-                await client.sendMessage(sender, { image: imageBuffer, caption: `✨ *TextPro - ${effect}*` });
-            }
-        } catch (error) {
-            console.error("❌ Error processing message:", error);
-        }
-    });
-
-    client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners
+    client.ev.removeAllListeners("messages.upsert"); // Prevent uplicate listeners
     client.ev.on("messages.upsert", async (chatUpdate) => {
         try {
             let mek = chatUpdate.messages[0];
