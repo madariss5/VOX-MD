@@ -6,19 +6,20 @@ module.exports = async (context) => {
 
         if (!m.isGroup) return m.reply("❌ *This command can only be used in groups.*");
 
-        // Extract the country code from the user input
+        // Extract the country code from user input
         const countryCode = text.trim();
-        if (!countryCode) {
-            return m.reply("❌ *Please specify the country code (e.g., +92 or +91).*");
+        if (!countryCode.startsWith('+')) {
+            return m.reply("❌ *Please enter a valid country code (e.g., +254, +91, +92).*");
         }
 
-        // Fetch group members
-        const membersToRemove = participants.filter(member => 
-            member.id.startsWith(countryCode)
-        );
+        // Extract numbers correctly & filter by country code
+        const membersToRemove = participants.filter(member => {
+            const rawNumber = member.id.replace(/@s\.whatsapp\.net$/, ''); // Remove @s.whatsapp.net
+            return rawNumber.startsWith(countryCode.replace('+', '')); // Compare with input code
+        });
 
         if (membersToRemove.length === 0) {
-            return m.reply("⚠️ *No members found with country code* " + countryCode + ".");
+            return m.reply(`⚠️ *No members found with country code* ${countryCode}.`);
         }
 
         // Notify group before removing members
