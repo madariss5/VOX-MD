@@ -1,56 +1,99 @@
 const axios = require("axios");
+const ytSearch = require("yt-search");
 
 module.exports = async (context) => {
     const { client, m, text } = context;
 
+    if (!text) return m.reply("❌ Please provide the name or link of the video you want to download.");
+
+    await m.reply("🔄 *VOX MD Bot is fetching your video... Please wait...*");
+
     try {
-        let urls = text.match(/(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch\?v=|v\/|embed\/|shorts\/|playlist\?list=)?)([a-zA-Z0-9_-]{11})/gi);
-        if (!urls) return m.reply("❌ Please provide a valid YouTube link.");
+        let videoUrl;
+        let title;
 
-        try {
-            const apiUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp4?url=${encodeURIComponent(text)}&quality=720`;
-            const response = await axios.get(apiUrl, { headers: { Accept: "application/json" } });
+        // If user provides a YouTube link, use it directly
+        if (text.includes("youtube.com") || text.includes("youtu.be")) {
+            videoUrl = text;
+            title = "YouTube Video";
+        } else {
+            // Perform YouTube search if user provided a title
+            let search = await ytSearch(text);
+            let video = search.videos[0];
 
-            console.log("🔍 API Response:", JSON.stringify(response.data, null, 2)); // Log response for debugging
+            if (!video) return m.reply("❌ No results found. Please refine your search.");
 
-            if (response.data?.status !== 200 || !response.data?.result?.media) {
-                throw new Error("Invalid response structure from API.");
-            }
-
-            // Extract video info
-            const videoUrl = response.data.result.media;
-            const title = response.data.result.title || "YouTube Video";
-
-            await m.reply(`📥 Downloading *${title}*...`);
-
-            await client.sendMessage(
-                m.chat,
-                {
-                    video: { url: videoUrl },
-                    mimetype: "video/mp4",
-                    caption: `🎬 *Title:* ${title}`,
-                    fileName: `${title}.mp4`,
-                },
-                { quoted: m }
-            );
-
-            await client.sendMessage(
-                m.chat,
-                {
-                    document: { url: videoUrl },
-                    mimetype: "video/mp4",
-                    caption: `🎬 *Title:* ${title}`,
-                    fileName: `${title}.mp4`,
-                },
-                { quoted: m }
-            );
-
-        } catch (apiError) {
-            console.error("❌ API Error:", apiError.message);
-            m.reply("⚠️ Download failed: The API response was not valid.");
+            videoUrl = video.url;
+            title = video.title;
         }
+
+        // Define the APIs
+        let apis = [
+            `https://api.ryzendesu.vip/api/downloader/ytmp4?url=${encodeURIComponent(videoUrl)}&quality=720`,
+            `https://fastrestapis.fasturl.cloud/downup/ytmp4?url=${encodeURIComponent(videoUrl)}&quality=720`
+        ];
+
+        for (const api of apis) {
+            try {
+                let { data } = await axios.get(api, { headers: { Accept: "application/json" } });
+
+                console.log(`🔍 API Response from ${api}:`, JSON.stringify(data, null, 2));
+
+                // Check if response is valid
+                if (data.status === 200 && data.result?.media) {
+                    let videoDownloadUrl = data.result.media;
+                    let thumbnail = data.result.metadata?.thumbnail || "https://www.youtube.com/img/desktop/yt_1200.png"; // Default thumbnail
+
+                    // Send metadata & thumbnail
+                    await client.sendMessage(
+                        m.chat,
+                        {
+                            image: { url: thumbnail },
+                            caption: `🎬 *Title:* ${title}\n🔗 *Link:* ${videoUrl}\n🎥 *Quality:* 720p\n\n📥 *Downloading...*`
+                        },
+                        { quoted: m }
+                    );
+
+                    await m.reply("📤 *Sending your video...*");
+
+                    // Send as a video file
+                    await client.sendMessage(
+                        m.chat,
+                        {
+                            video: { url: videoDownloadUrl },
+                            mimetype: "video/mp4",
+                            caption: `🎬 *Title:* ${title}`,
+                            fileName: `${title.replace(/[^a-zA-Z0-9 ]/g, "")}.mp4`,
+                        },
+                        { quoted: m }
+                    );
+
+                    // Send as a document file
+                    await client.sendMessage(
+                        m.chat,
+                        {
+                            document: { url: videoDownloadUrl },
+                            mimetype: "video/mp4",
+                            caption: `🎬 *Title:* ${title}`,
+                            fileName: `${title.replace(/[^a-zA-Z0-9 ]/g, "")}.mp4`,
+                        },
+                        { quoted: m }
+                    );
+
+                    // Success message
+                    await m.reply("✅ *Video sent successfully! 🎥*");
+
+                    return; // Stop execution if successful
+                }
+            } catch (e) {
+                console.error(`API Error (${api}):`, e.message);
+                continue; // Try next API if one fails
+            }
+        }
+
+        // If all APIs fail
+        return m.reply("⚠️ All APIs might be down or unable to process the request.");
     } catch (error) {
-        console.error("❌ Unexpected Error:", error.message);
-        m.reply("❌ Download failed: " + error.message);
+        return m.reply("❌ Download failed\n" + error.message);
     }
 };
