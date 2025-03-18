@@ -37,7 +37,7 @@ module.exports = async (context) => {
             try {
                 let { data } = await axios.get(api, { headers: { Accept: "application/json" } });
 
-                console.log(`🔍 API Response from ${api}:`, JSON.stringify(data, null, 2));
+                console.log(`🔍 API Response from ${api}:`, data); // Debugging API Response
 
                 // Check if response is valid
                 if (data.status === 200 && data.result?.media) {
@@ -71,9 +71,12 @@ module.exports = async (context) => {
                     await m.reply("✅ *Video sent successfully! 🎥*");
 
                     return; // Stop execution if successful
+                } else {
+                    console.log(`⚠️ API ${api} did not return a valid video.`);
                 }
             } catch (e) {
-                console.error(`API Error (${api}):`, e.message);
+                console.error(`❌ API Error (${api}):`, e.message);
+                await m.reply(`⚠️ Error with API ${api}: ${e.message}`);
                 continue; // Try next API if one fails
             }
         }
@@ -81,6 +84,7 @@ module.exports = async (context) => {
         // If all APIs fail
         return m.reply("⚠️ All APIs might be down or unable to process the request.");
     } catch (error) {
+        console.error("❌ Critical Error:", error.message);
         return m.reply("❌ Download failed\n" + error.message);
     }
 };
