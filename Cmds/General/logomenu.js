@@ -1,43 +1,46 @@
-const axios  = require("axios")
+const { DateTime } = require('luxon');
 
-module.exports.logo = async (client, message, args) => {
-  try {
-    if (!args[0]) {
-      return message.reply("*_Please provide a text for the logo._*");
+module.exports = async (context) => {
+    const { client, m, args, prefix } = context;
+
+    try {
+        if (!args[0]) {
+            return m.reply("*❌ Please provide a text for the logo.*");
+        }
+
+        let text = args.join(" ");
+
+        let logomenu = `╔══❖•ೋ°💎 *Sɪʟᴠᴀ Sᴘᴀʀᴋ MD LOGO MAKER* 💎°ೋ•❖══╗\n\n`;
+        logomenu += `🔹 *Text:* 〘 ${text} 〙\n`;
+        logomenu += `━━━━━━━━━━━━━━\n`;
+        logomenu += `🔢 Reply with the number to choose your style:\n\n`;
+        logomenu += `1️⃣ ➠ Black Pink\n`;
+        logomenu += `2️⃣ ➠ Black Pink 2\n`;
+        logomenu += `3️⃣ ➠ Silver 3D\n`;
+        logomenu += `4️⃣ ➠ Naruto\n`;
+        logomenu += `5️⃣ ➠ Digital Glitch\n`;
+        logomenu += `6️⃣ ➠ Pixel Glitch\n`;
+        logomenu += `7️⃣ ➠ Comic Style\n`;
+        logomenu += `8️⃣ ➠ Neon Light\n`;
+        logomenu += `9️⃣ ➠ Free Bear\n`;
+        logomenu += `🔟 ➠ Devil Wings\n`;
+        logomenu += `1️⃣1️⃣ ➠ Sad Girl\n`;
+        logomenu += `1️⃣2️⃣ ➠ Leaves\n`;
+        logomenu += `1️⃣3️⃣ ➠ Dragon Ball\n`;
+        logomenu += `1️⃣4️⃣ ➠ Hand Written\n`;
+        logomenu += `1️⃣5️⃣ ➠ Neon Light\n`;
+        logomenu += `1️⃣6️⃣ ➠ 3D Castle Pop\n`;
+        logomenu += `1️⃣7️⃣ ➠ Frozen Christmas\n`;
+        logomenu += `1️⃣8️⃣ ➠ 3D Foil Balloons\n`;
+        logomenu += `1️⃣9️⃣ ➠ 3D Colourful Paint\n`;
+        logomenu += `2️⃣0️⃣ ➠ American Flag 3D\n\n`;
+        logomenu += `━━━━━━━━━━━━━━\n`;
+        logomenu += `> *©💎 Sɪʟᴠᴀ Sᴘᴀʀᴋ MD 💎*\n`;
+
+        await client.sendMessage(m.chat, { text: logomenu }, { quoted: m });
+
+    } catch (err) {
+        console.error(err);
+        m.reply("*❌ An error occurred while generating the logo. Please try again later!*");
     }
-
-    let text = args.join(" ");
-    let logomenu = `*🤍 💎 Sɪʟᴠᴀ Sᴘᴀʀᴋ MD 💎 LOGO MAKER 💫*\n\n`
-      + `╼╼╼╼╼╼╼╼╼╼╼╼╼╼╼╼╼➻\n`
-      + `*◈ Text :* ${text}\n`
-      + `╼╼╼╼╼╼╼╼╼╼╼╼╼╼╼╼╼➻\n\n`
-      + `*🔢 Reply with the number for your desired style ➠*\n\n`
-      + `1 ➠ Black Pink\n`
-      + `2 ➠ Black Pink 2\n`
-      + `3 ➠ Silver 3D\n`
-      + `4 ➠ Naruto\n`
-      + `5 ➠ Digital Glitch\n`
-      + `6 ➠ Pixel Glitch\n`
-      + `7 ➠ Comic Style\n`
-      + `8 ➠ Neon Light\n`
-      + `9 ➠ Free Bear\n`
-      + `10 ➠ Devil Wings\n`
-      + `11 ➠ Sad Girl\n`
-      + `12 ➠ Leaves\n`
-      + `13 ➠ Dragon Ball\n`
-      + `14 ➠ Hand Written\n`
-      + `15 ➠ Neon Light\n`
-      + `16 ➠ 3D Castle Pop\n`
-      + `17 ➠ Frozen Christmas\n`
-      + `18 ➠ 3D Foil Balloons\n`
-      + `19 ➠ 3D Colourful Paint\n`
-      + `20 ➠ American Flag 3D\n\n`
-      + `> *©💎 Sɪʟᴠᴀ Sᴘᴀʀᴋ MD 💎*`;
-
-    await client.sendMessage(message.from, { text: logomenu }, { quoted: message });
-
-  } catch (err) {
-    console.error(err);
-    message.reply("*An error occurred while generating the logo. Please try again later!*");
-  }
 };
