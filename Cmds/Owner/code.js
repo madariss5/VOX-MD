@@ -4,7 +4,7 @@ module.exports = async (context) => {
     const { client, m, text, isGroup, senderNumber } = context;
     
     // Define the bot owner's number (Set this in your config)
-    const ownerNumber = "YOUR_NUMBER_HERE"; // Replace with actual owner number
+    const ownerNumber = "254114148625"; // Replace with actual owner number
 
     try {
         if (!isGroup) {
