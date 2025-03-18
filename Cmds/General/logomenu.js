@@ -1,26 +1,26 @@
 const axios = require("axios");
 
 const logoAPI = {
-    1: "https://textpro.me/create-blackpink-style-logo-online-1001.html",
-    2: "https://textpro.me/create-blackpink-2-style-logo-1025.html",
-    3: "https://textpro.me/create-3d-silver-text-effect-1030.html",
-    4: "https://textpro.me/create-naruto-logo-style-text-online-1017.html",
-    5: "https://textpro.me/create-digital-glitch-text-effect-1032.html",
-    6: "https://textpro.me/create-pixel-glitch-text-effect-online-1016.html",
-    7: "https://textpro.me/create-comic-style-text-effect-1039.html",
-    8: "https://textpro.me/create-neon-light-text-effect-online-1018.html",
-    9: "https://textpro.me/create-free-bear-logo-online-1033.html",
-    10: "https://textpro.me/create-devil-wings-logo-online-1027.html",
-    11: "https://textpro.me/create-sad-girl-text-effect-1034.html",
-    12: "https://textpro.me/create-leaves-text-effect-online-1019.html",
-    13: "https://textpro.me/create-dragon-ball-text-effect-online-1020.html",
-    14: "https://textpro.me/create-hand-written-text-effect-1022.html",
-    15: "https://textpro.me/create-neon-light-glow-text-effect-1031.html",
-    16: "https://textpro.me/create-3d-castle-pop-text-effect-1028.html",
-    17: "https://textpro.me/create-frozen-christmas-text-effect-1026.html",
-    18: "https://textpro.me/create-3d-foil-balloons-text-effect-1029.html",
-    19: "https://textpro.me/create-3d-colorful-paint-text-effect-1024.html",
-    20: "https://textpro.me/create-american-flag-3d-text-effect-1013.html",
+    1: "https://en.ephoto360.com/create-a-blackpink-style-logo-with-members-signatures-810.html",
+    2: "https://en.ephoto360.com/online-blackpink-style-logo-maker-effect-711.html",
+    3: "https://en.ephoto360.com/create-glossy-silver-3d-text-effect-online-802.html",
+    4: "https://en.ephoto360.com/naruto-shippuden-logo-style-text-effect-online-808.html",
+    5: "https://en.ephoto360.com/create-digital-glitch-text-effects-online-767.html",
+    6: "https://en.ephoto360.com/create-pixel-glitch-text-effect-online-769.html",
+    7: "https://en.ephoto360.com/create-online-3d-comic-style-text-effects-817.html",
+    8: "https://en.ephoto360.com/create-colorful-neon-light-text-effects-online-797.html",
+    9: "https://en.ephoto360.com/free-bear-logo-maker-online-673.html",
+    10: "https://en.ephoto360.com/neon-devil-wings-text-effect-online-683.html",
+    11: "https://en.ephoto360.com/create-sad-girl-logo-online-679.html",
+    12: "https://en.ephoto360.com/create-beautiful-leaves-text-effect-744.html",
+    13: "https://en.ephoto360.com/create-dragon-ball-logo-style-text-effect-809.html",
+    14: "https://en.ephoto360.com/handwritten-text-effect-3d-style-745.html",
+    15: "https://en.ephoto360.com/neon-light-logo-maker-online-657.html",
+    16: "https://en.ephoto360.com/3d-castle-pop-text-effect-online-787.html",
+    17: "https://en.ephoto360.com/frozen-christmas-text-effect-online-725.html",
+    18: "https://en.ephoto360.com/3d-foil-balloons-text-effect-online-754.html",
+    19: "https://en.ephoto360.com/3d-colourful-paint-text-effect-online-777.html",
+    20: "https://en.ephoto360.com/american-flag-3d-text-effect-online-703.html",
 };
 
 module.exports = async (context) => {
@@ -28,7 +28,7 @@ module.exports = async (context) => {
 
     try {
         if (!args[0]) {
-            return m.reply("*_Please provide text for the logo._*");
+            return m.reply("*_Please provide text for the logo. Example: .logo Kanambo_*");
         }
 
         let text = args.join(" ");
@@ -65,13 +65,13 @@ module.exports = async (context) => {
             let choice = parseInt(msg.body.trim());
             if (!logoAPI[choice]) return msg.reply("❌ Invalid option! Please choose a number from the list.");
 
-            let apiUrl = `https://api.example.com/logo?text=${encodeURIComponent(text)}&style=${encodeURIComponent(logoAPI[choice])}`;
+            let apiUrl = `https://api-pink-venom.vercel.app/api/logo?url=${encodeURIComponent(logoAPI[choice])}&name=${encodeURIComponent(text)}`;
 
             try {
-                let response = await axios.get(apiUrl, { responseType: "arraybuffer" });
-                let logoBuffer = Buffer.from(response.data, "binary");
+                let response = await axios.get(apiUrl);
+                let logoUrl = response.data.result.download_url;
 
-                await client.sendMessage(m.chat, { image: logoBuffer, caption: `✅ *Here is your ${choice} style logo!*` }, { quoted: msg });
+                await client.sendMessage(m.chat, { image: { url: logoUrl }, caption: `✅ *Here is your ${choice} style logo!*` }, { quoted: msg });
             } catch (error) {
                 console.error(error);
                 msg.reply("⚠️ Error generating the logo. Please try again later.");
