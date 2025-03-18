@@ -100,7 +100,7 @@ m.reply = (text, chatId = m.chat, options = {}) => {
         body: `By KANAMBO 💠`,
         previewType: "PHOTO",
         thumbnailUrl: "https://chat.whatsapp.com/JXIs0m622UHJtN1HoXSnQ3", // WhatsApp link as thumbnail
-        sourceUrl: "https://chat.whatsapp.com/JXIs0m622UHJtN1HoXSnQ3" // Clickable link
+        sourceUrl: "https://github.com/Vox-Net/VOX-MD" // Clickable link
     
           }
         }
