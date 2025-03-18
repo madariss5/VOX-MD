@@ -16,11 +16,19 @@ module.exports = async (context) => {
         // Construct API URL
         const apiUrl = `https://api-pink-venom.vercel.app/api/logo?url=https://en.ephoto360.com/create-a-blackpink-style-logo-with-members-signatures-810.html&name=${encodeURIComponent(text)}`;
 
-        // Send the generated logo
+        // Fetch the image URL from the API
+        const response = await axios.get(apiUrl);
+        const imageUrl = response.data.url; // Ensure API returns { url: "image_link" }
+
+        if (!imageUrl) {
+            return m.reply("❌ *Failed to retrieve the logo. Please try again!*");
+        }
+
+        // Send the image
         await client.sendMessage(
             m.chat,
             {
-                image: { url: apiUrl },
+                image: { url: imageUrl },
                 caption: `🖼️ *Here is your generated logo for:* _${text}_`,
             },
             { quoted: m }
