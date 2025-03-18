@@ -101,8 +101,7 @@ m.reply = (text, chatId = m.chat, options = {}) => {
         previewType: "PHOTO",
         thumbnailUrl: "https://chat.whatsapp.com/JXIs0m622UHJtN1HoXSnQ3", // WhatsApp link as thumbnail
         sourceUrl: "https://chat.whatsapp.com/JXIs0m622UHJtN1HoXSnQ3" // Clickable link
-    }
-}"
+    
           }
         }
       }, 
