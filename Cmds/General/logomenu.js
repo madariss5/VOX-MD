@@ -1,4 +1,4 @@
-const { fetchJson } = require("../lib/botFunctions");
+const { fetchJson } = require("../lib/botFunctions.js");
 
 module.exports.logo = async (client, message, args) => {
   try {
