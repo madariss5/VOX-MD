@@ -18,11 +18,11 @@ await m.reply("sending broadcast message...")
 for (let i of res) { 
 
 
-let txt = `BROADCAST MESSAGE (dreaded) \n\n🀄 Message: ${text}\n\nWritten by: ${pushname}` 
+let txt = `BROADCAST MESSAGE (VOXMD) \n\n🀄 Message: ${text}\n\nWritten by: ${pushname}` 
 
 await client.sendMessage(i, { 
                  image: { 
-                     url: "https://telegra.ph/file/c75efecf7f0aef851fc02.jpg" 
+                     url: "https://i.postimg.cc/NjymQz1X/VOX-MD-BOT-LOGO.jpg" 
                  }, mentions: participants.map(a => a.id),
                  caption: `${txt}` 
              }) 
