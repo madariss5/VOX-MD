@@ -43,7 +43,6 @@ module.exports = async (context) => {
 ╭═════════════════⊷
 ║ 🎶 *Title:* ${songData.title}
 ║ 🎤 *Artist:* ${songData.artist}
-║ 🔗 THANK YOU, SORRY NO URL TO BE SHARED
 ╰═════════════════⊷
 *Powered by VOX MD BOT*`
                         },
@@ -76,7 +75,7 @@ module.exports = async (context) => {
                     );
 
                     // Send success message
-                    await m.reply("✅ *VOX MD🎧 – World-class bot just successfully sent you what you requested! 🎶*");
+                    await m.reply("✅ *successfully sent ! 🎶*");
 
                     return; // Stop execution if successful
                 }
