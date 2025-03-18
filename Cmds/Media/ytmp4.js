@@ -29,7 +29,7 @@ module.exports = async (context) => {
 
         // Define the APIs
         let apis = [
-            `https://api.ryzendesu.vip/api/downloader/ytmp4?url=${encodeURIComponent(videoUrl)}&quality=720`,
+            `https://apis.davidcyriltech.my.id/download/ytmp4?url=${encodeURIComponent(videoUrl)}&quality=720`,
             `https://fastrestapis.fasturl.cloud/downup/ytmp4?url=${encodeURIComponent(videoUrl)}&quality=720`
         ];
 
