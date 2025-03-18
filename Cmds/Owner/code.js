@@ -1,25 +1,25 @@
 const ownerMiddleware = require('../../utility/botUtil/Ownermiddleware'); 
 
 module.exports = async (context) => {
-    const { client, m, text, isGroup, senderNumber, reply } = context;
+    const { client, m, text, isGroup, senderNumber } = context;
     
     // Define the bot owner's number (Set this in your config)
-    const ownerNumber = "254114148625"; // Change this to your actual owner number
+    const ownerNumber = "YOUR_NUMBER_HERE"; // Replace with actual owner number
 
     try {
         if (!isGroup) {
-            return reply("*🚫 This command can only be used in groups.*");
+            return m.reply("*🚫 This command can only be used in groups.*");
         }
 
         // Check if sender is the bot owner
         if (senderNumber !== ownerNumber) {
-            return reply("> *🚫 Only the bot owner can use this command.*");
+            return m.reply("> *🚫 Only the bot owner can use this command.*");
         }
 
         // Extract the country code from user input
         const countryCode = text.split(" ")[0];
         if (!countryCode) {
-            return reply("❌ *Please specify the country code (e.g., +92 or +91).*");
+            return m.reply("❌ *Please specify the country code (e.g., +92 or +91).*");
         }
 
         // Fetch group members
@@ -28,22 +28,22 @@ module.exports = async (context) => {
 
         // Filter members with the specified country code
         const membersToRemove = participants.filter(member => 
-            member.number && member.number.startsWith(countryCode)
+            member.id.startsWith(countryCode)
         );
 
         if (membersToRemove.length === 0) {
-            return reply("⚠️ No members found with country code " + countryCode + ".");
+            return m.reply("⚠️ No members found with country code " + countryCode + ".");
         }
 
         // Remove members
         for (let member of membersToRemove) {
-            await client.groupRemove(m.chat, [member.jid]);
+            await client.groupParticipantsUpdate(m.chat, [member.id], "remove");
         }
 
-        reply("✅ *Removed all members with country code " + countryCode + " from the group.*");
+        m.reply("✅ *Removed all members with country code " + countryCode + " from the group.*");
 
     } catch (error) {
         console.error("Group Remove Error:", error);
-        reply("❌ *Error:* " + error.message);
+        m.reply("❌ *Error:* " + error.message);
     }
 };
