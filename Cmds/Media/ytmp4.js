@@ -1,7 +1,6 @@
-const axios = require('axios');
-
-async function downloadYouTubeMP4(url, sender) {
-    try {
+module.exports = async (context) => {
+    const { client, m, text, fetchJson } = context;
+    const yts = require("yt-search");
         if (!url.includes("youtube.com") && !url.includes("youtu.be")) {
             return "❌ Please provide a valid YouTube link.";
         }
