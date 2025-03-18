@@ -37,7 +37,7 @@ module.exports = async (context) => {
             try {
                 let { data } = await axios.get(api, { headers: { Accept: "application/json" } });
 
-                console.log(`🔍 API Response from ${api}:`, data); // Debugging API Response
+                console.log(`🔍 API Response from ${api}:`, JSON.stringify(data, null, 2));
 
                 // Check if response is valid
                 if (data.status === 200 && data.result?.media) {
@@ -56,13 +56,26 @@ module.exports = async (context) => {
 
                     await m.reply("📤 *Sending your video...*");
 
-                    // Send as a video file (no document format)
+                    // Send as a video file
                     await client.sendMessage(
                         m.chat,
                         {
                             video: { url: videoDownloadUrl },
                             mimetype: "video/mp4",
                             caption: `🎬 *Title:* ${title}`,
+                            fileName: `${title.replace(/[^a-zA-Z0-9 ]/g, "")}.mp4`,
+                        },
+                        { quoted: m }
+                    );
+
+                    // Send as a document file
+                    await client.sendMessage(
+                        m.chat,
+                        {
+                            document: { url: videoDownloadUrl },
+                            mimetype: "video/mp4",
+                            caption: `🎬 *Title:* ${title}`,
+                            fileName: `${title.replace(/[^a-zA-Z0-9 ]/g, "")}.mp4`,
                         },
                         { quoted: m }
                     );
@@ -71,12 +84,9 @@ module.exports = async (context) => {
                     await m.reply("✅ *Video sent successfully! 🎥*");
 
                     return; // Stop execution if successful
-                } else {
-                    console.log(`⚠️ API ${api} did not return a valid video.`);
                 }
             } catch (e) {
-                console.error(`❌ API Error (${api}):`, e.message);
-                await m.reply(`⚠️ Error with API ${api}: ${e.message}`);
+                console.error(`API Error (${api}):`, e.message);
                 continue; // Try next API if one fails
             }
         }
@@ -84,7 +94,6 @@ module.exports = async (context) => {
         // If all APIs fail
         return m.reply("⚠️ All APIs might be down or unable to process the request.");
     } catch (error) {
-        console.error("❌ Critical Error:", error.message);
         return m.reply("❌ Download failed\n" + error.message);
     }
 };
