@@ -108,7 +108,7 @@ menuText += `╰═════════════════════�
                     title: "VOX-MD",
                     body: "Click to join our WhatsApp group!",
                     mediaType: 1, // Image
-                    thumbnail: thumbnailBuffer,
+                    thumbnail: 'https://chat.whatsapp.com/EZaBQvil8qT9JrI2aa1MAE',
                     sourceUrl: groupLink // WhatsApp group link in the source URL
                 }
             }
