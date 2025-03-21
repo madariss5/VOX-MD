@@ -79,8 +79,7 @@ async function startVOXMD() {
 
             // ✅ Ensure sender's number is correctly extracted  
             let sender = mek.key.remoteJid || mek.participant || mek.key.participant;  
-            console.log(`📩 New Message from: ${sender}`);  
-            console.log(`🤖 Bot Mode: ${mode}`);  
+            
 
             if (!sender) {  
                 console.log("⚠️ Sender is undefined. Possible issue with message format.");  
