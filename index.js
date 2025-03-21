@@ -34,7 +34,7 @@ const authentication = require("./kanambo.js");
 const { smsg } = require("./smsg");
 const { autoview, autoread, botname, autobio, mode, prefix, presence, autolike } = require("./settings");
 const { DateTime } = require("luxon");
-const { commands, totalCommands } = require("./Voxmdhandler");
+const { commands, totalCommands } = require("./VoxMdhandler");
 
 authentication();
 const groupEvents = require("./groupEvents.js");
