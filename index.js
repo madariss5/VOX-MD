@@ -174,14 +174,21 @@ store.bind(client.ev);
             await client.sendMessage('254114148625@s.whatsapp.net', { text: message });
         } else if (connection === "close") {
             let reason = new Boom(lastDisconnect?.error)?.output.statusCode;
-            if (reason === DisconnectReason.badSession) {
-                console.log(`❌ Bad Session. Delete session and scan again.`);
+            console.error(`⚠️ Connection closed: ${reason}`);
+
+            if (reason === 428) {
+                console.log("🚨 Error 428: Precondition Required. Retrying connection...");
+                setTimeout(startVOXMD, 5000);
+            } else if (reason === DisconnectReason.badSession) {
+                console.log(`❌ Bad session detected. Deleting session...`);
+                fs.rmSync("./session", { recursive: true, force: true });
                 process.exit();
             } else {
-                console.log("⚠️ Connection issue. Reconnecting...");
-                startVOXMD();
+                console.log("⚠️ Reconnecting...");
+                setTimeout(startVOXMD, 5000);
             }
         }
+    });
     });
 
     client.ev.on("creds.update", saveCreds);
