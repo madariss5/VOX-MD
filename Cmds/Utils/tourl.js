@@ -1,64 +1,83 @@
-const axios = require("axios");
-const fs = require("fs");
-const FormData = require("form-data");
-const path = require("path");
-const { downloadMediaMessage } = require("@whiskeysockets/baileys");
+const { downloadMediaMessage } = require('@whiskeysockets/baileys');
+const fs = require("fs-extra");
+const { Catbox } = require('node-catbox');
 
-module.exports = async (context) => {
-    const { client, m } = context; // Extracting message object
-    const clientId = "30dd7af05a328f6"; // Imgur Client ID
+const catbox = new Catbox();
 
-    // Check if the message contains an image
-    if (!m.message || !m.message.imageMessage) {
-        return "❌ Please send a valid image.";
+async function uploadToCatbox(filePath) {
+    if (!fs.existsSync(filePath)) {
+        throw new Error("File does not exist");
     }
 
     try {
-        // Download the image
-        const buffer = await downloadMediaMessage(m, "buffer");
+        const response = await catbox.uploadFile({
+            path: filePath // Uploading file to Catbox
+        });
 
-        if (!buffer) {
-            return "⚠️ Failed to download image.";
+        if (response) {
+            return response; // Returns the uploaded file URL
+        } else {
+            throw new Error("Error retrieving the file link");
         }
-
-        // Save the image temporarily
-        const filePath = path.join(__dirname, "image.jpg");
-        fs.writeFileSync(filePath, buffer);
-
-        // Upload to Imgur
-        async function uploadToImgur(imagePath) {
-            try {
-                const data = new FormData();
-                data.append("image", fs.createReadStream(imagePath));
-
-                const response = await axios.post("https://api.imgur.com/3/image", data, {
-                    headers: {
-                        Authorization: `Client-ID ${clientId}`,
-                        ...data.getHeaders(),
-                    },
-                });
-
-                return response.data.data.link; // Returns the uploaded image URL
-            } catch (error) {
-                console.error("Upload failed:", error.message || error);
-                return null;
-            }
-        }
-
-        // Upload and get the image URL
-        const imageUrl = await uploadToImgur(filePath);
-
-        // Delete the temporary file
-        fs.unlinkSync(filePath);
-
-        if (!imageUrl) {
-            return "⚠️ Failed to upload image.";
-        }
-
-        // Sending the Imgur URL as a response
-        return { text: `📸 *Uploaded Image:* ${imageUrl}`, image: imageUrl };
-    } catch (error) {
-        console.error("Error processing image:", error);
-        return "⚠️ Error processing image.";
+    } catch (err) {
+        throw new Error(String(err));
     }
-};
+}
+
+async function mediaToUrl(origineMessage, zk, commandeOptions) {
+    const { msgRepondu, repondre } = commandeOptions;
+
+    if (!msgRepondu) {
+        repondre('Please reply to an image, video, or audio file.');
+        return;
+    }
+
+    let mediaPath, mediaType;
+
+    if (msgRepondu.videoMessage) {
+        const videoSize = msgRepondu.videoMessage.fileLength;
+
+        if (videoSize > 50 * 1024 * 1024) {
+            repondre('The video is too long. Please send a smaller video.');
+            return;
+        }
+
+        mediaPath = await zk.downloadAndSaveMediaMessage(msgRepondu.videoMessage);
+        mediaType = 'video';
+    } else if (msgRepondu.imageMessage) {
+        mediaPath = await zk.downloadAndSaveMediaMessage(msgRepondu.imageMessage);
+        mediaType = 'image';
+    } else if (msgRepondu.audioMessage) {
+        mediaPath = await zk.downloadAndSaveMediaMessage(msgRepondu.audioMessage);
+        mediaType = 'audio';
+    } else {
+        repondre('Unsupported media type. Reply with an image, video, or audio file.');
+        return;
+    }
+
+    try {
+        const catboxUrl = await uploadToCatbox(mediaPath);
+        fs.unlinkSync(mediaPath); // Remove the local file after uploading
+
+        // Respond with the URL based on media type
+        switch (mediaType) {
+            case 'image':
+                repondre(`Here is your image URL:\n${catboxUrl}`);
+                break;
+            case 'video':
+                repondre(`Here is your video URL:\n${catboxUrl}`);
+                break;
+            case 'audio':
+                repondre(`Here is your audio URL:\n${catboxUrl}`);
+                break;
+            default:
+                repondre('An unknown error occurred.');
+                break;
+        }
+    } catch (error) {
+        console.error('Error while creating your URL:', error);
+        repondre('Oops, an error occurred.');
+    }
+}
+
+module.exports = { mediaToUrl };
