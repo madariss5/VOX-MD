@@ -49,7 +49,6 @@ process.on('uncaughtException', (err) => {
     console.error("❌ Uncaught Exception:", err);
 });
 
-
 async function startVOXMD() {
     const { saveCreds, state } = await useMultiFileAuthState("session");
     const client = VOXMDConnect({
@@ -79,11 +78,10 @@ async function startVOXMD() {
         }, 10 * 1000);
     }
 
-store.bind(client.ev);
+    store.bind(client.ev);
     setInterval(() => store.writeToFile("store.json"), 3000);
 
-
-    client.ev.removeAllListeners("messages.upsert"); // Prevent uplicate listeners
+    client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners
     client.ev.on("messages.upsert", async (chatUpdate) => {
         try {
             let mek = chatUpdate.messages[0];
@@ -188,7 +186,6 @@ store.bind(client.ev);
                 setTimeout(startVOXMD, 5000);
             }
         }
-    });
     });
 
     client.ev.on("creds.update", saveCreds);
