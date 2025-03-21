@@ -80,4 +80,3 @@ async function mediaToUrl(origineMessage, zk, commandeOptions) {
     }
 }
 
-module.exports = { mediaToUrl };
