@@ -81,6 +81,58 @@ async function startVOXMD() {
             );
         }, 10 * 1000);
     }
+client.ev.on("messages.upsert", async (chatUpdate) => {
+    try {
+        mek = chatUpdate.messages[0];
+        if (!mek.message) return;
+
+        mek.message = Object.keys(mek.message)[0] === "ephemeralMessage" 
+            ? mek.message.ephemeralMessage.message 
+            : mek.message;
+
+        // Auto-view and Auto-like Status Updates
+        if (autoview === 'true' && autolike === 'true' && mek.key && mek.key.remoteJid === "status@broadcast") {
+            const mokayas = await client.decodeJid(client.user.id);
+            if (!mek.status) {
+                await client.sendMessage(mek.key.remoteJid, { 
+                    react: { key: mek.key, text: '💚' } 
+                }, { statusJidList: [mek.key.participant, mokayas] });
+            }
+        }
+
+        // Auto-view and Auto-read Messages
+        if (autoview === 'true' && mek.key && mek.key.remoteJid === "status@broadcast") { 
+            await client.readMessages([mek.key]);
+        } else if (autoread === 'true' && mek.key && mek.key.remoteJid.endsWith('@s.whatsapp.net')) { 
+            await client.readMessages([mek.key]);
+        }
+
+        // Presence Update (Online, Typing, Recording)
+        if (mek.key && mek.key.remoteJid.endsWith('@s.whatsapp.net')) { 
+            const Chat = mek.key.remoteJid;
+
+            if (presence === 'online') {
+                await client.sendPresenceUpdate("available", Chat);
+            } else if (presence === 'typing') {
+                await client.sendPresenceUpdate("composing", Chat);
+            } else if (presence === 'recording') {
+                await client.sendPresenceUpdate("recording", Chat);
+            } else {
+                await client.sendPresenceUpdate("unavailable", Chat);
+            }
+        }
+
+        // Ensure Public Mode and Notify Handling
+        if (!client.public && !mek.key.fromMe && chatUpdate.type === "notify") return;
+
+        // Process Message
+        m = smsg(client, mek, store);
+        require("./Voxdat")(client, m, chatUpdate, store);
+
+    } catch (err) {
+        console.log(err);
+    }
+});
 
     client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners
     client.ev.on("messages.upsert", async (chatUpdate) => {
