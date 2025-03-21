@@ -64,13 +64,21 @@ async function startVOXMD() {
     setInterval(() => store.writeToFile("store.json"), 3000);
 
     if (autobio === 'true') {
-        setInterval(() => {
-            const date = new Date();
-            client.updateProfileStatus(
-                `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString('en-US', { timeZone: 'Africa/Nairobi', weekday: 'long' })}`
-            );
+        setInterval(async () => {
+            try {
+                const currentDate = DateTime.now().setZone("Africa/Nairobi").toFormat("EEEE");
+                await client.updateProfileStatus(`⚡ ${botname} is active 24/7 ⚡\n📅 ${currentDate}`, {
+                    headers: {
+                        "If-Match": "*",
+                        "If-Unmodified-Since": new Date().toUTCString()
+                    }
+                });
+            } catch (err) {
+                console.error("❌ Error updating profile status:", err);
+            }
         }, 10 * 1000);
     }
+
 store.bind(client.ev);
     setInterval(() => store.writeToFile("store.json"), 3000);
 
