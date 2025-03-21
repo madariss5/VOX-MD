@@ -1,82 +1,61 @@
-const { downloadMediaMessage } = require('@whiskeysockets/baileys');
-const fs = require("fs-extra");
-const { Catbox } = require('node-catbox');
+module.exports = async (context) => {
+    const { client, m, text, botname, downloadMediaMessage } = context;
+    const fs = require("fs-extra");
+    const { Catbox } = require("node-catbox");
 
-const catbox = new Catbox();
+    const catbox = new Catbox();
 
-async function uploadToCatbox(filePath) {
-    if (!fs.existsSync(filePath)) {
-        throw new Error("File does not exist");
-    }
-
-    try {
-        const response = await catbox.uploadFile({
-            path: filePath // Uploading file to Catbox
-        });
-
-        if (response) {
-            return response; // Returns the uploaded file URL
-        } else {
-            throw new Error("Error retrieving the file link");
+    async function uploadToCatbox(filePath) {
+        if (!fs.existsSync(filePath)) {
+            throw new Error("File does not exist");
         }
-    } catch (err) {
-        throw new Error(String(err));
-    }
-}
 
-async function mediaToUrl(origineMessage, zk, commandeOptions) {
-    const { msgRepondu, repondre } = commandeOptions;
+        try {
+            const response = await catbox.uploadFile({ path: filePath });
 
-    if (!msgRepondu) {
-        repondre('Please reply to an image, video, or audio file.');
-        return;
+            if (response) {
+                return response; // Returns the uploaded file URL
+            } else {
+                throw new Error("Error retrieving the file link");
+            }
+        } catch (err) {
+            throw new Error(String(err));
+        }
     }
+
+    if (!m.quoted) return m.reply("Please reply to an image, video, or audio file to generate a URL.");
 
     let mediaPath, mediaType;
-
-    if (msgRepondu.videoMessage) {
-        const videoSize = msgRepondu.videoMessage.fileLength;
-
-        if (videoSize > 50 * 1024 * 1024) {
-            repondre('The video is too long. Please send a smaller video.');
-            return;
-        }
-
-        mediaPath = await zk.downloadAndSaveMediaMessage(msgRepondu.videoMessage);
-        mediaType = 'video';
-    } else if (msgRepondu.imageMessage) {
-        mediaPath = await zk.downloadAndSaveMediaMessage(msgRepondu.imageMessage);
-        mediaType = 'image';
-    } else if (msgRepondu.audioMessage) {
-        mediaPath = await zk.downloadAndSaveMediaMessage(msgRepondu.audioMessage);
-        mediaType = 'audio';
-    } else {
-        repondre('Unsupported media type. Reply with an image, video, or audio file.');
-        return;
-    }
+    const msg = m.quoted;
 
     try {
-        const catboxUrl = await uploadToCatbox(mediaPath);
-        fs.unlinkSync(mediaPath); // Remove the local file after uploading
-
-        // Respond with the URL based on media type
-        switch (mediaType) {
-            case 'image':
-                repondre(`Here is your image URL:\n${catboxUrl}`);
-                break;
-            case 'video':
-                repondre(`Here is your video URL:\n${catboxUrl}`);
-                break;
-            case 'audio':
-                repondre(`Here is your audio URL:\n${catboxUrl}`);
-                break;
-            default:
-                repondre('An unknown error occurred.');
-                break;
+        if (msg.videoMessage) {
+            const videoSize = msg.videoMessage.fileLength;
+            if (videoSize > 50 * 1024 * 1024) {
+                return m.reply("The video is too long. Please send a smaller video.");
+            }
+            mediaPath = await downloadMediaMessage(msg, "buffer");
+            mediaType = "video";
+        } else if (msg.imageMessage) {
+            mediaPath = await downloadMediaMessage(msg, "buffer");
+            mediaType = "image";
+        } else if (msg.audioMessage) {
+            mediaPath = await downloadMediaMessage(msg, "buffer");
+            mediaType = "audio";
+        } else {
+            return m.reply("Unsupported media type. Reply with an image, video, or audio file.");
         }
-    } catch (error) {
-        console.error('Error while creating your URL:', error);
-        repondre('Oops, an error occurred.');
-    }
-}
 
+        const tempFilePath = `./temp_media.${mediaType}`;
+        await fs.writeFile(tempFilePath, mediaPath);
+
+        const catboxUrl = await uploadToCatbox(tempFilePath);
+        fs.unlinkSync(tempFilePath); // Remove the local file after uploading
+
+        const message = `Here is your ${mediaType} URL:\n${catboxUrl}`;
+        m.reply(message);
+    } catch (error) {
+        console.error("Error while uploading media:", error);
+        m.reply("Oops, an error occurred while generating the URL.");
+    }
+};
