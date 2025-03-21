@@ -67,7 +67,7 @@ async function startVOXMD() {
         setInterval(() => {
             const date = new Date();
             client.updateProfileStatus(
-                `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString('en-US', { timeZone: 'Africa/Naiobi', weekday: 'long' })}`
+                `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString('en-US', { timeZone: 'Africa/Nairobi', weekday: 'long' })}`
             );
         }, 10 * 1000);
     }
