@@ -1,20 +1,23 @@
 const fs = require('fs');
 const { session } = require('./settings');
 
-async function authenticationn() {
+async function authenticateSession() {
     try {
-        if (!fs.existsSync("./session/creds.json")) {
-            console.log("📡 connecting...");
-            await fs.writeFileSync("./session/creds.json", atob(session), "utf8");
-        }
-        else if (fs.existsSync("./session/creds.json") && session != "zokk") {
-            await fs.writeFileSync("./session/creds.json", atob(session), "utf8");
-        }
-    }
-    catch (e) {
-        console.log("Session is invalid: " + e);
-        return;
+        const sessionPath = "./session/creds.json";
+
+        if (!fs.existsSync("./session")) {  
+            fs.mkdirSync("./session");  
+        }  
+
+        if (!fs.existsSync(sessionPath) && session !== "zokk") {  
+            const sessionData = Buffer.from(session, "base64").toString("utf8");  
+            fs.writeFileSync(sessionPath, sessionData, "utf8");  
+        }  
+    } catch (e) {  
+        // Handle errors silently or log them elsewhere if needed
     }
 }
 
-module.exports = authenticationn;
+authenticateSession();
+
+module.exports = authenticateSession; 
