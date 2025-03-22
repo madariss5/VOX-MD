@@ -99,7 +99,7 @@ async function startVOXMD() {
             if (!mek.message) return;
 
             mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
-
+}
             // ✅ Ensure sender's number is correctly extracted
             let sender = mek.key.remoteJid || mek.participant || mek.key.participant;
             console.log(`📩 New Message from: ${sender}`);
