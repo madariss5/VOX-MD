@@ -93,7 +93,7 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
 
         mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
 
-        // ✅ Auto-view & Auto-like status updates
+        // ✅ Auto-view & Auto-like status updates (Fixed Error Handling)
         if (autoview?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {
             console.log("✅ Viewing status update...");
             await client.readMessages([mek.key]);
@@ -103,11 +103,16 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
                 let mokayas = await client.decodeJid(client.user.id);
 
                 try {
-                    await client.sendMessage(mek.key.remoteJid, {
-                        react: { key: mek.key, text: "💚" }
-                    }, { statusJidList: [mek.key.participant, mokayas] });
+                    // ✅ Ensure `mek.key` and `mek.key.participant` exist before reacting
+                    if (mek.key && mek.key.remoteJid && mek.key.participant) {
+                        await client.sendMessage(mek.key.remoteJid, {
+                            react: { key: mek.key, text: "💚" }
+                        }, { statusJidList: [mek.key.participant, mokayas] });
 
-                    console.log(`✅ Sent auto-like reaction.`);
+                        console.log(`✅ Sent auto-like reaction.`);
+                    } else {
+                        console.warn("⚠️ Cannot send reaction: Invalid message key.");
+                    }
                 } catch (error) {
                     console.error("❌ Error sending reaction:", error.message);
                 }
@@ -137,7 +142,6 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
         let sender = mek.key?.remoteJid || mek.participant || mek.key?.participant;
         if (!sender) return console.log("⚠️ Sender is undefined.");
 
-        console.log(`📩 New Message from: ${sender}`);
 
         // ✅ Owner & Developer Check
         const ownerNumber = "254114148625";
@@ -157,51 +161,44 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
     }
 });
 
-  // Handle error
-  const unhandledRejections = new Map();
-  process.on("unhandledRejection", (reason, promise) => {
+// ✅ Handle unhandled rejections & errors
+const unhandledRejections = new Map();
+process.on("unhandledRejection", (reason, promise) => {
     unhandledRejections.set(promise, reason);
     console.log("Unhandled Rejection at:", promise, "reason:", reason);
-  });
-  process.on("rejectionHandled", (promise) => {
+});
+process.on("rejectionHandled", (promise) => {
     unhandledRejections.delete(promise);
-  });
-  process.on("Something went wrong", function (err) {
+});
+process.on("Something went wrong", function (err) {
     console.log("Caught exception: ", err);
-  });
+});
 
-  // Setting
-  client.decodeJid = (jid) => {
+// ✅ Decode JID function
+client.decodeJid = (jid) => {
     if (!jid) return jid;
     if (/:\d+@/gi.test(jid)) {
-      let decode = jidDecode(jid) || {};
-      return (decode.user && decode.server && decode.user + "@" + decode.server) || jid;
+        let decode = jidDecode(jid) || {};
+        return (decode.user && decode.server && decode.user + "@" + decode.server) || jid;
     } else return jid;
-  };
+};
 
- 
-  client.getName = (jid, withoutContact = false) => {
+// ✅ Get Name function
+client.getName = (jid, withoutContact = false) => {
     id = client.decodeJid(jid);
     withoutContact = client.withoutContact || withoutContact;
     let v;
-    if (id.endsWith("@g.us"))
-      return new Promise(async (resolve) => {
+    if (id.endsWith("@g.us")) return new Promise(async (resolve) => {
         v = store.contacts[id] || {};
         if (!(v.name || v.subject)) v = client.groupMetadata(id) || {};
         resolve(v.name || v.subject || PhoneNumber("+" + id.replace("@s.whatsapp.net", "")).getNumber("international"));
-      });
-    else
-      v =
-        id === "0@s.whatsapp.net"
-          ? {
-              id,
-              name: "WhatsApp",
-            }
-          : id === client.decodeJid(client.user.id)
-          ? client.user
-          : store.contacts[id] || {};
-    return (withoutContact ? "" : v.name) || v.subject || v.verifiedName || PhoneNumber("+" + jid.replace("@s.whatsapp.net", "")).getNumber("international");
-  };
+    });
+    else v = id === "0@s.whatsapp.net" ? { id, name: "WhatsApp" } : 
+              id === client.decodeJid(client.user.id) ? client.user : 
+              store.contacts[id] || {};
+    return (withoutContact ? "" : v.name) || v.subject || v.verifiedName || 
+           PhoneNumber("+" + jid.replace("@s.whatsapp.net", "")).getNumber("international");
+};
 
     client.ev.removeAllListeners("connection.update"); // Prevent duplicate listeners
     client.ev.on("connection.update", async (update) => {
