@@ -33,6 +33,8 @@ const { session } = require("./settings");
 const authenticateSession = require('./kanambo'); // Import from kanambo.js
 
 authenticateSession(); // Call the function
+const path = require('path');
+const sessionName = path.join(__dirname, '..', 'Session'); 
 const { smsg } = require("./smsg");
 const { autoview, presence, autoread, botname, autobio, mode, prefix, dev, autolike } = require("./settings");
 const { commands, totalCommands } = require("./VoxMdhandler");
