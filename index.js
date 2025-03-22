@@ -71,49 +71,61 @@ async function startVOXMD() {
         }, 10 * 1000);  
     }  
 
-    client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners  
-    client.ev.on("messages.upsert", async (chatUpdate) => {  
-        try {  
-            let mek = chatUpdate.messages[0];  
-            if (!mek.message) return;  
+ client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners  
+client.ev.on("messages.upsert", async (chatUpdate) => {  
+    try {  
+        let mek = chatUpdate.messages[0];  
+        if (!mek.message) return;  
 
-            mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;  
-            if (autoview === 'true' && mek.key && mek.key.remoteJid === "status@broadcast") {  
-                await client.readMessages([mek.key]);  
-            }  
-            if (autoread === 'true' && mek.key && mek.key.remoteJid.endsWith('@s.whatsapp.net')) {  
-                await client.readMessages([mek.key]);  
-            }
+        mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;  
 
-            let sender = mek.key.remoteJid || mek.participant || mek.key.participant;  
-            console.log(`📩 New Message from: ${sender}`);  
-            console.log(`🤖 Bot Mode: ${mode}`);  
+        // ✅ Auto-view and react to status updates with 🥷 if enabled  
+        if (autoview === 'true' && mek.key && mek.key.remoteJid === "status@broadcast") {  
+            await client.readMessages([mek.key]);  
 
-            if (!sender) {  
-                console.log("⚠️ Sender is undefined. Possible issue with message format.");  
-                return;  
-            }  
-
-            const ownerNumber = "254114148625"; // Owner's WhatsApp number  
-
-            if (mode.toLowerCase() === "private") {  
-                const allowedUsers = [  
-                    `${ownerNumber}@s.whatsapp.net`,  
-                    `${dev}@s.whatsapp.net`  
-                ];  
-
-                if (!mek.key.fromMe && !allowedUsers.includes(sender)) {  
-                    console.log(`⛔ Ignoring message from: ${sender} (Not allowed in private mode)`);  
-                    return;  
+            if (autolike === 'true' && mek.key.participant) {  
+                try {  
+                    await client.sendMessage(mek.key.remoteJid, {  
+                        react: { key: mek.key, text: "🥷" }  
+                    });  
+                } catch (error) {  
+                    console.error("❌ Error sending reaction:", error.message);  
                 }  
             }  
+        }  
 
-            let m = smsg(client, mek, store);  
-            require("./Voxdat")(client, m, chatUpdate, store);  
-        } catch (error) {  
-            console.error("❌ Error processing message:", error);  
-        }
-    });
+        // ✅ Auto-read private messages  
+        if (autoread === 'true' && mek.key && mek.key.remoteJid.endsWith('@s.whatsapp.net')) {  
+            await client.readMessages([mek.key]);  
+        }  
+
+        // ✅ Ensure sender's number is correctly extracted  
+        let sender = mek.key.remoteJid || mek.participant || mek.key.participant;  
+        console.log(`📩 New Message from: ${sender}`);  
+
+        if (!sender) {  
+            console.log("⚠️ Sender is undefined. Possible issue with message format.");  
+            return;  
+        }  
+
+        // ✅ Owner & Developer Check  
+        const ownerNumber = "254114148625"; // Owner's WhatsApp number  
+
+        if (mode.toLowerCase() === "private") {  
+            const allowedUsers = [`${ownerNumber}@s.whatsapp.net`, `${dev}@s.whatsapp.net`];  
+
+            if (!mek.key.fromMe && !allowedUsers.includes(sender)) {  
+                console.log(`⛔ Ignoring message from: ${sender} (Not allowed in private mode)`);  
+                return;  
+            }  
+        }  
+
+        let m = smsg(client, mek, store);  
+        require("./Voxdat")(client, m, chatUpdate, store);  
+    } catch (error) {  
+        console.error("❌ Error in messages.upsert event:", error.message);  
+    }  
+});
 
     client.ev.removeAllListeners("connection.update"); // Prevent duplicate listeners  
     client.ev.on("connection.update", async (update) => {  
