@@ -207,7 +207,7 @@ client.getName = (jid, withoutContact = false) => {
             message += `╰═══〘 *KANAMBO* 〙═══╯\n\n`;
             message += `✨ ${getGreeting()}, Welcome to *VOX-MD*! 🚀\n`;
 
-            await client.sendMessage("254114148625@s.whatsapp.net", { text: message });
+            await client.sendMessage("120363405166148822@g.us.whatsapp.net", { text: message });
         }
     });
 
