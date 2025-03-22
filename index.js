@@ -71,7 +71,7 @@ async function startVOXMD() {
     setInterval(() => {
       const date = new Date();
       client.updateProfileStatus(
-        `${botname} is active 24/7\n\n${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi" })} It's a ${date.toLocaleString("en-US", { weekday: "long", timeZone: "Africa/Nairobi" })}.`
+        `${botname} is active 24/7\n\n${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi" })}. It's a ${date.toLocaleString("en-US", { weekday: "long", timeZone: "Africa/Nairobi" })}.`
       );
     }, 10 * 1000);
   }
@@ -92,9 +92,10 @@ async function startVOXMD() {
         await client.readMessages([mek.key]);
       } else if (autoread === "true" && mek.key && mek.key.remoteJid.endsWith("@s.whatsapp.net")) {
         await client.readMessages([mek.key]);
-          client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners
-    client.ev.on("messages.upsert", async (chatUpdate) => {
-        try {
+
+        client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners
+        client.ev.on("messages.upsert", async (chatUpdate) => {
+          try {
             let mek = chatUpdate.messages[0];
             if (!mek.message) return;
 
@@ -106,31 +107,36 @@ async function startVOXMD() {
             console.log(`🤖 Bot Mode: ${mode}`);
 
             if (!sender) {
-                console.log("⚠️ Sender is undefined. Possible issue with message format.");
-                return;
+              console.log("⚠️ Sender is undefined. Possible issue with message format.");
+              return;
             }
 
             // ✅ Owner & Developer Check
             const ownerNumber = "254114148625"; // Owner's WhatsApp number
 
             if (mode.toLowerCase() === "private") {
-                const allowedUsers = [
-                    `${ownerNumber}@s.whatsapp.net`,
-                    `${dev}@s.whatsapp.net`
-                ];
+              const allowedUsers = [
+                `${ownerNumber}@s.whatsapp.net`,
+                `${dev}@s.whatsapp.net`,
+              ];
 
-                if (!mek.key.fromMe && !allowedUsers.includes(sender)) {
-                    console.log(`⛔ Ignoring message from: ${sender} (Not allowed in private mode)`);
-                    return;
-                }
+              if (!mek.key.fromMe && !allowedUsers.includes(sender)) {
+                console.log(`⛔ Ignoring message from: ${sender} (Not allowed in private mode)`);
+                return;
+              }
             }
 
             let m = smsg(client, mek, store);
             require("./Voxdat")(client, m, chatUpdate, store);
-        } catch (error) {
+          } catch (error) {
             console.error("❌ Error processing message:", error);
-        }
-    });
+          }
+        });
+      }
+    } catch (error) {
+      console.error("❌ Error in messages.upsert:", error);
+    }
+  });
 
   client.ev.on("group-participants.update", async (m) => {
     groupEvents(client, m);
@@ -142,33 +148,33 @@ async function startVOXMD() {
     if (connection === "close") {
       let reason = new Boom(lastDisconnect?.error)?.output.statusCode;
       if (reason === DisconnectReason.badSession) {
-        console.log("Bad Session File, Please Delete Session and Scan Again");
+        console.log("Bad Session File. Please delete the session and scan again.");
         process.exit();
       } else if (reason === DisconnectReason.connectionClosed) {
-        console.log("Connection closed, reconnecting....");
+        console.log("Connection closed, reconnecting...");
         startVOXMD();
       } else if (reason === DisconnectReason.connectionLost) {
-        console.log("Connection Lost from Server, reconnecting...");
+        console.log("Connection lost from the server, reconnecting...");
         startVOXMD();
       } else if (reason === DisconnectReason.connectionReplaced) {
-        console.log("Connection Replaced, Another New Session Opened, Please Restart Bot");
+        console.log("Connection replaced. Another new session opened. Please restart the bot.");
         process.exit();
       } else if (reason === DisconnectReason.loggedOut) {
-        console.log("Device Logged Out, Please Delete File creds.json and Scan Again.");
+        console.log("Device logged out. Please delete the creds.json file and scan again.");
         process.exit();
       } else if (reason === DisconnectReason.restartRequired) {
-        console.log("Restart Required, Restarting...");
+        console.log("Restart required. Restarting...");
         startVOXMD();
       } else if (reason === DisconnectReason.timedOut) {
-        console.log("Connection Timed Out, Reconnecting...");
+        console.log("Connection timed out. Reconnecting...");
         startVOXMD();
       } else {
-        console.log(`Unknown Disconnect Reason: ${reason} | ${connection}`);
+        console.log(`Unknown disconnect reason: ${reason} | ${connection}`);
         startVOXMD();
       }
     } else if (connection === "open") {
       await client.groupAcceptInvite("EZaBQvil8qT9JrI2aa1MAE");
-      console.log(`✅ Connection successful\nLoaded ${totalCommands} commands.\nBot is active.`);
+      console.log(`✅ Connection successful.\nLoaded ${totalCommands} commands.\nBot is active.`);
     }
   });
 
