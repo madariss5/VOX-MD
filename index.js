@@ -79,60 +79,69 @@ async function startVOXMD() {
         }, 10 * 1000);
     }
 
-    client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners
-    client.ev.on("messages.upsert", async (chatUpdate) => {
-        try {
-            let mek = chatUpdate.messages[0];
-            if (!mek?.message) return;
+ 
 
-            mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
+client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners
+client.ev.on("messages.upsert", async (chatUpdate) => {
+    try {
+        let mek = chatUpdate.messages[0];
+        if (!mek?.message) return;
 
-            // ✅ Auto-view and react to status updates with 🥷 if enabled
-            if (autoview === "true" && mek.key?.remoteJid === "status@broadcast") {
-                await client.readMessages([mek.key]);
+        mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
 
-                if (autolike === "true" && mek.key.participant) {
+        // ✅ Auto-view and react to status updates
+        if (autoview?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {
+            console.log("✅ Viewing status update...");
+            await client.readMessages([mek.key]);
+
+            if (autolike?.trim().toLowerCase() === "true") {
+                console.log("✅ Attempting to send a reaction...");
+                let reactionJid = mek.key.remoteJid || mek.key.participant;
+                if (reactionJid) {
                     try {
-                        await client.sendMessage(mek.key.remoteJid, {
+                        await client.sendMessage(reactionJid, {
                             react: { key: mek.key, text: "💓" }
                         });
-                        console.log(`✅ Sent auto-like reaction to ${mek.key.participant}`);
+                        console.log(`✅ Sent auto-like reaction to ${reactionJid}`);
                     } catch (error) {
                         console.error("❌ Error sending reaction:", error.message);
                     }
                 } else {
-                    console.log("⚠️ Autolike is disabled or participant not found.");
+                    console.log("⚠️ Could not determine reaction JID.");
                 }
+            } else {
+                console.log("⚠️ Autolike is disabled.");
             }
-
-            // ✅ Auto-read private messages
-            if (autoread === "true" && mek.key?.remoteJid?.endsWith("@s.whatsapp.net")) {
-                await client.readMessages([mek.key]);
-            }
-
-            // ✅ Ensure sender's number is correctly extracted
-            let sender = mek.key?.remoteJid || mek.participant || mek.key?.participant;
-            if (!sender) return console.log("⚠️ Sender is undefined.");
-
-            console.log(`📩 New Message from: ${sender}`);
-
-            // ✅ Owner & Developer Check
-            const ownerNumber = "254114148625";
-            if (mode?.toLowerCase() === "private") {
-                const allowedUsers = [`${ownerNumber}@s.whatsapp.net`, `${dev}@s.whatsapp.net`];
-
-                if (!mek.key.fromMe && !allowedUsers.includes(sender)) {
-                    console.log(`⛔ Ignoring message from: ${sender} (Not allowed in private mode)`);
-                    return;
-                }
-            }
-
-            let m = smsg(client, mek, store);
-            require("./Voxdat")(client, m, chatUpdate, store);
-        } catch (error) {
-            console.error("❌ Error in messages.upsert event:", error);
         }
-    });
+
+        // ✅ Auto-read private messages
+        if (autoread?.trim().toLowerCase() === "true" && mek.key?.remoteJid?.endsWith("@s.whatsapp.net")) {
+            await client.readMessages([mek.key]);
+        }
+
+        // ✅ Ensure sender's number is correctly extracted
+        let sender = mek.key?.remoteJid || mek.participant || mek.key?.participant;
+        if (!sender) return console.log("⚠️ Sender is undefined.");
+
+        console.log(`📩 New Message from: ${sender}`);
+
+        // ✅ Owner & Developer Check
+        const ownerNumber = "254114148625";
+        if (mode?.toLowerCase() === "private") {
+            const allowedUsers = [`${ownerNumber}@s.whatsapp.net`, `${dev}@s.whatsapp.net`];
+
+            if (!mek.key.fromMe && !allowedUsers.includes(sender)) {
+                console.log(`⛔ Ignoring message from: ${sender} (Not allowed in private mode)`);
+                return;
+            }
+        }
+
+        let m = smsg(client, mek, store);
+        require("./Voxdat")(client, m, chatUpdate, store);
+    } catch (error) {
+        console.error("❌ Error in messages.upsert event:", error);
+    }
+});
 
     client.ev.removeAllListeners("connection.update"); // Prevent duplicate listeners
     client.ev.on("connection.update", async (update) => {
