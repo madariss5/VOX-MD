@@ -52,95 +52,100 @@ auth: state
 
 store.bind(client.ev);
 
-setInterval(() => store.writeToFile("store.json"), 3000);
+// ✅ Save store data every 3 seconds
+setInterval(() => {
+    store.writeToFile("store.json");
+}, 3000);
 
 // ✅ Auto-bio update
 if (autobio === "true") {
-setInterval(() => {
-const date = new Date();
-client.updateProfileStatus(
-⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi", weekday: "long" })}
-);
-}, 10 * 1000);
+    setInterval(async () => {
+        const date = new Date();
+        try {
+            await client.updateProfileStatus(
+                `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi", weekday: "long" })}`
+            );
+        } catch (error) {
+            console.error("❌ Error updating bio:", error.message);
+        }
+    }, 10 * 1000);
 }
 
 // ✅ Prevent duplicate event listeners
 client.ev.removeAllListeners("messages.upsert");
 client.ev.on("messages.upsert", async (chatUpdate) => {
-try {
-let mek = chatUpdate.messages[0];
-if (!mek?.message) return;
+    try {
+        let mek = chatUpdate.messages[0];
+        if (!mek?.message) return;
 
-mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
+        mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
 
-// ✅ Auto-view & Auto-like status updates    
-if (autoview?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {    
-    console.log("✅ Viewing status update...");    
-    await client.readMessages([mek.key]);    
+        // ✅ Auto-view & Auto-like status updates
+        if (autoview?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {
+            console.log("✅ Viewing status update...");
+            await client.readMessages([mek.key]);
 
-    if (autolike?.trim().toLowerCase() === "true") {    
-        console.log("✅ Attempting to send a reaction...");    
+            if (autolike?.trim().toLowerCase() === "true") {
+                console.log("✅ Attempting to send a reaction...");
+                try {
+                    let reactionKey = mek.key;
+                    let reactEmoji = "💚"; // Default emoji
+                    if (reactionKey && reactionKey.remoteJid && reactionKey.id) {
+                        await client.sendMessage(reactionKey.remoteJid, {
+                            react: { key: reactionKey, text: reactEmoji }
+                        });
+                        console.log(`✅ Sent auto-like reaction.`);
+                    }
+                } catch (error) {
+                    console.error("❌ Error sending reaction:", error.message);
+                }
+            }
+        }
 
-        try {    
-            let reactionKey = mek.key;    
-            let reactEmoji = "💚"; // Set your emoji here    
-            if (reactionKey && reactionKey.remoteJid && reactionKey.id) {    
-                await client.sendMessage(reactionKey.remoteJid, {    
-                    react: { key: reactionKey, text: reactEmoji }    
-                });    
-                console.log(`✅ Sent auto-like reaction.`);    
-            }    
-        } catch (error) {    
-            console.error("❌ Error sending reaction:", error.message);    
-        }    
-    }    
-}    
+        // ✅ Fix: Ensuring autolike runs correctly
+        if (autolike?.trim().toLowerCase() === "true" && mek.key.remoteJid === "status@broadcast") {
+            try {
+                const mokayas = await client.decodeJid(client.user.id);
+                const reactEmoji = "💓"; // Custom emoji
+                if (!mek.status) {
+                    await client.sendMessage(mek.key.remoteJid, {
+                        react: { key: mek.key, text: reactEmoji }
+                    }, { statusJidList: [mek.key.participant, mokayas] });
+                }
+            } catch (error) {
+                console.error("❌ Error in autolike reaction:", error.message);
+            }
+        }
 
-// ✅ Fix: Ensuring autolike runs correctly    
-if (autolike?.trim().toLowerCase() === "true" && mek.key.remoteJid === "status@broadcast") {    
-    try {    
-        const mokayas = await client.decodeJid(client.user.id);    
-        const reactEmoji = "💓"; // Custom emoji    
-        if (!mek.status) {    
-            await client.sendMessage(mek.key.remoteJid, {    
-                react: { key: mek.key, text: reactEmoji }    
-            }, { statusJidList: [mek.key.participant, mokayas] });    
-        }    
-    } catch (error) {    
-        console.error("❌ Error in autolike reaction:", error.message);    
-    }    
-}    
+        // ✅ Auto-read private messages
+        if (autoread?.trim().toLowerCase() === "true" && mek.key?.remoteJid?.endsWith("@s.whatsapp.net")) {
+            await client.readMessages([mek.key]);
+        }
 
-// ✅ Auto-read private messages    
-if (autoread?.trim().toLowerCase() === "true" && mek.key?.remoteJid?.endsWith("@s.whatsapp.net")) {    
-    await client.readMessages([mek.key]);    
-}    
+        // ✅ Presence Updates
+        if (mek.key?.remoteJid.endsWith("@s.whatsapp.net")) {
+            let chat = mek.key.remoteJid;
+            let presenceType = presence.toLowerCase();
+            if (["online", "typing", "recording"].includes(presenceType)) {
+                await client.sendPresenceUpdate(presenceType, chat);
+            }
+        }
 
-// ✅ Presence Updates    
-if (mek.key?.remoteJid.endsWith("@s.whatsapp.net")) {    
-    let chat = mek.key.remoteJid;    
-    let presenceType = presence.toLowerCase();    
-    if (["online", "typing", "recording"].includes(presenceType)) {    
-        await client.sendPresenceUpdate(presenceType, chat);    
-    }    
-}    
+        let sender = mek.key?.remoteJid || mek.participant || mek.key?.participant;
 
-let sender = mek.key?.remoteJid || mek.participant || mek.key?.participant;    
+        // ✅ Owner & Developer Check
+        const ownerNumber = "254114148625";
+        if (mode?.toLowerCase() === "private") {
+            const allowedUsers = [`${ownerNumber}@s.whatsapp.net`, `${dev}@s.whatsapp.net`];
+            if (!mek.key.fromMe && !allowedUsers.includes(sender)) return;
+        }
 
-// ✅ Owner & Developer Check    
-const ownerNumber = "254114148625";    
-if (mode?.toLowerCase() === "private") {    
-    const allowedUsers = [`${ownerNumber}@s.whatsapp.net`, `${dev}@s.whatsapp.net`];    
-    if (!mek.key.fromMe && !allowedUsers.includes(sender)) return;    
-}    
+        let m = smsg(client, mek, store);
+        require("./Voxdat")(client, m, chatUpdate, store);
 
-let m = smsg(client, mek, store);    
-require("./Voxdat")(client, m, chatUpdate, store);
-
-} catch (error) {
-console.error("❌ Error in messages.upsert event:", error);
-}
-
+    } catch (error) {
+        console.error("❌ Error in messages.upsert event:", error.message);
+    }
 });
 
 // ✅ Handle unhandled rejections & errors
