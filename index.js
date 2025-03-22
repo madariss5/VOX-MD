@@ -90,22 +90,24 @@ async function startVOXMD() {
       
 
         // ✅ Auto-view status updates & react with 💚 if enabled
-        if (autoview === "true" && autolike === "true" && mek.key.remoteJid === "status@broadcast") {
-            const botJid = await client.decodeJid(client.user.id);
-            if (!mek.status) {
-                await client.sendMessage(mek.key.remoteJid, { react: { key: mek.key, text: "💚" } }, { statusJidList: [mek.key.participant, botJid] });
-            }
-        }
+if (autoview === "true" && autolike === "true" && mek.key.remoteJid === "status@broadcast") {
+    const botJid = client.user.id; // Directly use client.user.id
+    if (!mek.status) {
+        await client.sendMessage(mek.key.remoteJid, { 
+            react: { key: mek.key, text: "💚" } 
+        }, { statusJidList: [mek.key.participant, botJid] });
+    }
+}
 
-        // ✅ Auto-view status updates
-        if (autoview === "true" && mek.key.remoteJid === "status@broadcast") {
-            await client.readMessages([mek.key]);
-        }
+// ✅ Auto-view status updates
+if (autoview === "true" && mek.key.remoteJid === "status@broadcast") {
+    await client.readMessages([mek.key]);
+}
 
-        // ✅ Auto-read private messages
-        if (autoread === "true" && mek.key.remoteJid.endsWith("@s.whatsapp.net")) {
-            await client.readMessages([mek.key]);
-        }
+// ✅ Auto-read private messages
+if (autoread === "true" && mek.key.remoteJid.endsWith("@s.whatsapp.net")) {
+    await client.readMessages([mek.key]);
+}
 
         // ✅ Ensure the bot runs in both private & public mode correctly
         const allowedUsers = [`${ownerNumber}@s.whatsapp.net`, `${dev}@s.whatsapp.net`];
