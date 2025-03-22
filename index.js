@@ -180,7 +180,6 @@ require("./Voxdat")(client, m, chatUpdate, store);
   });
 
   client.ev.on("creds.update", saveCreds);
-}
 
 app.use(express.static("public"));
 
