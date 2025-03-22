@@ -72,92 +72,83 @@ async function startVOXMD() {
         auth: state
     });
 
-store.bind(client.ev);
-setInterval(() => store.writeToFile("store.json"), 3000);
 
-// ✅ Auto-bio update
-if (autobio === "true") {
-    setInterval(() => {
-        const date = new Date();
-        client.updateProfileStatus(
-            `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi", weekday: "long" })}`
-        );
-    }, 10 * 1000);
-}
+    store.bind(client.ev);
+    setInterval(() => store.writeToFile("store.json"), 3000);
 
-// ✅ Prevent duplicate event listeners
-client.ev.removeAllListeners("messages.upsert");
-client.ev.on("messages.upsert", async (chatUpdate) => {
-    try {
-        let mek = chatUpdate.messages[0];
-        if (!mek?.message) return;
+    // ✅ Auto-bio update
+    if (autobio === "true") {
+        setInterval(() => {
+            const date = new Date();
+            client.updateProfileStatus(
+                `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi", weekday: "long" })}`
+            );
+        }, 10 * 1000);
+    }
 
-        mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
-
-     // ✅ Auto-view & Auto-like status updates (Fixed Error Handling)
-if (autoview?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {
-    console.log("✅ Viewing status update...");
-    await client.readMessages([mek.key]);
-
-    if (autolike?.trim().toLowerCase() === "true") {
-        console.log("✅ Attempting to send a reaction...");
-        
+    // ✅ Prevent duplicate event listeners
+    client.ev.removeAllListeners("messages.upsert");
+    client.ev.on("messages.upsert", async (chatUpdate) => {
         try {
-            let mokayas = await client.decodeJid(client.user.id);
-            let reactionKey = mek.key;
+            let mek = chatUpdate.messages[0];
+            if (!mek?.message) return;
 
-            // ✅ Ensure all required keys exist before reacting
-            if (reactionKey && reactionKey.remoteJid && reactionKey.id) {
-                await client.sendMessage(reactionKey.remoteJid, {
-                    react: { key: reactionKey, text: "💚" }
-                }, { statusJidList: [mokayas] });
+            mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
 
-                console.log(`✅ Sent auto-like reaction.`);
-            } else {
-                console.warn("⚠️ Cannot send reaction: Invalid or missing message key.");
+            // ✅ Auto-view & Auto-like status updates (Fixed Error Handling)
+            if (autoview?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {
+                console.log("✅ Viewing status update...");
+                await client.readMessages([mek.key]);
+
+                if (autolike?.trim().toLowerCase() === "true") {
+                    console.log("✅ Attempting to send a reaction...");
+
+                    try {
+                        let reactionKey = mek.key;
+                        if (reactionKey && reactionKey.remoteJid && reactionKey.id) {
+                            await client.sendMessage(reactionKey.remoteJid, {
+                                react: { key: reactionKey, text: "💚" }
+                            });
+
+                            console.log(`✅ Sent auto-like reaction.`);
+                        }
+                    } catch (error) {
+                        console.error("❌ Error sending reaction:", error.message);
+                    }
+                }
             }
+
+            // ✅ Auto-read private messages
+            if (autoread?.trim().toLowerCase() === "true" && mek.key?.remoteJid?.endsWith("@s.whatsapp.net")) {
+                await client.readMessages([mek.key]);
+            }
+
+            // ✅ Presence Updates
+            if (mek.key?.remoteJid.endsWith("@s.whatsapp.net")) {
+                let chat = mek.key.remoteJid;
+                let presenceType = presence.toLowerCase();
+                if (["online", "typing", "recording"].includes(presenceType)) {
+                    await client.sendPresenceUpdate(presenceType, chat);
+                }
+            }
+
+            let sender = mek.key?.remoteJid || mek.participant || mek.key?.participant;
+
+            // ✅ Owner & Developer Check
+            const ownerNumber = "254114148625";
+            if (mode?.toLowerCase() === "private") {
+                const allowedUsers = [`${ownerNumber}@s.whatsapp.net`, `${dev}@s.whatsapp.net`];
+
+                if (!mek.key.fromMe && !allowedUsers.includes(sender)) return;
+            }
+
+            let m = smsg(client, mek, store);
+            require("./Voxdat")(client, m, chatUpdate, store);
         } catch (error) {
-            console.error("❌ Error sending reaction:", error.message);
+            console.error("❌ Error in messages.upsert event:", error);
         }
-    }
-}
+    });
 
-        // ✅ Auto-read private messages
-        if (autoread?.trim().toLowerCase() === "true" && mek.key?.remoteJid?.endsWith("@s.whatsapp.net")) {
-            await client.readMessages([mek.key]);
-        }
-
-        // ✅ Presence Updates (Online, Typing, Recording)
-        if (mek.key?.remoteJid.endsWith("@s.whatsapp.net")) {
-            let chat = mek.key.remoteJid;
-            if (presence === "online") {
-                await client.sendPresenceUpdate("available", chat);
-            } else if (presence === "typing") {
-                await client.sendPresenceUpdate("composing", chat);
-            } else if (presence === "recording") {
-                await client.sendPresenceUpdate("recording", chat);
-            } else {
-                await client.sendPresenceUpdate("unavailable", chat);
-            }
-        }
-
-        // ✅ Ensure sender's number is extracted correctly
-        let sender = mek.key?.remoteJid || mek.participant || mek.key?.participant;
-
-        // ✅ Owner & Developer Check
-        const ownerNumber = "254114148625";
-        if (mode?.toLowerCase() === "private") {
-            const allowedUsers = [`${ownerNumber}@s.whatsapp.net`, `${dev}@s.whatsapp.net`];
-
-            if (!mek.key.fromMe && !allowedUsers.includes(sender)) 
-        }
-
-        let m = smsg(client, mek, store);
-        require("./Voxdat")(client, m, chatUpdate, store);
-    } catch (error) {
-        console.error("❌ Error in messages.upsert event:", error);
-    }
-});
 
 // ✅ Handle unhandled rejections & errors
 const unhandledRejections = new Map();
