@@ -63,7 +63,7 @@ if (autobio === "true") {
         const date = new Date();
         try {
             await client.updateProfileStatus(
-                `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi", weekday: "long" })}`
+    `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi", weekday: "long" })}`
             );
         } catch (error) {
             console.error("❌ Error updating bio:", error.message);
