@@ -20,8 +20,6 @@ const express = require("express");
 const { execSync } = require("child_process");
 const { DateTime } = require("luxon");
 const chalk = require("chalk");
-
-events.defaultMaxListeners = 50; // Prevent memory leaks
 const app = express();
 const port = process.env.PORT || 10000;
 const store = makeInMemoryStore({ logger: pino().child({ level: "silent" }) });
