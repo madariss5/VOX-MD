@@ -94,31 +94,33 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
 
         mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
 
-        // ✅ Auto-view & Auto-like status updates (Fixed Error Handling)
-        if (autoview?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {
-            console.log("✅ Viewing status update...");
-            await client.readMessages([mek.key]);
+     // ✅ Auto-view & Auto-like status updates (Fixed Error Handling)
+if (autoview?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {
+    console.log("✅ Viewing status update...");
+    await client.readMessages([mek.key]);
 
-            if (autolike?.trim().toLowerCase() === "true") {
-                console.log("✅ Attempting to send a reaction...");
-                let mokayas = await client.decodeJid(client.user.id);
+    if (autolike?.trim().toLowerCase() === "true") {
+        console.log("✅ Attempting to send a reaction...");
+        
+        try {
+            let mokayas = await client.decodeJid(client.user.id);
+            let reactionKey = mek.key;
 
-                try {
-                    // ✅ Ensure `mek.key` and `mek.key.participant` exist before reacting
-                    if (mek.key && mek.key.remoteJid && mek.key.participant) {
-                        await client.sendMessage(mek.key.remoteJid, {
-                            react: { key: mek.key, text: "💚" }
-                        }, { statusJidList: [mek.key.participant, mokayas] });
+            // ✅ Ensure all required keys exist before reacting
+            if (reactionKey && reactionKey.remoteJid && reactionKey.id) {
+                await client.sendMessage(reactionKey.remoteJid, {
+                    react: { key: reactionKey, text: "💚" }
+                }, { statusJidList: [mokayas] });
 
-                        console.log(`✅ Sent auto-like reaction.`);
-                    } else {
-                        console.warn("⚠️ Cannot send reaction: Invalid message key.");
-                    }
-                } catch (error) {
-                    console.error("❌ Error sending reaction:", error.message);
-                }
+                console.log(`✅ Sent auto-like reaction.`);
+            } else {
+                console.warn("⚠️ Cannot send reaction: Invalid or missing message key.");
             }
+        } catch (error) {
+            console.error("❌ Error sending reaction:", error.message);
         }
+    }
+}
 
         // ✅ Auto-read private messages
         if (autoread?.trim().toLowerCase() === "true" && mek.key?.remoteJid?.endsWith("@s.whatsapp.net")) {
