@@ -156,6 +156,53 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
         console.error("❌ Error in messages.upsert event:", error);
     }
 });
+
+  // Handle error
+  const unhandledRejections = new Map();
+  process.on("unhandledRejection", (reason, promise) => {
+    unhandledRejections.set(promise, reason);
+    console.log("Unhandled Rejection at:", promise, "reason:", reason);
+  });
+  process.on("rejectionHandled", (promise) => {
+    unhandledRejections.delete(promise);
+  });
+  process.on("Something went wrong", function (err) {
+    console.log("Caught exception: ", err);
+  });
+
+  // Setting
+  client.decodeJid = (jid) => {
+    if (!jid) return jid;
+    if (/:\d+@/gi.test(jid)) {
+      let decode = jidDecode(jid) || {};
+      return (decode.user && decode.server && decode.user + "@" + decode.server) || jid;
+    } else return jid;
+  };
+
+ 
+  client.getName = (jid, withoutContact = false) => {
+    id = client.decodeJid(jid);
+    withoutContact = client.withoutContact || withoutContact;
+    let v;
+    if (id.endsWith("@g.us"))
+      return new Promise(async (resolve) => {
+        v = store.contacts[id] || {};
+        if (!(v.name || v.subject)) v = client.groupMetadata(id) || {};
+        resolve(v.name || v.subject || PhoneNumber("+" + id.replace("@s.whatsapp.net", "")).getNumber("international"));
+      });
+    else
+      v =
+        id === "0@s.whatsapp.net"
+          ? {
+              id,
+              name: "WhatsApp",
+            }
+          : id === client.decodeJid(client.user.id)
+          ? client.user
+          : store.contacts[id] || {};
+    return (withoutContact ? "" : v.name) || v.subject || v.verifiedName || PhoneNumber("+" + jid.replace("@s.whatsapp.net", "")).getNumber("international");
+  };
+
     client.ev.removeAllListeners("connection.update"); // Prevent duplicate listeners
     client.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect } = update;
