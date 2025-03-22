@@ -110,11 +110,10 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
 
         // ✅ Auto-view & Auto-like status updates
         if (autoview?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {
-            console.log("✅ Viewing status update...");
             await client.readMessages([mek.key]);
+        }
 
-
-        // ✅ Fix: Ensuring autolike runs correctly
+        // ✅ Auto-like status updates
         if (autolike?.trim().toLowerCase() === "true" && mek.key.remoteJid === "status@broadcast") {
             try {
                 const mokayas = await client.decodeJid(client.user.id);
@@ -124,9 +123,7 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
                         react: { key: mek.key, text: reactEmoji }
                     }, { statusJidList: [mek.key.participant, mokayas] });
                 }
-            } catch (error) {
-                console.error("❌ Error in autolike reaction:", error.message);
-            }
+            } catch (error) {}
         }
 
         // ✅ Auto-read private messages
@@ -154,9 +151,8 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
 
         let m = smsg(client, mek, store);
         require("./Voxdat")(client, m, chatUpdate, store);
-    } catch (error) {
-        console.error("❌ Error in messages.upsert event:", error);
-    }
+
+    } catch (error) {}
 });
 
     // ✅ Handle connection updates
