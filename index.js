@@ -1,6 +1,16 @@
 /* VOX-MD - The Modern WhatsApp Bot */
 
-const { default: VOXMDConnect, useMultiFileAuthState, DisconnectReason, makeInMemoryStore, downloadContentFromMessage, jidDecode } = require("@whiskeysockets/baileys");
+const {
+  default: dreadedConnect,
+  useMultiFileAuthState,
+  DisconnectReason,
+  fetchLatestBaileysVersion,
+  makeInMemoryStore,
+  downloadContentFromMessage,
+  jidDecode,
+  proto,
+  getContentType,
+} = require("@whiskeysockets/baileys");
 const events = require("events");
 const pino = require("pino");
 const { Boom } = require("@hapi/boom");
