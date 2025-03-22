@@ -30,7 +30,7 @@ const { imageToWebp, videoToWebp, writeExifImg, writeExifVid } = require('./lib/
 const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream: "store" }) });
 const { session } = require("./settings");
 const { smsg } = require("./smsg");
-const { autoview, autoread, botname, autobio, mode, prefix, dev, autolike } = require("./settings");
+const { autoview, presence, autoread, botname, autobio, mode, prefix, dev, autolike } = require("./settings");
 const { commands, totalCommands } = require("./VoxMdhandler");
 const groupEvents = require("./groupEvents.js");
 
