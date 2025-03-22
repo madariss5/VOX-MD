@@ -21,6 +21,7 @@ const chalk = require("chalk");
 const { DateTime } = require("luxon");
 const figlet = require("figlet");
 const express = require("express");
+require('events').EventEmitter.defaultMaxListeners = 50;
 const app = express();
 const port = process.env.PORT || 10000;
 const _ = require("lodash");
