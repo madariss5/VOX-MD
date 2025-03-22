@@ -89,24 +89,40 @@ async function startVOXMD() {
         const ownerNumber = "254114148625"; // Your WhatsApp number
       
 
-        // ✅ Auto-view status updates & react with 💚 if enabled
-if (autoview === "true" && autolike === "true" && mek.key.remoteJid === "status@broadcast") {
-    const botJid = client.user.id; // Directly use client.user.id
-    if (!mek.status) {
-        await client.sendMessage(mek.key.remoteJid, { 
-            react: { key: mek.key, text: "💚" } 
-        }, { statusJidList: [mek.key.participant, botJid] });
+        // ✅ Ensure mek.key and mek.key.remoteJid are defined before accessing them
+if (mek?.key?.remoteJid) {
+
+    // ✅ Auto-view status updates & react with 💚 if enabled
+    if (autoview === "true" && autolike === "true" && mek.key.remoteJid === "status@broadcast") {
+        const botJid = client.user.id; // Directly use client.user.id
+        if (!mek.status) {
+            try {
+                await client.sendMessage(mek.key.remoteJid, { 
+                    react: { key: mek.key, text: "💚" } 
+                }, { statusJidList: [mek.key.participant, botJid] });
+            } catch (error) {
+                console.error("❌ Error sending reaction:", error);
+            }
+        }
     }
-}
 
-// ✅ Auto-view status updates
-if (autoview === "true" && mek.key.remoteJid === "status@broadcast") {
-    await client.readMessages([mek.key]);
-}
+    // ✅ Auto-view status updates
+    if (autoview === "true" && mek.key.remoteJid === "status@broadcast") {
+        try {
+            await client.readMessages([mek.key]);
+        } catch (error) {
+            console.error("❌ Error marking status as read:", error);
+        }
+    }
 
-// ✅ Auto-read private messages
-if (autoread === "true" && mek.key.remoteJid.endsWith("@s.whatsapp.net")) {
-    await client.readMessages([mek.key]);
+    // ✅ Auto-read private messages
+    if (autoread === "true" && mek.key.remoteJid.endsWith("@s.whatsapp.net")) {
+        try {
+            await client.readMessages([mek.key]);
+        } catch (error) {
+            console.error("❌ Error marking private message as read:", error);
+        }
+    }
 }
 
         // ✅ Ensure the bot runs in both private & public mode correctly
