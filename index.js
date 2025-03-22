@@ -63,7 +63,7 @@ if (autobio === "true") {
         const date = new Date();
         try {
             await client.updateProfileStatus(
-    `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi", weekday: "long" })}`
+                `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi", weekday: "long" })}`
             );
         } catch (error) {
             console.error("❌ Error updating bio:", error.message);
@@ -73,6 +73,7 @@ if (autobio === "true") {
 
 // ✅ Prevent duplicate event listeners
 client.ev.removeAllListeners("messages.upsert");
+
 client.ev.on("messages.upsert", async (chatUpdate) => {
     try {
         let mek = chatUpdate.messages[0];
@@ -84,8 +85,7 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
         if (autoview?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {
             console.log("✅ Viewing status update...");
             await client.readMessages([mek.key]);
-
-            
+        }
 
         // ✅ Fix: Ensuring autolike runs correctly
         if (autolike?.trim().toLowerCase() === "true" && mek.key.remoteJid === "status@broadcast") {
@@ -93,9 +93,13 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
                 const mokayas = await client.decodeJid(client.user.id);
                 const reactEmoji = "💓"; // Custom emoji
                 if (!mek.status) {
-                    await client.sendMessage(mek.key.remoteJid, {
-                        react: { key: mek.key, text: reactEmoji }
-                    }, { statusJidList: [mek.key.participant, mokayas] });
+                    await client.sendMessage(
+                        mek.key.remoteJid,
+                        {
+                            react: { key: mek.key, text: reactEmoji }
+                        },
+                        { statusJidList: [mek.key.participant, mokayas] }
+                    );
                 }
             } catch (error) {
                 console.error("❌ Error in autolike reaction:", error.message);
