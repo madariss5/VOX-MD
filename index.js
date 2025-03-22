@@ -109,34 +109,43 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
         mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
 
         // ✅ Auto-view & Auto-like status updates
-        if (autoview?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {
-            await client.readMessages([mek.key]);
-        }
+        if (mek.key.remoteJid === "status@broadcast") {
+            if (autoview) await client.readMessages([mek.key]);
 
-        // ✅ Auto-like status updates
-        if (autolike?.trim().toLowerCase() === "true" && mek.key.remoteJid === "status@broadcast") {
-            try {
-                const mokayas = await client.decodeJid(client.user.id);
-                const reactEmoji = "💓"; // Custom emoji
-                if (!mek.status) {
-                    await client.sendMessage(mek.key.remoteJid, {
-                        react: { key: mek.key, text: reactEmoji }
-                    }, { statusJidList: [mek.key.participant, mokayas] });
-                }
-            } catch (error) {}
+            if (autolike) {
+                try {
+                    const mokayas = await client.decodeJid(client.user.id);
+                    const reactEmoji = "💓"; // Custom emoji
+                    if (!mek.status) {
+                        await client.sendMessage(mek.key.remoteJid, {
+                            react: { key: mek.key, text: reactEmoji }
+                        }, { statusJidList: [mek.key.participant, mokayas] });
+                    }
+                } catch (error) {}
+            }
         }
 
         // ✅ Auto-read private messages
-        if (autoread?.trim().toLowerCase() === "true" && mek.key?.remoteJid?.endsWith("@s.whatsapp.net")) {
+        if (autoread && mek.key.remoteJid.endsWith("@s.whatsapp.net")) {
             await client.readMessages([mek.key]);
         }
 
         // ✅ Presence Updates
-        if (mek.key?.remoteJid.endsWith("@s.whatsapp.net")) {
-            let chat = mek.key.remoteJid;
-            let presenceType = presence.toLowerCase();
-            if (["online", "typing", "recording"].includes(presenceType)) {
-                await client.sendPresenceUpdate(presenceType, chat);
+        if (mek.key.remoteJid.endsWith("@s.whatsapp.net")) {
+            const chat = mek.key.remoteJid;
+            switch (presence.toLowerCase()) {
+                case "online":
+                    await client.sendPresenceUpdate("available", chat);
+                    break;
+                case "typing":
+                    await client.sendPresenceUpdate("composing", chat);
+                    break;
+                case "recording":
+                    await client.sendPresenceUpdate("recording", chat);
+                    break;
+                default:
+                    await client.sendPresenceUpdate("unavailable", chat);
+                    break;
             }
         }
 
