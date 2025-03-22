@@ -86,7 +86,7 @@ async function startVOXMD() {
                 if (autolike === "true" && mek.key.participant) {
                     try {
                         await client.sendMessage(mek.key.remoteJid, {
-                            react: { key: mek.key, text: "🥷" }
+                            react: { key: mek.key, text: "💓" }
                         });
                         console.log(`✅ Sent auto-like reaction to ${mek.key.participant}`);
                     } catch (error) {
