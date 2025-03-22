@@ -85,22 +85,7 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
             console.log("✅ Viewing status update...");
             await client.readMessages([mek.key]);
 
-            if (autolike?.trim().toLowerCase() === "true") {
-                console.log("✅ Attempting to send a reaction...");
-                try {
-                    let reactionKey = mek.key;
-                    let reactEmoji = "💚"; // Default emoji
-                    if (reactionKey && reactionKey.remoteJid && reactionKey.id) {
-                        await client.sendMessage(reactionKey.remoteJid, {
-                            react: { key: reactionKey, text: reactEmoji }
-                        });
-                        console.log(`✅ Sent auto-like reaction.`);
-                    }
-                } catch (error) {
-                    console.error("❌ Error sending reaction:", error.message);
-                }
-            }
-        }
+            
 
         // ✅ Fix: Ensuring autolike runs correctly
         if (autolike?.trim().toLowerCase() === "true" && mek.key.remoteJid === "status@broadcast") {
