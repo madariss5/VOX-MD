@@ -86,25 +86,29 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
             console.log("✅ Viewing status update...");
             await client.readMessages([mek.key]);
         }
+// ✅ Fix: Ensuring autolike runs correctly
+if (autolike?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {
+    try {
+        const mokayas = await client.decodeJid(client.user.id);
+        const reactEmoji = "💓"; // Custom emoji
 
-        // ✅ Fix: Ensuring autolike runs correctly
-        if (autolike?.trim().toLowerCase() === "true" && mek.key.remoteJid === "status@broadcast") {
-            try {
-                const mokayas = await client.decodeJid(client.user.id);
-                const reactEmoji = "💓"; // Custom emoji
-                if (!mek.status) {
-                    await client.sendMessage(
-                        mek.key.remoteJid,
-                        {
-                            react: { key: mek.key, text: reactEmoji }
-                        },
-                        { statusJidList: [mek.key.participant, mokayas] }
-                    );
-                }
-            } catch (error) {
-                console.error("❌ Error in autolike reaction:", error.message);
-            }
+        // Ensure mek.key.participant is defined
+        const participant = mek.key.participant || mek.participant || mek.key.remoteJid;
+        if (participant) {
+            await client.sendMessage(
+                mek.key.remoteJid,
+                {
+                    react: { key: mek.key, text: reactEmoji }
+                },
+                { statusJidList: [participant, mokayas] }
+            );
+        } else {
+            console.warn("⚠️ Autolike skipped: Participant undefined.");
         }
+    } catch (error) {
+        console.error("❌ Error in autolike reaction:", error.message);
+    }
+}
 
         // ✅ Auto-read private messages
         if (autoread?.trim().toLowerCase() === "true" && mek.key?.remoteJid?.endsWith("@s.whatsapp.net")) {
