@@ -86,14 +86,12 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
             console.log("✅ Viewing status update...");
             await client.readMessages([mek.key]);
         }
-// ✅ Fix: Ensuring autolike runs correctly
 if (autolike?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {
     try {
         const mokayas = await client.decodeJid(client.user.id);
         const reactEmoji = "💓"; // Custom emoji
-
-        // Ensure mek.key.participant is defined
         const participant = mek.key.participant || mek.participant || mek.key.remoteJid;
+
         if (participant) {
             await client.sendMessage(
                 mek.key.remoteJid,
@@ -102,12 +100,8 @@ if (autolike?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@
                 },
                 { statusJidList: [participant, mokayas] }
             );
-        } else {
-            console.warn("⚠️ Autolike skipped: Participant undefined.");
         }
-    } catch (error) {
-        console.error("❌ Error in autolike reaction:", error.message);
-    }
+    } catch (error) {}
 }
 
         // ✅ Auto-read private messages
