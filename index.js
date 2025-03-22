@@ -1,7 +1,7 @@
 /* VOX-MD - The Modern WhatsApp Bot */
 
 const {
-  default: dreadedConnect,
+  default: VOXMDConnect,
   useMultiFileAuthState,
   DisconnectReason,
   fetchLatestBaileysVersion,
