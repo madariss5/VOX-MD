@@ -11,19 +11,23 @@ const {
   proto,
   getContentType,
 } = require("@whiskeysockets/baileys");
-const events = require("events");
 const pino = require("pino");
 const { Boom } = require("@hapi/boom");
 const fs = require("fs");
-const FileType = require("file-type");
-const express = require("express");
-const { execSync } = require("child_process");
-const { DateTime } = require("luxon");
+ const FileType = require("file-type");
+const { exec, spawn, execSync } = require("child_process");
+const axios = require("axios");
 const chalk = require("chalk");
+const { DateTime } = require("luxon");
+const figlet = require("figlet");
+const express = require("express");
 const app = express();
 const port = process.env.PORT || 10000;
-const store = makeInMemoryStore({ logger: pino().child({ level: "silent" }) });
-
+const _ = require("lodash");
+const PhoneNumber = require("awesome-phonenumber");
+const { imageToWebp, videoToWebp, writeExifImg, writeExifVid } = require('./lib/exif');
+ const { isUrl, generateMessageTag, getBuffer, getSizeMedia, fetchJson, await, sleep } = require('./lib/botFunctions');
+const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream: "store" }) });
 const { session } = require("./settings");
 const { smsg } = require("./smsg");
 const { autoview, autoread, botname, autobio, mode, prefix, dev, autolike } = require("./settings");
