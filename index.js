@@ -30,37 +30,14 @@ const { imageToWebp, videoToWebp, writeExifImg, writeExifVid } = require('./lib/
  const { isUrl, generateMessageTag, getBuffer, getSizeMedia, fetchJson, await, sleep } = require('./lib/botFunctions');
 const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream: "store" }) });
 const { session } = require("./settings");
+const authenticateSession = require('./kanambo'); // Import from kanambo.js
+
+authenticateSession(); // Call the function
 const { smsg } = require("./smsg");
 const { autoview, presence, autoread, botname, autobio, mode, prefix, dev, autolike } = require("./settings");
 const { commands, totalCommands } = require("./VoxMdhandler");
 const groupEvents = require("./groupEvents.js");
 
-// ✅ Corrected Base64 session decoding
-async function authenticateSession() {
-    try {
-        const sessionPath = "./session/creds.json";
-
-        if (!fs.existsSync("./session")) {  
-            fs.mkdirSync("./session");  
-        }  
-
-        if (!fs.existsSync(sessionPath) && session !== "zokk") {  
-            console.log("📡 Connecting...");  
-            const sessionData = Buffer.from(session, "base64").toString("utf8");  
-            fs.writeFileSync(sessionPath, sessionData, "utf8");  
-        }  
-    } catch (e) {  
-        console.log("❌ Session is invalid: " + e);  
-    }
-}
-
-authenticateSession();
-
-// Prevent duplicate event listeners
-process.removeAllListeners("uncaughtException");
-process.on("uncaughtException", (err) => {
-    console.error("❌ Uncaught Exception:", err);
-});
 
 async function startVOXMD() {
     const { saveCreds, state } = await useMultiFileAuthState("session");
