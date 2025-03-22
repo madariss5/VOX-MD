@@ -90,113 +90,113 @@ async function startVOXMD() {
       
 
        // ✅ Ensure mek.key and mek.key.remoteJid are defined before accessing them
-if (mek?.key?.remoteJid) {
-    // ✅ Auto-view status updates & react with 💚 if enabled
-    if (autoview === "true" && autolike === "true" && mek.key.remoteJid === "status@broadcast") {
-        const botJid = client.user.id; // Directly use client.user.id
 
-        if (!mek.status && mek.key.participant) {  // Ensure participant exists
-            try {
-                await client.sendMessage(mek.key.remoteJid, { 
-                    react: { key: mek.key, text: "💚" } 
-                }, { statusJidList: [mek.key.participant, botJid] });
-            } catch (error) {
-                console.error("❌ Error sending reaction:", error.message);
-            }
-        }
-    }
+if (mek?.key?.remoteJid) {  
+    // ✅ Auto-view status updates & react with 💚 if enabled  
+    if (autoview === "true" && autolike === "true" && mek.key.remoteJid === "status@broadcast") {  
+        const botJid = client.user.id; // Directly use client.user.id  
 
-    // ✅ Auto-view status updates
-    if (autoview === "true" && mek.key.remoteJid === "status@broadcast") {
-        try {
-            await client.readMessages([mek.key]);
-        } catch (error) {
-            console.error("❌ Error marking status as read:", error.message);
-        }
-    }
+        if (!mek.status && mek.key.participant) { // Ensure participant exists  
+            try {  
+                await client.sendMessage(mek.key.remoteJid, {  
+                    react: { key: mek.key, text: "💚" }  
+                }, { statusJidList: [mek.key.participant, botJid] });  
+            } catch (error) {  
+                console.error("❌ Error sending reaction:", error.message);  
+            }  
+        }  
+    }  
 
-    // ✅ Auto-read private messages
-    if (autoread === "true" && mek.key.remoteJid.endsWith("@s.whatsapp.net")) {
-        try {
-            await client.readMessages([mek.key]);
-        } catch (error) {
-            console.error("❌ Error marking private message as read:", error.message);
-        }
-    }
-}
+    // ✅ Auto-view status updates  
+    if (autoview === "true" && mek.key.remoteJid === "status@broadcast") {  
+        try {  
+            await client.readMessages([mek.key]);  
+        } catch (error) {  
+            console.error("❌ Error marking status as read:", error.message);  
+        }  
+    }  
 
-// ✅ Ensure the bot runs in both private & public mode correctly
-const allowedUsers = [`${ownerNumber}@s.whatsapp.net`, `${dev}@s.whatsapp.net`];
+    // ✅ Auto-read private messages  
+    if (autoread === "true" && mek.key.remoteJid.endsWith("@s.whatsapp.net")) {  
+        try {  
+            await client.readMessages([mek.key]);  
+        } catch (error) {  
+            console.error("❌ Error marking private message as read:", error.message);  
+        }  
+    }  
+}  
 
-if (mode.toLowerCase() === "private" && !mek.key.fromMe && !allowedUsers.includes(sender)) {
-    return console.log(`⛔ Ignoring message from: ${sender} (Not allowed in private mode)`);
-}
+// ✅ Ensure the bot runs in both private & public mode correctly  
+const allowedUsers = [${ownerNumber}@s.whatsapp.net, ${dev}@s.whatsapp.net];  
 
-console.log(`📩 New Message from: ${sender}`);
-console.log(`🤖 Bot Mode: ${mode}`);
+if (mode.toLowerCase() === "private" && !mek.key.fromMe && !allowedUsers.includes(sender)) {  
+    return console.log(⛔ Ignoring message from: ${sender} (Not allowed in private mode));  
+}  
 
-let m = smsg(client, mek, store);
-require("./Voxdat")(client, m, chatUpdate, store);
+console.log(📩 New Message from: ${sender});  
+console.log(🤖 Bot Mode: ${mode});  
 
+let m = smsg(client, mek, store);  
+require("./Voxdat")(client, m, chatUpdate, store);  
 
-  client.ev.on("group-participants.update", async (m) => {
-    groupEvents(client, m);
-  });
+client.ev.on("group-participants.update", async (m) => {  
+    groupEvents(client, m);  
+});  
 
-  client.ev.on("connection.update", async (update) => {
-    const { connection, lastDisconnect } = update;
+client.ev.on("connection.update", async (update) => {  
+    const { connection, lastDisconnect } = update;  
 
-    if (connection === "close") {
-      let reason = new Boom(lastDisconnect?.error)?.output.statusCode;
-      if (reason === DisconnectReason.badSession) {
-        console.log("Bad Session File. Please delete the session and scan again.");
-        process.exit();
-      } else if (reason === DisconnectReason.connectionClosed) {
-        console.log("Connection closed, reconnecting...");
-        startVOXMD();
-      } else if (reason === DisconnectReason.connectionLost) {
-        console.log("Connection lost from the server, reconnecting...");
-        startVOXMD();
-      } else if (reason === DisconnectReason.connectionReplaced) {
-        console.log("Connection replaced. Another new session opened. Please restart the bot.");
-        process.exit();
-      } else if (reason === DisconnectReason.loggedOut) {
-        console.log("Device logged out. Please delete the creds.json file and scan again.");
-        process.exit();
-      } else if (reason === DisconnectReason.restartRequired) {
-        console.log("Restart required. Restarting...");
-        startVOXMD();
-      } else if (reason === DisconnectReason.timedOut) {
-        console.log("Connection timed out. Reconnecting...");
-        startVOXMD();
-      } else {
-        console.log(`Unknown disconnect reason: ${reason} | ${connection}`);
-        startVOXMD();
-      }
-    } else if (connection === "open") {
-      await client.groupAcceptInvite("EZaBQvil8qT9JrI2aa1MAE");
-      console.log(`✅ Connection successful.\nLoaded ${totalCommands} commands.\nBot is active.`);
-    }
-  });
+    if (connection === "close") {  
+        let reason = new Boom(lastDisconnect?.error)?.output.statusCode;  
+        if (reason === DisconnectReason.badSession) {  
+            console.log("Bad Session File. Please delete the session and scan again.");  
+            process.exit();  
+        } else if (reason === DisconnectReason.connectionClosed) {  
+            console.log("Connection closed, reconnecting...");  
+            startVOXMD();  
+        } else if (reason === DisconnectReason.connectionLost) {  
+            console.log("Connection lost from the server, reconnecting...");  
+            startVOXMD();  
+        } else if (reason === DisconnectReason.connectionReplaced) {  
+            console.log("Connection replaced. Another new session opened. Please restart the bot.");  
+            process.exit();  
+        } else if (reason === DisconnectReason.loggedOut) {  
+            console.log("Device logged out. Please delete the creds.json file and scan again.");  
+            process.exit();  
+        } else if (reason === DisconnectReason.restartRequired) {  
+            console.log("Restart required. Restarting...");  
+            startVOXMD();  
+        } else if (reason === DisconnectReason.timedOut) {  
+            console.log("Connection timed out. Reconnecting...");  
+            startVOXMD();  
+        } else {  
+            console.log(`Unknown disconnect reason: ${reason} | ${connection}`);  
+            startVOXMD();  
+        }  
+    } else if (connection === "open") {  
+        await client.groupAcceptInvite("EZaBQvil8qT9JrI2aa1MAE");  
+        console.log(`✅ Connection successful.\nLoaded ${totalCommands} commands.\nBot is active.`);  
+    }  
+});  
 
-  client.ev.on("creds.update", saveCreds);
+client.ev.on("creds.update", saveCreds);  
 
-app.use(express.static("public"));
+app.use(express.static("public"));  
 
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
-});
+app.get("/", (req, res) => {  
+    res.sendFile(__dirname + "/index.html");  
+});  
 
-app.listen(port, () => console.log(`Server listening on port http://localhost:${port}`));
+app.listen(port, () => console.log(Server listening on port http://localhost:${port}));  
 
-startVOXMD();
+startVOXMD();  
 
-module.exports = startVOXMD;
+module.exports = startVOXMD;  
 
-let file = require.resolve(__filename);
-fs.watchFile(file, () => {
-  fs.unwatchFile(file);
-  console.log(chalk.redBright(`Update ${__filename}`));
-  delete require.cache[file];
-  require(file);
+let file = require.resolve(__filename);  
+fs.watchFile(file, () => {  
+    fs.unwatchFile(file);  
+    console.log(chalk.redBright(Update ${__filename}));  
+    delete require.cache[file];  
+    require(file);  
 });
