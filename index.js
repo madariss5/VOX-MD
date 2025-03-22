@@ -143,18 +143,13 @@ if (autoview?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@
 
         // ✅ Ensure sender's number is extracted correctly
         let sender = mek.key?.remoteJid || mek.participant || mek.key?.participant;
-        if (!sender) return console.log("⚠️ Sender is undefined.");
-
 
         // ✅ Owner & Developer Check
         const ownerNumber = "254114148625";
         if (mode?.toLowerCase() === "private") {
             const allowedUsers = [`${ownerNumber}@s.whatsapp.net`, `${dev}@s.whatsapp.net`];
 
-            if (!mek.key.fromMe && !allowedUsers.includes(sender)) {
-                console.log(`⛔ Ignoring message from: ${sender} (Not allowed in private mode)`);
-                return;
-            }
+            if (!mek.key.fromMe && !allowedUsers.includes(sender)) 
         }
 
         let m = smsg(client, mek, store);
