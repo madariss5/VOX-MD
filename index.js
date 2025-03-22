@@ -131,7 +131,7 @@ async function startVOXMD() {
     
     const client = VOXMDConnect({
         logger: pino({ level: "silent" }),
-        printQRInTerminal: true,
+        printQRInTerminal: false,
         version: [2, 3000, 1015901307],
         browser: ["VOX-MD", "Safari", "3.0"],
         auth: state
