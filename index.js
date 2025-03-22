@@ -249,7 +249,39 @@ client.getName = (jid, withoutContact = false) => {
     });
 
     client.ev.on("creds.update", saveCreds);
+    client.downloadMediaMessage = async (message) => { 
+         let mime = (message.msg || message).mimetype || ''; 
+         let messageType = message.mtype ? message.mtype.replace(/Message/gi, '') : mime.split('/')[0]; 
+         const stream = await downloadContentFromMessage(message, messageType); 
+         let buffer = Buffer.from([]); 
+         for await(const chunk of stream) { 
+             buffer = Buffer.concat([buffer, chunk]) 
+         } 
+
+         return buffer 
+      }; 
+
+
+       
+
+ client.downloadAndSaveMediaMessage = async (message, filename, attachExtension = true) => { 
+         let quoted = message.msg ? message.msg : message; 
+         let mime = (message.msg || message).mimetype || ''; 
+         let messageType = message.mtype ? message.mtype.replace(/Message/gi, '') : mime.split('/')[0]; 
+         const stream = await downloadContentFromMessage(quoted, messageType); 
+         let buffer = Buffer.from([]); 
+         for await(const chunk of stream) { 
+             buffer = Buffer.concat([buffer, chunk]); 
+         } 
+         let type = await FileType.fromBuffer(buffer); 
+         const trueFileName = attachExtension ? (filename + '.' + type.ext) : filename; 
+         // save to file 
+         await fs.writeFileSync(trueFileName, buffer); 
+         return trueFileName; 
+     };
+
 }
+
 
 app.use(express.static("public"));
 app.get("/", (req, res) => res.sendFile(__dirname + "/index.html"));
