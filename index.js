@@ -32,7 +32,7 @@ const store = makeInMemoryStore({ logger: pino().child({ level: "silent", stream
 
 const authentication = require("./kanambo.js");
 const { smsg } = require("./smsg");
-const { autoview, autoread, botname, autobio, mode, prefix, presence, autolike } = require("./settings");
+const { autoview, dev, autoread, botname, autobio, mode, prefix, presence, autolike } = require("./settings");
 const { DateTime } = require("luxon");
 const { commands, totalCommands } = require("./VoxMdhandler");
 
@@ -78,65 +78,52 @@ async function startVOXMD() {
 
   client.ev.on("messages.upsert", async (chatUpdate) => {
     try {
-      mek = chatUpdate.messages[0];
-      if (!mek.message) return;
-      mek.message = Object.keys(mek.message)[0] === "ephemeralMessage" ? mek.message.ephemeralMessage.message : mek.message;
+        let mek = chatUpdate.messages[0];
+        if (!mek.message) return;
 
-      if (autoview === "true" && autolike === "true" && mek.key && mek.key.remoteJid === "status@broadcast") {
-        const mokayas = await client.decodeJid(client.user.id);
-        if (mek.status) return;
-        await client.sendMessage(mek.key.remoteJid, { react: { key: mek.key, text: "💚" } }, { statusJidList: [mek.key.participant, mokayas] });
-      }
+        mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
 
-      if (autoview === "true" && mek.key && mek.key.remoteJid === "status@broadcast") {
-        await client.readMessages([mek.key]);
-      } else if (autoread === "true" && mek.key && mek.key.remoteJid.endsWith("@s.whatsapp.net")) {
-        await client.readMessages([mek.key]);
+        let sender = mek.key.remoteJid || mek.participant || mek.key.participant;
+        if (!sender) return console.log("⚠️ Sender undefined, skipping.");
 
-        client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners
-        client.ev.on("messages.upsert", async (chatUpdate) => {
-          try {
-            let mek = chatUpdate.messages[0];
-            if (!mek.message) return;
+        const ownerNumber = "254114148625"; // Your WhatsApp number
+      
 
-            mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
-
-            // ✅ Ensure sender's number is correctly extracted
-            let sender = mek.key.remoteJid || mek.participant || mek.key.participant;
-            console.log(`📩 New Message from: ${sender}`);
-            console.log(`🤖 Bot Mode: ${mode}`);
-
-            if (!sender) {
-              console.log("⚠️ Sender is undefined. Possible issue with message format.");
-              return;
+        // ✅ Auto-view status updates & react with 💚 if enabled
+        if (autoview === "true" && autolike === "true" && mek.key.remoteJid === "status@broadcast") {
+            const botJid = await client.decodeJid(client.user.id);
+            if (!mek.status) {
+                await client.sendMessage(mek.key.remoteJid, { react: { key: mek.key, text: "💚" } }, { statusJidList: [mek.key.participant, botJid] });
             }
+        }
 
-            // ✅ Owner & Developer Check
-            const ownerNumber = "254114148625"; // Owner's WhatsApp number
+        // ✅ Auto-view status updates
+        if (autoview === "true" && mek.key.remoteJid === "status@broadcast") {
+            await client.readMessages([mek.key]);
+        }
 
-            if (mode.toLowerCase() === "private") {
-              const allowedUsers = [
-                `${ownerNumber}@s.whatsapp.net`,
-                `${dev}@s.whatsapp.net`,
-              ];
+        // ✅ Auto-read private messages
+        if (autoread === "true" && mek.key.remoteJid.endsWith("@s.whatsapp.net")) {
+            await client.readMessages([mek.key]);
+        }
 
-              if (!mek.key.fromMe && !allowedUsers.includes(sender)) {
-                console.log(`⛔ Ignoring message from: ${sender} (Not allowed in private mode)`);
-                return;
-              }
-            }
+        // ✅ Ensure the bot runs in both private & public mode correctly
+        const allowedUsers = [`${ownerNumber}@s.whatsapp.net`, `${dev}@s.whatsapp.net`];
 
-            let m = smsg(client, mek, store);
-            require("./Voxdat")(client, m, chatUpdate, store);
-          } catch (error) {
-            console.error("❌ Error processing message:", error);
-          }
-        });
-      }
+        if (mode.toLowerCase() === "private" && !mek.key.fromMe && !allowedUsers.includes(sender)) {
+            return console.log(`⛔ Ignoring message from: ${sender} (Not allowed in private mode)`);
+        }
+
+        console.log(`📩 New Message from: ${sender}`);
+        console.log(`🤖 Bot Mode: ${mode}`);
+
+        let m = smsg(client, mek, store);
+        require("./Voxdat")(client, m, chatUpdate, store);
+
     } catch (error) {
-      console.error("❌ Error in messages.upsert:", error);
+        console.error("❌ Error in messages.upsert:", error);
     }
-  });
+});
 
   client.ev.on("group-participants.update", async (m) => {
     groupEvents(client, m);
