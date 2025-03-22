@@ -71,21 +71,21 @@ async function startVOXMD() {
         auth: state
     });
 
-    store.bind(client.ev);
-    setInterval(() => store.writeToFile("store.json"), 3000);
+store.bind(client.ev);
+setInterval(() => store.writeToFile("store.json"), 3000);
 
-    if (autobio === "true") {
-        setInterval(() => {
-            const date = new Date();
-            client.updateProfileStatus(
-                `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi", weekday: "long" })}`
-            );
-        }, 10 * 1000);
-    }
+// ✅ Auto-bio update
+if (autobio === "true") {
+    setInterval(() => {
+        const date = new Date();
+        client.updateProfileStatus(
+            `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi", weekday: "long" })}`
+        );
+    }, 10 * 1000);
+}
 
- 
-
-client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners
+// ✅ Prevent duplicate event listeners
+client.ev.removeAllListeners("messages.upsert");
 client.ev.on("messages.upsert", async (chatUpdate) => {
     try {
         let mek = chatUpdate.messages[0];
@@ -93,28 +93,24 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
 
         mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
 
-        // ✅ Auto-view and react to status updates
+        // ✅ Auto-view & Auto-like status updates
         if (autoview?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {
             console.log("✅ Viewing status update...");
             await client.readMessages([mek.key]);
 
             if (autolike?.trim().toLowerCase() === "true") {
                 console.log("✅ Attempting to send a reaction...");
-                let reactionJid = mek.key.remoteJid || mek.key.participant;
-                if (reactionJid) {
-                    try {
-                        await client.sendMessage(reactionJid, {
-                            react: { key: mek.key, text: "💓" }
-                        });
-                        console.log(`✅ Sent auto-like reaction to ${reactionJid}`);
-                    } catch (error) {
-                        console.error("❌ Error sending reaction:", error.message);
-                    }
-                } else {
-                    console.log("⚠️ Could not determine reaction JID.");
+                let mokayas = await client.decodeJid(client.user.id);
+
+                try {
+                    await client.sendMessage(mek.key.remoteJid, {
+                        react: { key: mek.key, text: "💚" }
+                    }, { statusJidList: [mek.key.participant, mokayas] });
+
+                    console.log(`✅ Sent auto-like reaction.`);
+                } catch (error) {
+                    console.error("❌ Error sending reaction:", error.message);
                 }
-            } else {
-                console.log("⚠️ Autolike is disabled.");
             }
         }
 
@@ -123,7 +119,21 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
             await client.readMessages([mek.key]);
         }
 
-        // ✅ Ensure sender's number is correctly extracted
+        // ✅ Presence Updates (Online, Typing, Recording)
+        if (mek.key?.remoteJid.endsWith("@s.whatsapp.net")) {
+            let chat = mek.key.remoteJid;
+            if (presence === "online") {
+                await client.sendPresenceUpdate("available", chat);
+            } else if (presence === "typing") {
+                await client.sendPresenceUpdate("composing", chat);
+            } else if (presence === "recording") {
+                await client.sendPresenceUpdate("recording", chat);
+            } else {
+                await client.sendPresenceUpdate("unavailable", chat);
+            }
+        }
+
+        // ✅ Ensure sender's number is extracted correctly
         let sender = mek.key?.remoteJid || mek.participant || mek.key?.participant;
         if (!sender) return console.log("⚠️ Sender is undefined.");
 
@@ -146,7 +156,6 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
         console.error("❌ Error in messages.upsert event:", error);
     }
 });
-
     client.ev.removeAllListeners("connection.update"); // Prevent duplicate listeners
     client.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect } = update;
