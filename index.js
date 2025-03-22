@@ -41,15 +41,6 @@ const { commands, totalCommands } = require("./VoxMdhandler");
 const groupEvents = require("./groupEvents.js");
 
 
-async function startVOXMD() {
-    const { saveCreds, state } = await useMultiFileAuthState("session");
-    const client = VOXMDConnect({
-        logger: pino({ level: "silent" }),
-        printQRInTerminal: true,
-        version: [2, 3000, 1015901307],
-        browser: ["VOX-MD", "Safari", "3.0"],
-        auth: state
-    });
 
 
     store.bind(client.ev);
@@ -240,9 +231,6 @@ client.getName = (jid, withoutContact = false) => {
          return buffer 
       }; 
 
-
-       
-
  client.downloadAndSaveMediaMessage = async (message, filename, attachExtension = true) => { 
          let quoted = message.msg ? message.msg : message; 
          let mime = (message.msg || message).mimetype || ''; 
@@ -266,6 +254,15 @@ app.use(express.static("public"));
 app.get("/", (req, res) => res.sendFile(__dirname + "/index.html"));
 app.listen(port, () => console.log("🚀 Server listening on: http://localhost:" + port));
 
+async function startVOXMD() {
+    const { saveCreds, state } = await useMultiFileAuthState("session");
+    const client = VOXMDConnect({
+        logger: pino({ level: "silent" }),
+        printQRInTerminal: true,
+        version: [2, 3000, 1015901307],
+        browser: ["VOX-MD", "Safari", "3.0"],
+        auth: state
+    });
 
 
 startVOXMD();
