@@ -92,15 +92,45 @@ async function startVOXMD() {
         await client.readMessages([mek.key]);
       } else if (autoread === "true" && mek.key && mek.key.remoteJid.endsWith("@s.whatsapp.net")) {
         await client.readMessages([mek.key]);
-      }
+          client.ev.removeAllListeners("messages.upsert"); // Prevent duplicate listeners
+    client.ev.on("messages.upsert", async (chatUpdate) => {
+        try {
+            let mek = chatUpdate.messages[0];
+            if (!mek.message) return;
 
-      if (!client.public && !mek.key.fromMe && chatUpdate.type === "notify") return;
-      m = smsg(client, mek, store);
-      require("./Voxdat")(client, m, chatUpdate, store);
-    } catch (err) {
-      console.log(err);
-    }
-  });
+            mek.message = mek.message.ephemeralMessage ? mek.message.ephemeralMessage.message : mek.message;
+
+            // ✅ Ensure sender's number is correctly extracted
+            let sender = mek.key.remoteJid || mek.participant || mek.key.participant;
+            console.log(`📩 New Message from: ${sender}`);
+            console.log(`🤖 Bot Mode: ${mode}`);
+
+            if (!sender) {
+                console.log("⚠️ Sender is undefined. Possible issue with message format.");
+                return;
+            }
+
+            // ✅ Owner & Developer Check
+            const ownerNumber = "254114148625"; // Owner's WhatsApp number
+
+            if (mode.toLowerCase() === "private") {
+                const allowedUsers = [
+                    `${ownerNumber}@s.whatsapp.net`,
+                    `${dev}@s.whatsapp.net`
+                ];
+
+                if (!mek.key.fromMe && !allowedUsers.includes(sender)) {
+                    console.log(`⛔ Ignoring message from: ${sender} (Not allowed in private mode)`);
+                    return;
+                }
+            }
+
+            let m = smsg(client, mek, store);
+            require("./Voxdat")(client, m, chatUpdate, store);
+        } catch (error) {
+            console.error("❌ Error processing message:", error);
+        }
+    });
 
   client.ev.on("group-participants.update", async (m) => {
     groupEvents(client, m);
