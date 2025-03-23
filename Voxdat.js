@@ -10,10 +10,10 @@ const uploadtoimgur = require('../lib/Imgur');
 const { readFileSync } = require('fs');
 
 const { commands, aliases, totalCommands } = require('../Handler/commandHandler');
-// const blocked_users = require('../Functions/blocked_users');
+const blocked_users = require('../Functions/blocked_users');
 const status_saver = require('../Functions/status_saver');
 const gcPresence = require('../Functions/gcPresence');
-// const antilinkgc = require('../Functions/antilink');
+const antilinkgc = require('../Functions/antilink');
 const antitaggc = require('../Functions/antitag');
 const antidel = require('../Functions/antidelete');
 
