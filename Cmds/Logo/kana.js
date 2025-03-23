@@ -5,7 +5,7 @@ module.exports = async (context) => {
     const { client, m, text } = context;
 
     if (!text) {
-        return m.reply("❌ *Please provide text for the logo!*\n\nExample usage:\n`.glow Happy Birthday!`");
+        return m.reply("❌ *Please provide text for the logo!*\n\nExample usage:\n`.kana Happy Birthday!`");
     }
 
     try {
