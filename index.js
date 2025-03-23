@@ -61,15 +61,15 @@ store.writeToFile("store.json");
 // ✅ Auto-bio update
 if (autobio === "true") {
 setInterval(async () => {
-const date = new Date();
-await client.updateProfileStatus(
-  `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi", weekday: "long" })}`
-);
-} catch (error) {
-console.error("❌ Error updating bio:", error.message);
-}
+  try {
+    const date = new Date();
+    await client.updateProfileStatus(
+      `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi", weekday: "long" })}`
+    );
+  } catch (error) {
+    console.error("❌ Error updating bio:", error.message);
+  }
 }, 10 * 1000);
-}
 
 // ✅ Prevent duplicate event listeners
 client.ev.removeAllListeners("messages.upsert");
@@ -260,7 +260,7 @@ app.listen(port, () => console.log("🚀 Server listening on: http://localhost:"
 
 startVOXMD();
 
-modul.exports = startVOXMD
+module.exports = startVOXMD
 
 let file = require.resolve(__filename);
 fs.watchFile(file, () => {
