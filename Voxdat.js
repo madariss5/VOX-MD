@@ -1,7 +1,7 @@
 const {
-  BufferJSON, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, proto,
-  generateWAMessageContent, generateWAMessage, prepareWAMessageMedia, areJidsSameUser,
-  getContentType, jidNormalizedUser
+BufferJSON, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, proto,
+generateWAMessageContent, generateWAMessage, prepareWAMessageMedia, areJidsSameUser,
+getContentType, jidNormalizedUser
 } = require("@whiskeysockets/baileys");
 
 const fs = require("fs");
@@ -10,8 +10,8 @@ const chalk = require("chalk");
 const speed = require("performance-now");
 
 const {
-  smsg, formatp, tanggal, formatDate, getTime, sleep, clockString,
-  fetchJson, getBuffer, jsonformat, generateProfilePicture, parseMention, getRandom, fetchBuffer
+smsg, formatp, tanggal, formatDate, getTime, sleep, clockString,
+fetchJson, getBuffer, jsonformat, generateProfilePicture, parseMention, getRandom, fetchBuffer
 } = require('./lib/botFunctions.js');
 
 const { exec, spawn, execSync } = require("child_process");
@@ -34,134 +34,135 @@ const masterEval = require('./Functions/masterEval');
 const antidel = require('./Functions/antidelete');
 
 const {
-  presence, autoread, botname, mode, prefix, mycode, author, packname,
-  dev, gcpresence, antionce, antitag, antidelete
+presence, autoread, botname, mode, prefix, mycode, author, packname,
+dev, gcpresence, antionce, antitag, antidelete
 } = require('./settings');
 
-// ✅ Global Request Queue
-const requestQueue = [];
-let processingRequest = false;
+module.exports = voxmd= async (client, m, chatUpdate, store) => {
+try {
+if (!m || !m.message) return; // Prevent bot from crashing if m is undefined
 
-// ✅ Process Requests One by One
-const processQueue = async () => {
-  if (processingRequest || requestQueue.length === 0) return;
+let body =  
+  m.mtype === "conversation"  
+    ? m.message.conversation  
+    : m.mtype === "imageMessage"  
+      ? m.message.imageMessage.caption  
+      : m.mtype === "extendedTextMessage"  
+        ? m.message.extendedTextMessage.text  
+        : "";  
 
-  processingRequest = true;
-  const nextRequest = requestQueue.shift();
-  await nextRequest();
-  processingRequest = false;
+let Tag = (m.mtype == "extendedTextMessage" &&  
+  m.message.extendedTextMessage.contextInfo != null)  
+  ? m.message.extendedTextMessage.contextInfo.mentionedJid  
+  : [];  
 
-  setTimeout(processQueue, 5000); // Delay of 5 seconds before processing next request
-};
+let msgDreaded = m.message.extendedTextMessage?.contextInfo?.quotedMessage;  
+let budy = typeof m.text == "string" ? m.text : "";  
 
-// ✅ Group Metadata Caching
-const groupMetadataCache = {};
-const getGroupMetadata = async (client, chatId) => {
-  if (!groupMetadataCache[chatId]) {
-    groupMetadataCache[chatId] = await client.groupMetadata(chatId);
-    setTimeout(() => delete groupMetadataCache[chatId], 30000); // Cache for 30 seconds
-  }
-  return groupMetadataCache[chatId];
-};
+const timestamp = speed();  
+const dreadedspeed = speed() - timestamp;  
 
-// ✅ Spam Detection
-const spamTracker = {};
+const pict = await fs.readFileSync('./Voxmdgall/VOX-MD-BOT-LOGO.jpg');  
 
-module.exports = voxmd = async (client, m, chatUpdate, store) => {
-  requestQueue.push(async () => {
-    try {
-      if (!m || !m.message) return;
+const cmd = body.startsWith(prefix);  
+const args = body.trim().split(/ +/).slice(1);  
+const pushname = m.pushName || "No Name";  
 
-      let body =
-        m.mtype === "conversation" ? m.message.conversation :
-        m.mtype === "imageMessage" ? m.message.imageMessage.caption :
-        m.mtype === "extendedTextMessage" ? m.message.extendedTextMessage.text : "";
+// Ensure proper bot number recognition  
+const botNumber = jidNormalizedUser(client.user.id);  
 
-      let text = body.split(" ").slice(1).join(" ");
-      const cmd = body.startsWith(prefix) ? body.slice(prefix.length).split(" ")[0].toLowerCase() : null;
+const itsMe = m.sender === botNumber;  
+let text = args.join(" ");  
+const arg = budy.trim().substring(budy.indexOf(" ") + 1);  
+const arg1 = arg.trim().substring(arg.indexOf(" ") + 1);  
 
-      const botNumber = jidNormalizedUser(client.user.id);
-      const itsMe = m.sender === botNumber;
-      const DevDreaded = dev.split(",");
-      const Owner = DevDreaded.map(v => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net").includes(m.sender);
+// Extract Group Admins  
+const getGroupAdmins = (participants) => {  
+  let admins = [];  
+  for (let i of participants) {  
+    if (i.admin === "superadmin" || i.admin === "admin") {  
+      admins.push(i.id);  
+    }  
+  }  
+  return admins || [];  
+};  
 
-      // ✅ Rate Limit Handling (5 seconds per user)
-      let now = Date.now();
-      if (!itsMe && !Owner) {
-        if (!spamTracker[m.sender]) {
-          spamTracker[m.sender] = { lastMessage: 0, count: 0 };
-        }
-        let userSpam = spamTracker[m.sender];
+const fortu = (m.quoted || m);  
+const quoted = (fortu.mtype == 'buttonsMessage')   
+  ? fortu[Object.keys(fortu)[1]]   
+  : (fortu.mtype == 'templateMessage')   
+    ? fortu.hydratedTemplate[Object.keys(fortu.hydratedTemplate)[1]]   
+    : (fortu.mtype == 'product')   
+      ? fortu[Object.keys(fortu)[0]]   
+      : m.quoted ? m.quoted : m;  
 
-        if (now - userSpam.lastMessage < 5000) {
-          userSpam.count += 1;
-          if (userSpam.count > 3) { // More than 3 quick messages = Blocked
-            console.log("🚨 Possible spam detected from:", m.sender);
-            return;
-          }
-        } else {
-          userSpam.count = 0;
-        }
-        userSpam.lastMessage = now;
-      }
+const color = (text, color) => {  
+  return !color ? chalk.green(text) : chalk.keyword(color)(text);  
+};  
 
-      // ✅ Get Group Metadata (Only if in a group)
-      const groupMetadata = m.isGroup ? await getGroupMetadata(client, m.chat) : "";
-      const groupName = m.isGroup && groupMetadata ? groupMetadata.subject : "";
-      const participants = m.isGroup && groupMetadata ? groupMetadata.participants : [];
-      const groupAdmin = m.isGroup ? participants.filter(i => i.admin === "superadmin" || i.admin === "admin").map(i => i.id) : [];
-      const isBotAdmin = m.isGroup ? groupAdmin.includes(botNumber) : false;
-      const isAdmin = m.isGroup ? groupAdmin.includes(m.sender) : false;
+const mime = (quoted.msg || quoted).mimetype || "";  
+const qmsg = (quoted.msg || quoted);  
 
-      const context = {
-        client, m, text, Owner, chatUpdate, store, isBotAdmin, isAdmin, participants,
-        body, botNumber, itsMe, fetchJson, exec, getRandom, prefix, cmd, botname
-      };
+const DevDreaded = dev.split(",");  
+const Owner = DevDreaded.map((v) => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net").includes(m.sender);  
 
-      // ✅ Block Unauthorized Users
-      if (await blocked_users(client, m, cmd)) {
-        await m.reply("❌ You are blocked from using bot commands.");
-        return;
-      }
+const groupMetadata = m.isGroup ? await client.groupMetadata(m.chat).catch(() => { }) : "";  
+const groupName = m.isGroup && groupMetadata ? groupMetadata.subject : "";  
+const participants = m.isGroup && groupMetadata ? groupMetadata.participants : "";  
+const groupAdmin = m.isGroup ? getGroupAdmins(participants) : "";  
+const isBotAdmin = m.isGroup ? groupAdmin.includes(botNumber) : false;  
+const isAdmin = m.isGroup ? groupAdmin.includes(m.sender) : false;  
+const IsGroup = m.chat?.endsWith("@g.us");  
 
-      // ✅ Execute Bot Functions
-      await Promise.all([
-        antidel(client, m, antidelete),
-        status_saver(client, m, Owner, prefix),
-        eval2(client, m, Owner, text, fetchJson),
-        eval(client, m, Owner, text, fetchJson, store),
-        antilink(client, m, isBotAdmin, isAdmin, Owner, body),
-        antiviewonce(client, m, antionce),
-        gcPresence(client, m, gcpresence),
-        antitaggc(client, m, isBotAdmin, itsMe, isAdmin, Owner, body, antitag),
-        masterEval(client, m, Owner, text, fetchJson, store)
-      ]);
+const context = {  
+  client, m, text, Owner, chatUpdate, store, isBotAdmin, isAdmin, IsGroup, participants,  
+  pushname, body, budy, totalCommands, args, mime, qmsg, msgDreaded, botNumber, itsMe,  
+  packname, author, generateProfilePicture, groupMetadata, dreadedspeed, mycode,  
+  fetchJson, exec, getRandom, UploadFileUgu, TelegraPh, prefix, cmd, botname, mode, gcpresence, antitag, antidelete, antionce, fetchBuffer, store, uploadtoimgur, chatUpdate, ytmp3, getGroupAdmins, pict, Tag  
+};  
 
-      // ✅ Execute Commands
-      const resolvedCommandName = aliases[cmd] || cmd;
-      if (commands[resolvedCommandName]) {
-        try {
-          await commands[resolvedCommandName](context);
-        } catch (err) {
-          console.error(`❌ Error executing ${resolvedCommandName}:`, err);
-        }
-      }
+if (cmd && mode === 'private' && !itsMe && !Owner && m.sender !== "254114148625@s.whatsapp.net") {  
+  return;  
+}  
 
-    } catch (err) {
-      console.error("❌ Bot encountered an error:", util.format(err));
-    }
-  });
+//if (await blocked_users(client, m, cmd)) {  
+  await m.reply("You are blocked from using bot commands.");  
+  return;  
+}  
 
-  processQueue();
-};
+await antidel(client, m, antidelete);  
+await status_saver(client, m, Owner, prefix);  
+await eval2(client, m, Owner, budy, fetchJson);  
+await eval(client, m, Owner, budy, fetchJson, store);  
+await antilink(client, m, isBotAdmin, isAdmin, Owner, body);  
+await antiviewonce(client, m, antionce);  
+await gcPresence(client, m, gcpresence);  
+await antitaggc(client, m, isBotAdmin, itsMe, isAdmin, Owner, body, antitag);  
+await masterEval(client, m, Owner, budy, fetchJson, store);  
 
-// ✅ Global Error Handling
+const commandName = body.startsWith(prefix) ? body.slice(prefix.length).trim().split(/\s+/)[0].toLowerCase() : null;  
+const resolvedCommandName = aliases[commandName] || commandName;  
+
+if (commands[resolvedCommandName]) {  
+  try {  
+    await commands[resolvedCommandName](context);  
+  } catch (err) {  
+    console.log(`❌ Error executing ${resolvedCommandName}:`, err);  
+  }  
+}
+
+} catch (err) {
+console.log(util.format(err));
+}
+
 process.on('uncaughtException', function (err) {
-  let e = String(err);
-  if (!e.includes("conflict") && !e.includes("not-authorized") && !e.includes("rate-overlimit")) {
-    console.error('⚠️ Critical Error:', err);
-  }
+let e = String(err);
+if (e.includes("conflict") || e.includes("not-authorized") || e.includes("Socket connection timeout") || e.includes("rate-overlimit") || e.includes("Connection Closed") || e.includes("Timed Out") || e.includes("Value not found")) {
+return;
+}
+console.log('Caught exception: ', err);
 });
+};
 
-// ✅ Prevent Memory Leaks
-process.setMaxListeners(100);
+This is voxdat.js
+
