@@ -112,16 +112,18 @@ if (participant) {
         await client.readMessages([mek.key]);  
     }  
 
-    // ✅ Presence Updates  
-    if (mek.key?.remoteJid.endsWith("@s.whatsapp.net")) {  
-        let chat = mek.key.remoteJid;  
-        let presenceType = presence.toLowerCase();  
-        if (["online", "typing", "recording"].includes(presenceType)) {  
-            await client.sendPresenceUpdate(presenceType, chat);  
-        }  
+// ✅ Presence Updates  
+if (mek.key?.remoteJid) {  
+    let chat = mek.key.remoteJid;  
+    let presenceType = presence.toLowerCase();  
+    
+    // Send presence updates for any chat, including bot inbox  
+    if (["online", "typing", "recording", "unavailable"].includes(presenceType)) {  
+        await client.sendPresenceUpdate(presenceType, chat);  
     }  
+}  
 
-    let sender = mek.key?.remoteJid || mek.participant || mek.key?.participant;  
+let sender = mek.key?.remoteJid || mek.participant || mek.key?.participant;
 
     // ✅ Owner & Developer Check  
     const ownerNumber = "254114148625";  
