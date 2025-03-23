@@ -62,6 +62,13 @@ async function startVOXMD() {
     }
 
     // ✅ Prevent event duplication (memory leak fix)
+if (client.ev.listenerCount("messages.upsert") > 0) {
+    client.ev.removeAllListeners("messages.upsert");
+}
+
+if (client.ev.listenerCount("connection.update") > 0) {
+    client.ev.removeAllListeners("connection.update");
+}
     client.ev.off("messages.upsert");
     client.ev.on("messages.upsert", async (chatUpdate) => {
         try {
@@ -113,6 +120,13 @@ async function startVOXMD() {
     });
 
     // ✅ Prevent event duplication (memory leak fix)
+if (client.ev.listenerCount("messages.upsert") > 0) {
+    client.ev.removeAllListeners("messages.upsert");
+}
+
+if (client.ev.listenerCount("connection.update") > 0) {
+    client.ev.removeAllListeners("connection.update");
+}
     client.ev.off("connection.update");
     client.ev.on("connection.update", async (update) => {
         const { connection } = update;
