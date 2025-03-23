@@ -70,6 +70,7 @@ setInterval(async () => {
     console.error("❌ Error updating bio:", error.message);
   }
 }, 10 * 1000);
+}
 
 // ✅ Prevent duplicate event listeners
 client.ev.removeAllListeners("messages.upsert");
