@@ -1,11 +1,12 @@
 const axios = require("axios");
+const fs = require("fs");
 
 module.exports = async (context) => {
-    const { client, m, text, mime, quoted } = context;
+    const { client, m, mime, quoted } = context;
 
-    // Check if the message contains an image or if the user replied to one
-    const isImage = m.hasMedia && mime.startsWith("image/");
-    const isQuotedImage = quoted && quoted.mtype === "imageMessage";
+    // Check if the message contains an image or the user replied to an image
+    const isImage = m.type === "imageMessage";
+    const isQuotedImage = quoted && quoted.type === "imageMessage";
 
     if (!isImage && !isQuotedImage) {
         return m.reply("❌ *Please send an image with the caption `.removebg` or reply to an image with `.removebg` to remove its background!*");
@@ -17,20 +18,24 @@ module.exports = async (context) => {
             text: "🖼️ *Removing background... Please wait!* ⏳" 
         });
 
-        // Download the image (either from the original message or a quoted reply)
-        const media = isImage ? await m.downloadMediaMessage() : await quoted.downloadMediaMessage();
+        // Download the image (either from the sent message or a quoted reply)
+        const media = isImage ? await client.downloadMediaMessage(m) : await client.downloadMediaMessage(quoted);
 
-        // Convert image to buffer and upload to API
-        const formData = new FormData();
-        formData.append("image", media, { filename: "image.png" });
+        // Save the image temporarily
+        const filePath = "/tmp/image.png";
+        fs.writeFileSync(filePath, media);
 
-        const apiUrl = "https://fastrestapis.fasturl.cloud/aiimage/removebg?type=auto&shadow=false";
-        const response = await axios.post(apiUrl, formData, {
+        // Send image to RemoveBG API
+        const apiUrl = `https://fastrestapis.fasturl.cloud/aiimage/removebg?type=auto&shadow=false`;
+        const response = await axios.post(apiUrl, fs.createReadStream(filePath), {
             headers: { "Content-Type": "multipart/form-data" },
             responseType: "arraybuffer",
         });
 
-        // Send the processed image
+        // Delete temp image after processing
+        fs.unlinkSync(filePath);
+
+        // Send the processed image back
         await client.sendMessage(
             m.chat,
             {
