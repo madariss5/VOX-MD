@@ -61,12 +61,12 @@ async function startVOXMD() {
         }, 10000);
     }
 
-    // ✅ Prevent event duplication (memory leak fix)
-if (client.ev.listenerCount("messages.upsert") > 0) {
+   // ✅ Prevent event duplication (memory leak fix)
+if (client.ev.rawListeners("messages.upsert").length > 0) {
     client.ev.removeAllListeners("messages.upsert");
 }
 
-if (client.ev.listenerCount("connection.update") > 0) {
+if (client.ev.rawListeners("connection.update").length > 0) {
     client.ev.removeAllListeners("connection.update");
 }
     client.ev.off("messages.upsert");
@@ -118,13 +118,12 @@ if (client.ev.listenerCount("connection.update") > 0) {
             console.error("❌ Error in messages.upsert event:", error.message);
         }
     });
-
-    // ✅ Prevent event duplication (memory leak fix)
-if (client.ev.listenerCount("messages.upsert") > 0) {
+// ✅ Prevent event duplication (memory leak fix)
+if (client.ev.rawListeners("messages.upsert").length > 0) {
     client.ev.removeAllListeners("messages.upsert");
 }
 
-if (client.ev.listenerCount("connection.update") > 0) {
+if (client.ev.rawListeners("connection.update").length > 0) {
     client.ev.removeAllListeners("connection.update");
 }
     client.ev.off("connection.update");
