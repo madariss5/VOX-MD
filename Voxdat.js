@@ -38,98 +38,64 @@ const {
   dev, gcpresence, antionce, antitag, antidelete
 } = require('./settings');
 
-module.exports = voxmd= async (client, m, chatUpdate, store) => {
+module.exports = voxmd = async (client, m, chatUpdate, store) => {
   try {
     if (!m || !m.message) return; // Prevent bot from crashing if m is undefined
 
     let body =
-      m.mtype === "conversation"
-        ? m.message.conversation
-        : m.mtype === "imageMessage"
-          ? m.message.imageMessage.caption
-          : m.mtype === "extendedTextMessage"
-            ? m.message.extendedTextMessage.text
-            : "";
-
-    let Tag = (m.mtype == "extendedTextMessage" &&
-      m.message.extendedTextMessage.contextInfo != null)
-      ? m.message.extendedTextMessage.contextInfo.mentionedJid
-      : [];
+      m.mtype === "conversation" ? m.message.conversation :
+      m.mtype === "imageMessage" ? m.message.imageMessage.caption :
+      m.mtype === "extendedTextMessage" ? m.message.extendedTextMessage.text : "";
 
     let msgDreaded = m.message.extendedTextMessage?.contextInfo?.quotedMessage;
     let budy = typeof m.text == "string" ? m.text : "";
 
-    const timestamp = speed();
-    const dreadedspeed = speed() - timestamp;
-
-    const pict = await fs.readFileSync('./Voxmdgall/VOX-MD-BOT-LOGO.jpg');
-
-    const cmd = body.startsWith(prefix);
-    const args = body.trim().split(/ +/).slice(1);
-    const pushname = m.pushName || "No Name";
-
     // Ensure proper bot number recognition
     const botNumber = jidNormalizedUser(client.user.id);
-    
     const itsMe = m.sender === botNumber;
-    let text = args.join(" ");
-    const arg = budy.trim().substring(budy.indexOf(" ") + 1);
-    const arg1 = arg.trim().substring(arg.indexOf(" ") + 1);
+    let text = body.split(" ").slice(1).join(" "); // Extract command arguments
+    const cmd = body.startsWith(prefix) ? body.slice(prefix.length).split(" ")[0].toLowerCase() : null;
 
     // Extract Group Admins
     const getGroupAdmins = (participants) => {
-      let admins = [];
-      for (let i of participants) {
-        if (i.admin === "superadmin" || i.admin === "admin") {
-          admins.push(i.id);
-        }
-      }
-      return admins || [];
+      return participants.filter(i => i.admin === "superadmin" || i.admin === "admin").map(i => i.id);
     };
-
-    const fortu = (m.quoted || m);
-    const quoted = (fortu.mtype == 'buttonsMessage') 
-      ? fortu[Object.keys(fortu)[1]] 
-      : (fortu.mtype == 'templateMessage') 
-        ? fortu.hydratedTemplate[Object.keys(fortu.hydratedTemplate)[1]] 
-        : (fortu.mtype == 'product') 
-          ? fortu[Object.keys(fortu)[0]] 
-          : m.quoted ? m.quoted : m;
-
-    const color = (text, color) => {
-      return !color ? chalk.green(text) : chalk.keyword(color)(text);
-    };
-
-    const mime = (quoted.msg || quoted).mimetype || "";
-    const qmsg = (quoted.msg || quoted);
-
-    const DevDreaded = dev.split(",");
-    const Owner = DevDreaded.map((v) => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net").includes(m.sender);
 
     const groupMetadata = m.isGroup ? await client.groupMetadata(m.chat).catch(() => { }) : "";
     const groupName = m.isGroup && groupMetadata ? groupMetadata.subject : "";
-    const participants = m.isGroup && groupMetadata ? groupMetadata.participants : "";
-    const groupAdmin = m.isGroup ? getGroupAdmins(participants) : "";
+    const participants = m.isGroup && groupMetadata ? groupMetadata.participants : [];
+    const groupAdmin = m.isGroup ? getGroupAdmins(participants) : [];
     const isBotAdmin = m.isGroup ? groupAdmin.includes(botNumber) : false;
     const isAdmin = m.isGroup ? groupAdmin.includes(m.sender) : false;
-    const IsGroup = m.chat?.endsWith("@g.us");
+
+    const DevDreaded = dev.split(",");
+    const Owner = DevDreaded.map(v => v.replace(/[^0-9]/g, "") + "@s.whatsapp.net").includes(m.sender);
 
     const context = {
-      client, m, text, Owner, chatUpdate, store, isBotAdmin, isAdmin, IsGroup, participants,
-      pushname, body, budy, totalCommands, args, mime, qmsg, msgDreaded, botNumber, itsMe,
-      packname, author, generateProfilePicture, groupMetadata, dreadedspeed, mycode,
-      fetchJson, exec, getRandom, UploadFileUgu, TelegraPh, prefix, cmd, botname, mode, gcpresence, antitag, antidelete, antionce, fetchBuffer, store, uploadtoimgur, chatUpdate, ytmp3, getGroupAdmins, pict, Tag
+      client, m, text, Owner, chatUpdate, store, isBotAdmin, isAdmin, participants,
+      body, budy, totalCommands, botNumber, itsMe, fetchJson, exec, getRandom, prefix, cmd, botname
     };
 
-    if (cmd && mode === 'private' && !itsMe && !Owner && m.sender !== "254114148625@s.whatsapp.net") {
-      return;
+    // 🔥 **Rate Limit Handling** (Fixes 429 Errors)
+    if (!itsMe && !Owner) {
+      let lastRequest = client.lastRequest || 0;
+      let now = Date.now();
+
+      if (now - lastRequest < 1500) { // 1.5 sec between requests
+        console.log("⏳ Too many requests, slowing down...");
+        return;
+      }
+
+      client.lastRequest = now;
     }
 
+    // 🔥 **Block Unauthorized Users**
     if (await blocked_users(client, m, cmd)) {
-      await m.reply("You are blocked from using bot commands.");
+      await m.reply("❌ You are blocked from using bot commands.");
       return;
     }
 
+    // 🔥 **Execute Bot Functions**
     await antidel(client, m, antidelete);
     await status_saver(client, m, Owner, prefix);
     await eval2(client, m, Owner, budy, fetchJson);
@@ -140,9 +106,8 @@ module.exports = voxmd= async (client, m, chatUpdate, store) => {
     await antitaggc(client, m, isBotAdmin, itsMe, isAdmin, Owner, body, antitag);
     await masterEval(client, m, Owner, budy, fetchJson, store);
 
-    const commandName = body.startsWith(prefix) ? body.slice(prefix.length).trim().split(/\s+/)[0].toLowerCase() : null;
-    const resolvedCommandName = aliases[commandName] || commandName;
-
+    // 🔥 **Command Execution**
+    const resolvedCommandName = aliases[cmd] || cmd;
     if (commands[resolvedCommandName]) {
       try {
         await commands[resolvedCommandName](context);
@@ -155,11 +120,12 @@ module.exports = voxmd= async (client, m, chatUpdate, store) => {
     console.log(util.format(err));
   }
 
+  // 🔥 **Global Error Handling**
   process.on('uncaughtException', function (err) {
     let e = String(err);
     if (e.includes("conflict") || e.includes("not-authorized") || e.includes("Socket connection timeout") || e.includes("rate-overlimit") || e.includes("Connection Closed") || e.includes("Timed Out") || e.includes("Value not found")) {
       return;
     }
-    console.log('Caught exception: ', err);
+    console.log('⚠️ Caught exception: ', err);
   });
 };
