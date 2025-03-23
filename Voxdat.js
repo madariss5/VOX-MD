@@ -81,7 +81,7 @@ module.exports = voxmd = async (client, m, chatUpdate, store) => {
       let lastRequest = client.lastRequest || 0;
       let now = Date.now();
 
-      if (now - lastRequest < 2000) { // 2 seconds between requests
+      if (now - lastRequest < 5000) { // 2 seconds between requests
         console.log("⏳ Too many requests, slowing down...");
         return;
       }
