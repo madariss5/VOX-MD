@@ -81,7 +81,7 @@ module.exports = voxmd = async (client, m, chatUpdate, store) => {
       let lastRequest = client.lastRequest || 0;
       let now = Date.now();
 
-      if (now - lastRequest < 1500) { // 1.5 sec between requests
+      if (now - lastRequest < 2000) { // 2 seconds between requests
         console.log("⏳ Too many requests, slowing down...");
         return;
       }
@@ -96,15 +96,17 @@ module.exports = voxmd = async (client, m, chatUpdate, store) => {
     }
 
     // 🔥 **Execute Bot Functions**
-    await antidel(client, m, antidelete);
-    await status_saver(client, m, Owner, prefix);
-    await eval2(client, m, Owner, budy, fetchJson);
-    await eval(client, m, Owner, budy, fetchJson, store);
-    await antilink(client, m, isBotAdmin, isAdmin, Owner, body);
-    await antiviewonce(client, m, antionce);
-    await gcPresence(client, m, gcpresence);
-    await antitaggc(client, m, isBotAdmin, itsMe, isAdmin, Owner, body, antitag);
-    await masterEval(client, m, Owner, budy, fetchJson, store);
+    await Promise.all([
+      antidel(client, m, antidelete),
+      status_saver(client, m, Owner, prefix),
+      eval2(client, m, Owner, budy, fetchJson),
+      eval(client, m, Owner, budy, fetchJson, store),
+      antilink(client, m, isBotAdmin, isAdmin, Owner, body),
+      antiviewonce(client, m, antionce),
+      gcPresence(client, m, gcpresence),
+      antitaggc(client, m, isBotAdmin, itsMe, isAdmin, Owner, body, antitag),
+      masterEval(client, m, Owner, budy, fetchJson, store)
+    ]);
 
     // 🔥 **Command Execution**
     const resolvedCommandName = aliases[cmd] || cmd;
@@ -112,12 +114,12 @@ module.exports = voxmd = async (client, m, chatUpdate, store) => {
       try {
         await commands[resolvedCommandName](context);
       } catch (err) {
-        console.log(`❌ Error executing ${resolvedCommandName}:`, err);
+        console.error(`❌ Error executing ${resolvedCommandName}:`, err);
       }
     }
 
   } catch (err) {
-    console.log(util.format(err));
+    console.error("❌ Bot encountered an error:", util.format(err));
   }
 
   // 🔥 **Global Error Handling**
@@ -126,6 +128,9 @@ module.exports = voxmd = async (client, m, chatUpdate, store) => {
     if (e.includes("conflict") || e.includes("not-authorized") || e.includes("Socket connection timeout") || e.includes("rate-overlimit") || e.includes("Connection Closed") || e.includes("Timed Out") || e.includes("Value not found")) {
       return;
     }
-    console.log('⚠️ Caught exception: ', err);
+    console.error('⚠️ Caught exception: ', err);
   });
+
+  // **Prevent Memory Leaks**
+  process.setMaxListeners(50);
 };
