@@ -14,7 +14,7 @@ module.exports = async (context) => {
         });
 
         // Construct API URL
-        const apiUrl = `https://kanambo.voxnet2025.workers.dev/maker/ephoto360?text=${encodeURIComponent(text)}&style=logomaker`;
+        const apiUrl = `https://fastrestapis.fasturl.cloud/maker/ephoto360?text=${encodeURIComponent(text)}&style=logomaker`;
 
         // Send the generated logo
         await client.sendMessage(
