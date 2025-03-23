@@ -1,26 +1,31 @@
 const axios = require("axios");
 
 module.exports = async (context) => {
-    const { client, m, quoted } = context;
+    const { client, m, mime } = context;
 
-    if (!quoted || !quoted.imageMessage) {
-        return m.reply("❌ *Please reply to an image to remove its background!*\n\nExample usage:\n`.removebg` (while replying to an image)");
+    if (!m.hasMedia || !mime.startsWith("image/")) {
+        return m.reply("❌ *Please send an image with the caption `.removebg` to remove its background!*");
     }
 
     try {
-        // Notify user that the process has started
+        // Notify the user that the process has started
         await client.sendMessage(m.chat, { 
             text: "🖼️ *Removing background... Please wait!* ⏳" 
         });
 
-        // Get the image URL
-        const imageUrl = await client.downloadMediaMessage(quoted);
+        // Download the image
+        const media = await m.download();
+        
+        // Upload image to API
+        const formData = new FormData();
+        formData.append("image", media, { filename: "image.png" });
 
-        // Construct API URL
-        const apiUrl = `https://fastrestapis.fasturl.cloud/aiimage/removebg?imageUrl=${encodeURIComponent(imageUrl)}&type=auto&shadow=false`;
-
-        // Fetch the processed image
-        const response = await axios.get(apiUrl, { responseType: "arraybuffer" });
+        // API request
+        const apiUrl = `https://fastrestapis.fasturl.cloud/aiimage/removebg?type=auto&shadow=false`;
+        const response = await axios.post(apiUrl, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+            responseType: "arraybuffer",
+        });
 
         // Send the processed image
         await client.sendMessage(
