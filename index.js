@@ -261,3 +261,12 @@ app.listen(port, () => console.log("🚀 Server listening on: http://localhost:"
 
 startVOXMD();
 
+modul.exports = startVOXMD
+
+let file = require.resolve(__filename);
+fs.watchFile(file, () => {
+  fs.unwatchFile(file);
+  console.log(chalk.redBright(`Update ${__filename}`));
+  delete require.cache[file];
+  require(file);
+}); 
