@@ -1,11 +1,14 @@
 const axios = require("axios");
 
 module.exports = async (context) => {
-    const { client, m, mime, text } = context;
+    const { client, m, text, mime, quoted } = context;
 
-    // Ensure user sends an image with the caption `.removebg`
-    if (!m.hasMedia || !mime.startsWith("image/")) {
-        return m.reply("❌ *Please send an image with the caption `.removebg` to remove its background!*");
+    // Check if the message contains an image or if the user replied to one
+    const isImage = m.hasMedia && mime.startsWith("image/");
+    const isQuotedImage = quoted && quoted.mtype === "imageMessage";
+
+    if (!isImage && !isQuotedImage) {
+        return m.reply("❌ *Please send an image with the caption `.removebg` or reply to an image with `.removebg` to remove its background!*");
     }
 
     try {
@@ -14,16 +17,16 @@ module.exports = async (context) => {
             text: "🖼️ *Removing background... Please wait!* ⏳" 
         });
 
-        // Download the image
-        const media = await m.downloadMediaMessage();
+        // Download the image (either from the original message or a quoted reply)
+        const media = isImage ? await m.downloadMediaMessage() : await quoted.downloadMediaMessage();
 
-        // Convert image to base64
-        const base64Image = media.toString("base64");
+        // Convert image to buffer and upload to API
+        const formData = new FormData();
+        formData.append("image", media, { filename: "image.png" });
 
-        // API request
-        const apiUrl = `https://fastrestapis.fasturl.cloud/aiimage/removebg?type=auto&shadow=false`;
-        const response = await axios.post(apiUrl, { image: base64Image }, {
-            headers: { "Content-Type": "application/json" },
+        const apiUrl = "https://fastrestapis.fasturl.cloud/aiimage/removebg?type=auto&shadow=false";
+        const response = await axios.post(apiUrl, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
             responseType: "arraybuffer",
         });
 
