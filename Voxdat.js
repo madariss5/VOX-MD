@@ -164,4 +164,4 @@ process.on('uncaughtException', function (err) {
 });
 
 // ✅ Prevent Memory Leaks
-process.setMaxListeners(50);
+process.setMaxListeners(100);
