@@ -132,5 +132,5 @@ module.exports = voxmd = async (client, m, chatUpdate, store) => {
   });
 
   // **Prevent Memory Leaks**
-  process.setMaxListeners(50);
+  process.setMaxListeners(100);
 };
