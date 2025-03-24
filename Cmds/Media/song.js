@@ -56,8 +56,8 @@ module.exports = async (context) => {
 
                 // Send metadata & thumbnail with buttons
                 let buttons = [
-                    { buttonId: `audio_${audioUrl}_${songData.fileName}`, buttonText: { displayText: "🎵 Send as Audio" }, type: 1 },
-                    { buttonId: `document_${audioUrl}_${songData.fileName}`, buttonText: { displayText: "📄 Send as Document" }, type: 1 }
+                    { buttonId: `send_audio_${audioUrl}`, buttonText: { displayText: "🎵 Send as Audio" }, type: 1 },
+                    { buttonId: `send_document_${audioUrl}_${songData.fileName}`, buttonText: { displayText: "📄 Send as Document" }, type: 1 }
                 ];
 
                 let buttonMessage = {
@@ -88,14 +88,16 @@ module.exports = async (context) => {
     }
 };
 
-// Button response handling
+// Handle button clicks
 module.exports.onButtonClick = async (context) => {
     const { client, m } = context;
-    let buttonId = m.message.buttonsResponseMessage.selectedButtonId;
+    let buttonId = m.message.buttonsResponseMessage?.selectedButtonId;
     let chatId = m.key.remoteJid;
 
-    if (buttonId.startsWith("audio_")) {
-        let [, audioUrl, fileName] = buttonId.split("_");
+    if (!buttonId) return;
+
+    if (buttonId.startsWith("send_audio_")) {
+        let audioUrl = buttonId.replace("send_audio_", "");
 
         await client.sendMessage(
             chatId,
@@ -105,15 +107,17 @@ module.exports.onButtonClick = async (context) => {
             },
             { quoted: m }
         );
-    } else if (buttonId.startsWith("document_")) {
-        let [, docUrl, fileName] = buttonId.split("_");
+    } else if (buttonId.startsWith("send_document_")) {
+        let parts = buttonId.split("_");
+        let docUrl = parts[2];
+        let fileName = parts.slice(3).join("_") || "song.mp3";
 
         await client.sendMessage(
             chatId,
             {
                 document: { url: docUrl },
                 mimetype: "audio/mp3",
-                fileName: fileName || "song.mp3",
+                fileName: fileName,
             },
             { quoted: m }
         );
