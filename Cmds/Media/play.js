@@ -18,6 +18,7 @@ module.exports = async (context) => {
         let apis = [
             `https://apis.davidcyriltech.my.id/youtube/mp3?url=${link}`,
 `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${link}`,
+`https://kanambo.voxnet2025.workers.dev/downup/ytmp3?url=${link}&quality=128kbps&server=server2`,
 `https://api.ryzendesu.vip/api/downloader/ytmp3?url=${link}`
         ];
 
@@ -49,7 +50,7 @@ module.exports = async (context) => {
                         { quoted: m }
                     );
 
-                    await m.reply("📤 *Sending your audio and file...*");
+                   
 
                     // Send as an audio file
                     await client.sendMessage(
