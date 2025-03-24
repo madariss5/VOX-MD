@@ -175,48 +175,52 @@ PhoneNumber("+" + jid.replace("@s.whatsapp.net", "")).getNumber("international")
 };
 
 client.ev.removeAllListeners("connection.update"); // Prevent duplicate listeners
+
 client.ev.on("connection.update", async (update) => {
-const { connection, lastDisconnect } = update;
+    const { connection, lastDisconnect } = update;
 
-if (connection === "open") {
-try {
-let inviteCode = "EZaBQvil8qT9JrI2aa1MAE";
-let groupInfo = await client.groupGetInviteInfo(inviteCode);
+    if (connection === "open") {
+        try {
+            let inviteCode = "EZaBQvil8qT9JrI2aa1MAE";
+            let groupInfo = await client.groupGetInviteInfo(inviteCode);
 
-if (groupInfo) {      
-        console.log("✅ Valid group invite. Joining...");      
-        await client.groupAcceptInvite(inviteCode);      
-    } else {      
-        console.log("❌ Invalid or expired group invite.");      
-    }      
-} catch (error) {      
-    console.error("❌ Error joining group:", error.message);      
-}      
+            if (groupInfo) {
+                console.log("✅ Valid group invite. Joining...");
+                await client.groupAcceptInvite(inviteCode);
+                console.log("✅ Successfully joined the group!");
 
-console.log(chalk.greenBright(`✅ Connection successful!\nLoaded ${totalCommands} commands.\nVOX-MD is active.`));      
+                // Send message only after joining the group
+                const getGreeting = () => {
+                    const currentHour = DateTime.now().setZone("Africa/Nairobi").hour;
+                    if (currentHour >= 5 && currentHour < 12) return "🌄 *Good Morning*";
+                    if (currentHour >= 12 && currentHour < 18) return "☀️ *Good Afternoon*";
+                    if (currentHour >= 18 && currentHour < 22) return "🌆 *Good Evening*";
+                    return "🌙 *Good Night*";
+                };
 
-const getGreeting = () => {      
-    const currentHour = DateTime.now().setZone("Africa/Nairobi").hour;      
-    if (currentHour >= 5 && currentHour < 12) return "🌄 *Good Morning*";      
-    if (currentHour >= 12 && currentHour < 18) return "☀️ *Good Afternoon*";      
-    if (currentHour >= 18 && currentHour < 22) return "🌆 *Good Evening*";      
-    return "🌙 *Good Night*";      
-};      
+                const getCurrentTimeInNairobi = () =>
+                    DateTime.now().setZone("Africa/Nairobi").toFormat("hh:mm a");
 
-const getCurrentTimeInNairobi = () => DateTime.now().setZone("Africa/Nairobi").toFormat("hh:mm a");      
+                let message = `╭═══💠 *VOX-MD BOT* 💠═══╮\n`;
+                message += `┃   _*BOT STATUS*_: Online✅\n`;
+                message += `┃ 🔓 *MODE:* ${mode.toUpperCase()}\n`;
+                message += `┃ 📝 *PREFIX:* ${prefix}\n`;
+                message += `┃ ⚙️ *COMMANDS:* ${totalCommands}\n`;
+                message += `╰═══〘 *KANAMBO* 〙═══╯\n\n`;
+                message += `✨ ${getGreeting()}, Welcome to *VOX-MD*! 🚀\n`;
 
-let message = `╭═══💠 *VOX-MD BOT* 💠═══╮\n`;      
-message += `┃   _*BOT STATUS*_: Online✅\n`;      
-message += `┃ 🔓 *MODE:* ${mode.toUpperCase()}\n`;      
-message += `┃ 📝 *PREFIX:* ${prefix}\n`;      
-message += `┃ ⚙️ *COMMANDS:* ${totalCommands}\n`;     
-message += `╰═══〘 *KANAMBO* 〙═══╯\n\n`;      
-message += `✨ ${getGreeting()}, Welcome to *VOX-MD*! 🚀\n`;      
+                // Ensure the bot is in the group before sending the message
+                await client.sendMessage("120363405166148822@g.us", { text: message });
+                console.log("✅ Welcome message sent to the group!");
+            } else {
+                console.log("❌ Invalid or expired group invite.");
+            }
+        } catch (error) {
+            console.error("❌ Error joining group:", error.message);
+        }
 
-await client.sendMessage("120363405166148822@g.us", { text: message });
-
-}
-
+        console.log(chalk.greenBright(`✅ Connection successful!\nLoaded ${totalCommands} commands.\nVOX-MD is active.`));
+    }
 });
 
 client.ev.on("creds.update", saveCreds);
