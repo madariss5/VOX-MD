@@ -21,7 +21,7 @@
   "author": "Fortunatus",
   "license": "MIT",
   "dependencies": {
-    "@whiskeysockets/baileys": "git+https://github.com/Fortunatusmokaya/baileys.git",
+    "@whiskeysockets/baileys": "^6.7.12",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@distube/ytdl-core": "^4.15.1",
     "@hapi/boom": "^10.0.0",
