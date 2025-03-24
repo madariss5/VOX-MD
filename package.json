@@ -1,5 +1,5 @@
 {
-  "name": "DREADED-V2",
+  "name": "VOX-MD",
   "version": "2.0.0",
   "description": "WhatsApp Multi Device Bot",
   "main": "index.js",
@@ -29,7 +29,7 @@
     "@adiwajshing/keyed-db": "^0.2.4",
     "@distube/ytdl-core": "^4.15.1",
     "@hapi/boom": "^10.0.0",
-
+    "@vitalets/google-translate-api": "^9.2.0",
     "@shineiichijo/marika": "^3.0.0",
 "@google/generative-ai":"^0.1.3",
       "canvacord": "^5.4.9",
