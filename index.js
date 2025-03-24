@@ -131,17 +131,21 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
     } catch (error) {}
 });
 
-// ✅ Handle unhandled rejections & errors
+// ✅ Handle unhandled promise rejections
 const unhandledRejections = new Map();
+
 process.on("unhandledRejection", (reason, promise) => {
-unhandledRejections.set(promise, reason);
-console.log("Unhandled Rejection at:", promise, "reason:", reason);
+    unhandledRejections.set(promise, reason);
+    console.error("❌ Unhandled Rejection at:", promise, "\n🔍 Reason:", reason);
 });
+
 process.on("rejectionHandled", (promise) => {
-unhandledRejections.delete(promise);
+    unhandledRejections.delete(promise);
 });
-process.on("Something went wrong", function (err) {
-console.log("Caught exception: ", err);
+
+// ✅ Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+    console.error("⚠️ Uncaught Exception:", err);
 });
 
 // ✅ Decode JID function
