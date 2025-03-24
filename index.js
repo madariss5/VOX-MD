@@ -67,7 +67,7 @@ if (autobio === "true") {
                 `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi", weekday: "long" })}`
             );
         } catch (error) {}
-    }, 10 * 1000);
+    }, 5 * 10 * 1000);
 }
 
 // ✅ Prevent duplicate event listeners
@@ -88,7 +88,7 @@ client.ev.on("messages.upsert", async (chatUpdate) => {
         if (autolike?.trim().toLowerCase() === "true" && mek.key?.remoteJid === "status@broadcast") {
             try {
                 const mokayas = await client.decodeJid(client.user.id);
-                const reactEmoji = "💓"; // Custom emoji
+                const reactEmoji = "🥷"; // Custom emoji
                 const participant = mek.key.participant || mek.participant || mek.key.remoteJid;
 
                 if (participant) {
