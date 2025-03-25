@@ -98,8 +98,7 @@ m.reply = (text, chatId = m.chat, options = {}) => {
     externalAdReply: {
         title: `✨ 𝗩𝗢𝗫-𝗠𝗗 𝗕𝗢𝗧 ✨`,
         body: `By KANAMBO 💠`,
-        previewType: "NONE",
-        thumbnailUrl: "https://chat.whatsapp.com/EZaBQvil8qT9JrI2aa1MAE", // WhatsApp link as thumbnail
+        previewType: "Kali",
         sourceUrl: "https://github.com/Vox-Net/VOX-MD" // Clickable link
     
           }
