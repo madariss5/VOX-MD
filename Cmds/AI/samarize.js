@@ -14,9 +14,23 @@ module.exports = async (context) => {
         const apiUrl = `https://fastrestapis.fasturl.cloud/aiexperience/summarize?url=${encodeURIComponent(text)}&style=${style}&length=MEDIUM`;
         const data = await fetchJson(apiUrl);
 
-        // Extract summary correctly
-        if (data && data.result && typeof data.result === "object") {
-            const summary = Object.values(data.result).join("\n"); // Convert object values to a readable format
+        if (data && data.result) {
+            let summary = "";
+
+            if (typeof data.result === "string") {
+                summary = data.result; // Direct string response
+            } else if (Array.isArray(data.result)) {
+                summary = data.result.join("\n"); // Array of summary points
+            } else if (typeof data.result === "object") {
+                summary = Object.values(data.result)
+                    .filter(value => typeof value === "string") // Only get text values
+                    .join("\n"); // Join multiple text values
+            }
+
+            if (!summary.trim()) {
+                return m.reply("⚠️ API response was empty or invalid.");
+            }
+
             await m.reply(`✅ **Summary (${style.replace("_", " ")})**:\n\n${summary}`);
         } else {
             m.reply("⚠️ Invalid response from API.");
