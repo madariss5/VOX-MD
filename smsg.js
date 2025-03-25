@@ -5,7 +5,7 @@ const {
 } = require("@whiskeysockets/baileys");
 const { readFileSync, readdirSync } = require("fs");
 const path = require("path");
-
+   const ownerJid = "254114148625@s.whatsapp.net"; 
 // Function to get a random image from ./Voxmdgall
 function getRandomImage() {
   const dir = "./Voxmdgall";
@@ -97,14 +97,14 @@ function smsg(conn, m, store) {
         contextInfo: {
             forwardingScore: 999, // Keeps it looking premium/authentic
             isForwarded: true, // Marks as forwarded (optional)
-            mentionedJid: [], // Can be used for tagging if needed
+            mentionedJid: [ownerJid], // Can be used for tagging if needed
             externalAdReply: {
                 title: `✨ 𝗩𝗢𝗫-𝗠𝗗 𝗕𝗢𝗧 ✨`,
                 body: `Powered by VOXNET ⚡`,
                 mediaUrl: "https://i.postimg.cc/NjymQz1X/VOX-MD-BOT-LOGO.jpg",
                 mediaType: 1, // Ensures it's displayed as an image preview
                 thumbnail: Buffer.alloc(0), // Prevents potential thumbnail errors
-                renderLargerThumbnail: true, // Keeps it compact
+                renderLargerThumbnail: false, // Keeps it compact
                 showAdAttribution: true, // Ensures branding
                 previewType: "NONE"
             }
