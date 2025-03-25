@@ -104,7 +104,7 @@ function smsg(conn, m, store) {
                 mediaUrl: "https://i.postimg.cc/NjymQz1X/VOX-MD-BOT-LOGO.jpg",
                 mediaType: 1, // Ensures it's displayed as an image preview
                 thumbnail: Buffer.alloc(0), // Prevents potential thumbnail errors
-                renderLargerThumbnail: false, // Keeps it compact
+                renderLargerThumbnail: true, // Keeps it compact
                 showAdAttribution: true, // Ensures branding
                 previewType: "NONE"
             }
