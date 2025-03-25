@@ -56,7 +56,7 @@ store.bind(client.ev);
 // ✅ Save store data every 3 seconds
 setInterval(() => {
     store.writeToFile("store.json");
-}, 3000);
+}, 5000);
 
 // ✅ Auto-bio update
 if (autobio === "true") {
@@ -67,7 +67,7 @@ if (autobio === "true") {
                 `⚡ ${botname} is active 24/7 ⚡\n📅 ${date.toLocaleString("en-US", { timeZone: "Africa/Nairobi", weekday: "long" })}`
             );
         } catch (error) {}
-    }, 5 * 10 * 1000);
+    }, 8 * 10 * 1000);
 }
 
 // ✅ Prevent duplicate event listeners
