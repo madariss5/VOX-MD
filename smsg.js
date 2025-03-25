@@ -86,27 +86,33 @@ function smsg(conn, m, store) {
   if (m.msg.url) m.download = () => conn.downloadMediaMessage(m.msg);
   m.text = m.msg.text || m.msg.caption || m.message.conversation || m.msg.contentText || m.msg.selectedDisplayText || m.msg.title || "";
 
-  // Reply function with footer
-m.reply = (text, chatId = m.chat, options = {}) => {
+  // Reply function with updated footer
+  m.reply = (text, chatId = m.chat, options = {}) => {
     return conn.sendMessage(chatId, 
       {
-        text: `\n${text}\n\n╭═══〘✨ 𝗩𝗢𝗫-𝗠𝗗 ✨〙═══╮\n` +
+        text: `\n${text}\n\n╭───〘✨ 𝗩𝗢𝗫-𝗠𝗗 ✨〙───╮\n` +
               `┃ 👤 *𝗔𝘂𝘁𝗵𝗼𝗿:* 𝙆𝘼𝙉𝘼𝙈𝘽𝙊\n` +
-              `┃ ⚡ *𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗕𝘆:* 𝘾𝗼𝗿𝙥. 𝘝𝙊𝙓𝙉𝙀𝙏.𝙄𝙉𝘾\n` +
-              `╰═════════════════╯`,
+              `┃ 🔹 *𝗣𝗼𝘄𝗲𝗿𝗲𝗱 𝗕𝘆:* 𝗩𝗢𝗫𝗡𝗘𝗧\n` +
+              `╰──────────────────╯`,
         contextInfo: {
-    externalAdReply: {
-        title: `✨ 𝗩𝗢𝗫-𝗠𝗗 𝗕𝗢𝗧 ✨`,
-        body: `By KANAMBO 💠`,
-        previewType: "Kali",
-        sourceUrl: "https://github.com/Vox-Net/VOX-MD" // Clickable link
-    
-          }
+            forwardingScore: 999, // Keeps it looking premium/authentic
+            isForwarded: true, // Marks as forwarded (optional)
+            mentionedJid: [], // Can be used for tagging if needed
+            externalAdReply: {
+                title: `✨ 𝗩𝗢𝗫-𝗠𝗗 𝗕𝗢𝗧 ✨`,
+                body: `Powered by VOXNET ⚡`,
+                mediaUrl: "https://i.postimg.cc/NjymQz1X/VOX-MD-BOT-LOGO.jpg",
+                mediaType: 1, // Ensures it's displayed as an image preview
+                thumbnail: Buffer.alloc(0), // Prevents potential thumbnail errors
+                renderLargerThumbnail: false, // Keeps it compact
+                showAdAttribution: true, // Ensures branding
+                previewType: "NONE"
+            }
         }
       }, 
       { quoted: m, ...options }
     );
-};
+  };
 
   m.copy = () => exports.smsg(conn, M.fromObject(M.toObject(m)));
 
