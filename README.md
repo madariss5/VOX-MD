@@ -413,7 +413,6 @@ Click the icon below to join our official WhatsApp group for updates and support
 Need direct support? Click below to chat with the owner on WhatsApp.  
 
 [![Contact Owner](https://img.shields.io/badge/Chat%20on%20WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/254114148625)
-
 # ✨ VOX-MD CREDITS  
 
 🚀 **Special Thanks & Acknowledgments**  
@@ -423,7 +422,7 @@ Need direct support? Click below to chat with the owner on WhatsApp.
 <table align="center">
 <tr>
     <td align="center"><strong>👑 Kanambo</strong><br>Owner & Developer<br>
-        <a href="https://github.com/Kanambp">
+        <a href="https://github.com/Kanambo">
             <img src="https://img.shields.io/badge/GitHub-Kanambo-181717?style=for-the-badge&logo=github">
         </a>
         <br>
@@ -438,7 +437,7 @@ Need direct support? Click below to chat with the owner on WhatsApp.
     </td>
     <td align="center"><strong>⚙️ Adiwajshing</strong><br>Baileys Library Creator<br>
         <a href="https://github.com/WhiskeySockets/Baileys">
-            <img src="https://img.shields.io/badge/GitHub-Adiwajshing-181717?style=for-the-badge&logo=github">
+            <img src="https://img.shields.io/badge/GitHub-WhiskeySockets-181717?style=for-the-badge&logo=github">
         </a>
     </td>
 </tr>
@@ -448,12 +447,11 @@ Need direct support? Click below to chat with the owner on WhatsApp.
             <img src="https://img.shields.io/badge/Join%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white">
         </a>
     </td>
-    <td align="center"><strong>🔥 Fortunatus Mokaya</strong><br>Debugging & Compilation base codes<br>
+    <td align="center"><strong>🔥 Fortunatus Mokaya</strong><br>Debugging & Compilation Base Codes<br>
         <a href="https://github.com/Fortunatusmokaya">
             <img src="https://img.shields.io/badge/GitHub-Fortunatusmokaya-181717?style=for-the-badge&logo=github">
         </a>
     </td>
-    
     <td align="center"><strong>🤖 ChatGPT</strong><br>Debugging & Enhancements<br>
         <a href="https://chat.openai.com">
             <img src="https://img.shields.io/badge/ChatGPT-OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white">
