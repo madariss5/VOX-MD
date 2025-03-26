@@ -21,22 +21,22 @@ module.exports = async (context) => {
 
         // Fetch lyrics
         const response = await axios.get(apiUrl);
-        console.log("API Full Response:", JSON.stringify(response.data, null, 2)); // Full API response for debugging
+        console.log("API Full Response:", JSON.stringify(response.data, null, 2)); // Debugging
 
-        // Check if lyrics exist
+        // Check if lyrics exist in "plainLyrics"
         if (!response.data || !response.data.result || response.data.result.length === 0) {
             return m.reply("❌ *Lyrics not found!*\n\n💡 Try searching for another song.");
         }
 
-        let songData = response.data.result[0]; // Assuming first result is the best match
-        let { title, artist, lyrics } = songData;
+        let songData = response.data.result[0]; // Get the first result
+        let { trackName, artistName, plainLyrics } = songData;
 
-        if (!lyrics) {
+        if (!plainLyrics) {
             return m.reply("❌ *Lyrics not found!*\n\n💡 Try searching for another song.");
         }
 
-        // Format lyrics
-        let formattedLyrics = lyrics.replace(/&gt;/g, ">").replace(/\\n/g, "\n").trim();
+        // Format lyrics properly
+        let formattedLyrics = plainLyrics.replace(/\\n/g, "\n").trim();
 
         // WhatsApp message limit is ~4096 characters, so split long lyrics
         const MAX_MESSAGE_LENGTH = 4000;
@@ -48,7 +48,7 @@ module.exports = async (context) => {
         }
 
         // Send lyrics in chunks
-        await client.sendMessage(m.chat, { text: `🎶 *Lyrics Found!*\n\n📌 *Title:* _${title}_\n👤 *Artist:* _${artist}_\n\n📜 *Lyrics:*` }, { quoted: m });
+        await client.sendMessage(m.chat, { text: `🎶 *Lyrics Found!*\n\n📌 *Title:* _${trackName}_\n👤 *Artist:* _${artistName}_\n\n📜 *Lyrics:*` }, { quoted: m });
 
         for (let msg of messages) {
             await client.sendMessage(m.chat, { text: msg });
