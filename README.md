@@ -80,3 +80,13 @@ git clone https://github.com/Vox-Net/VOX-MD
 cd VOX-MD
 npm install
 node index.js
+```
+## 📢 Join Our WhatsApp Community  
+Click the icon below to join our official WhatsApp group for updates and support!  
+
+[![WhatsApp Group](https://img.shields.io/badge/Join%20WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/C7RHZxXZB5k1hGdOtzYIuF)  
+
+## 📞 Contact Owner  
+Need direct support? Click below to chat with the owner on WhatsApp.  
+
+[![Contact Owner](https://img.shields.io/badge/Chat%20on%20WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/254114148625)
