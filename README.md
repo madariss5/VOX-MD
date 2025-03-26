@@ -41,7 +41,27 @@ Easily deploy **VOX-MD** to Heroku by clicking the button below:
 
 ## 🔹 Step 3: Configuration  
 Once deployed, set up your **.env variables** as required:
----
+## 🥷 here are the env variables or you can make changes in settings if not using deployment app 
+```.env
+SESSION="your-session-data"
+PREFIX="."
+CODE="254"
+STICKER_AUTHOR=""
+PACKNAME=""
+BOTNAME="VOX-MD"
+DEV="254114148625"
+MODE="public"
+GC_PRESENCE="false"
+ANTIVIEWONCE="true"
+WA_PRESENCE="online"
+ANTITAG="true"
+ANTIDELETE="true"
+AUTOVIEW_STATUS="true"
+AUTOLIKE_STATUS="true"
+AUTOREAD="false"
+AUTOBIO="false"
+```
+
 
 ## 🌟 **Features of VOX-MD**  
 
