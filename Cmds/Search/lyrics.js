@@ -13,14 +13,9 @@ module.exports = async (context) => {
             text: "🎵 *Fetching song lyrics... Please wait!* ⏳" 
         });
 
-        // Extract title and artist from text
-        let [title, artist] = text.split(" - ");
-        if (!artist) {
-            return m.reply("⚠️ *Please provide both song title and artist!*\n\nExample:\n`.lyrics Faded - Alan Walker`");
-        }
-
-        // Construct API URL
-        const apiUrl = `https://apis.davidcyriltech.my.id/lyrics2?t=${encodeURIComponent(title)}&a=${encodeURIComponent(artist)}`;
+        // Construct API URL using the full text input
+        const query = encodeURIComponent(text.trim());
+        const apiUrl = `https://apidl.asepharyana.cloud/api/search/lyrics?query=${query}`;
 
         console.log("Requesting URL:", apiUrl); // Debugging
 
@@ -28,11 +23,12 @@ module.exports = async (context) => {
         const response = await axios.get(apiUrl);
         console.log("API Response:", response.data); // Debugging
 
+        // Validate response data
         if (!response.data || !response.data.lyrics) {
             return m.reply("❌ *Lyrics not found!*\n\n💡 Try searching for another song.");
         }
 
-        let { title: songTitle, artist: songArtist, lyrics } = response.data;
+        let { title, artist, lyrics } = response.data;
 
         // Format lyrics properly
         let formattedLyrics = lyrics
@@ -44,14 +40,14 @@ module.exports = async (context) => {
         await client.sendMessage(
             m.chat,
             {
-                text: `🎶 *Lyrics Found!*\n\n📌 *Title:* _${songTitle}_\n👤 *Artist:* _${songArtist}_\n\n📜 *Lyrics:*\n${formattedLyrics}\n\n⚡ _Powered by VOX-MD_`,
+                text: `🎶 *Lyrics Found!*\n\n📌 *Title:* _${title}_\n👤 *Artist:* _${artist}_\n\n📜 *Lyrics:*\n${formattedLyrics}\n\n⚡ _Powered by VOX-MD_`,
             },
             { quoted: m }
         );
     } catch (error) {
         console.error("Lyrics fetch error:", error);
 
-        // If API error, send user-friendly message
+        // Handle API errors
         if (error.response) {
             console.error("API Error Response:", error.response.data);
             return m.reply(`❌ *Error fetching lyrics!*\n\n📌 *API Error:* ${error.response.data.message || "Unknown error"}`);
