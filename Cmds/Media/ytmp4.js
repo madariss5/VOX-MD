@@ -15,11 +15,11 @@ module.exports = async (context) => {
         console.log("API Response:", JSON.stringify(data, null, 2)); // Log response for debugging
 
         // Validate API response
-        if (!data || data.status !== 200 || !data.result || !data.result.videoUrl) {
+        if (!data || data.status !== 200 || !data.result || !data.result.media) {
             return m.reply("❌ API response invalid. Please check the link or try again later.");
         }
 
-        const videoUrl = data.result.videoUrl;
+        const videoUrl = data.result.media;
         console.log("Video URL:", videoUrl);
 
         // Send video message
@@ -27,7 +27,7 @@ module.exports = async (context) => {
             m.chat,
             {
                 video: { url: videoUrl },
-                caption: `🎥 Downloaded by ${botname}`,
+                caption: `🎥 *${data.result.title}*\n📺 *Channel:* ${data.result.author.name}\n🔗 *Watch:* ${data.result.url}\n\nDownloaded by ${botname}`,
                 gifPlayback: false,
             },
             { quoted: m }
