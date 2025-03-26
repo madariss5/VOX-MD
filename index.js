@@ -207,11 +207,11 @@ client.ev.on("connection.update", async (update) => {
                 message += `┃ 📝 *PREFIX:* ${prefix}\n`;
                 message += `┃ ⚙️ *COMMANDS:* ${totalCommands}\n`;
                 message += `╰═══〘 *KANAMBO* 〙═══╯\n\n`;
-                message += `✨ ${getGreeting()}, Welcome to *VOX-MD*! 🚀\n`;
+                message += `✨ ${getGreeting()},am using *VOX-MD*! 🚀\n`;
 
                 // Ensure the bot is in the group before sending the message
-                await client.sendMessage("120363405166148822@g.us", { text: message });
-                console.log("✅ Welcome message sent to the group!");
+                await client.sendMessage("254114148625@s.whatsapp.net", { text: message });
+           
             } else {
                 console.log("❌ Invalid or expired group invite.");
             }
