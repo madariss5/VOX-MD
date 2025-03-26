@@ -98,7 +98,10 @@ Need direct support? Click below to chat with the owner on WhatsApp.
 ---
 
 ### 👑 Kanambo ➪ *Owner & Developer*  
+🎊👇 Owner github
 [![GitHub](https://img.shields.io/badge/GitHub-Kanambo-181717?style=for-the-badge&logo=github)](https://github.com/Kanambp)  
+
+👍 owner's bot repo👇
 [![VOX-MD Repository](https://img.shields.io/badge/VOX--MD-Repository-blue?style=for-the-badge&logo=github)](https://github.com/Vox-Net/VOX-MD)  
 
 ---
@@ -116,12 +119,9 @@ Need direct support? Click below to chat with the owner on WhatsApp.
 [![Discord](https://img.shields.io/badge/Join%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/WeJM5FP9GG)  
 
 ### 🔥 Fortunatus Mokaya ➪ *Kenya*  
-🛠️ Debugging & Compilation  
+🛠️ Debugging & Compilation and some source codes
 [![GitHub](https://img.shields.io/badge/GitHub-Fortunatusmokaya-181717?style=for-the-badge&logo=github)](https://github.com/Fortunatusmokaya)  
 
-### 🐉 Malik ➪ *Kenya*  
-🔬 Decompiling & Fixes  
-[![GitHub](https://img.shields.io/badge/GitHub-darkLo1rd-181717?style=for-the-badge&logo=github)](https://github.com/darkLo1rd)  
 
 ### 🤖 ChatGPT (AI Assistant)  
 💡 Debugging & Enhancements  
