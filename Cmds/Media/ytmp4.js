@@ -7,7 +7,7 @@ module.exports = async (context) => {
 
     try {
         // API URL with encoded text (URL)
-        const apiUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp4?url=${encodeURIComponent(text)}&quality=480&server=auto`;
+        const apiUrl = `https://kanambo.voxnet2025.workers.dev/downup/ytmp4?url=${encodeURIComponent(text)}&quality=480&server=auto`;
         console.log("Fetching video from:", apiUrl);
 
         // Fetch API response
