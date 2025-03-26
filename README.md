@@ -448,18 +448,12 @@ Need direct support? Click below to chat with the owner on WhatsApp.
             <img src="https://img.shields.io/badge/Join%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white">
         </a>
     </td>
-    <td align="center"><strong>🔥 Fortunatus Mokaya</strong><br>Debugging & Compilation<br>
+    <td align="center"><strong>🔥 Fortunatus Mokaya</strong><br>Debugging & Compilation base codes<br>
         <a href="https://github.com/Fortunatusmokaya">
             <img src="https://img.shields.io/badge/GitHub-Fortunatusmokaya-181717?style=for-the-badge&logo=github">
         </a>
     </td>
-    <td align="center"><strong>🐉 Malik</strong><br>Decompiling & Fixes<br>
-        <a href="https://github.com/darkLo1rd">
-            <img src="https://img.shields.io/badge/GitHub-darkLo1rd-181717?style=for-the-badge&logo=github">
-        </a>
-    </td>
-</tr>
-<tr>
+    
     <td align="center"><strong>🤖 ChatGPT</strong><br>Debugging & Enhancements<br>
         <a href="https://chat.openai.com">
             <img src="https://img.shields.io/badge/ChatGPT-OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white">
