@@ -23,18 +23,23 @@ module.exports = async (context) => {
         const response = await axios.get(apiUrl);
         console.log("API Response:", response.data); // Debugging
 
-        // Validate response data
-        if (!response.data || !response.data.lyrics) {
+        // Ensure response structure is correct
+        if (!response.data || !response.data.result || response.data.result.length === 0) {
             return m.reply("❌ *Lyrics not found!*\n\n💡 Try searching for another song.");
         }
 
-        let { title, artist, lyrics } = response.data;
+        let songData = response.data.result[0]; // Assuming API returns an array of results
+        let { title, artist, lyrics } = songData;
 
         // Format lyrics properly
         let formattedLyrics = lyrics
             .replace(/&gt;/g, ">")
             .replace(/\\n/g, "\n")
             .trim();
+
+        if (!formattedLyrics) {
+            return m.reply("❌ *Lyrics not found!*\n\n💡 Try searching for another song.");
+        }
 
         // Send lyrics response
         await client.sendMessage(
