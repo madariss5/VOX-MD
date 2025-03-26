@@ -1,71 +1,37 @@
-const axios = require("axios");
-
 module.exports = async (context) => {
-    const { client, m, text } = context;
+    const { client, m, text, botname, fetchJson, args } = context;
 
     if (!text) {
-        return m.reply("❌ *Please provide a song title and artist!*\n\nExample usage:\n`.lyrics Faded - Alan Walker`");
+        return m.reply("❌ Please provide a song name to search for lyrics.\n\nUsage:\n- `!lyrics <song name>`\n\nExample:\n- `!lyrics Alan Walker Faded`");
     }
 
     try {
-        // Notify user that lyrics are being fetched
-        await client.sendMessage(m.chat, { 
-            text: "🎵 *Fetching song lyrics... Please wait!* ⏳" 
-        });
-
-        // Construct API URL
-        const query = encodeURIComponent(text.trim());
+        const query = encodeURIComponent(text);
         const apiUrl = `https://apidl.asepharyana.cloud/api/search/lyrics?query=${query}`;
+        const data = await fetchJson(apiUrl);
 
-        console.log("Requesting URL:", apiUrl); // Debugging
+        if (data && data.result) {
+            let lyrics = "";
 
-        // Fetch lyrics
-        const response = await axios.get(apiUrl);
-        console.log("API Full Response:", JSON.stringify(response.data, null, 2)); // Debugging
+            if (typeof data.result === "string") {
+                lyrics = data.result; // Direct string response
+            } else if (Array.isArray(data.result)) {
+                lyrics = data.result.join("\n"); // If lyrics are in array format
+            } else if (typeof data.result === "object") {
+                lyrics = Object.values(data.result)
+                    .filter(value => typeof value === "string") // Only get text values
+                    .join("\n"); // Join multiple text values
+            }
 
-        // Check if lyrics exist in "plainLyrics"
-        if (!response.data || !response.data.result || response.data.result.length === 0) {
-            return m.reply("❌ *Lyrics not found!*\n\n💡 Try searching for another song.");
-        }
+            if (!lyrics.trim()) {
+                return m.reply("⚠️ No lyrics found for the given song.");
+            }
 
-        let songData = response.data.result[0]; // Get the first result
-        let { trackName, artistName, plainLyrics } = songData;
-
-        if (!plainLyrics) {
-            return m.reply("❌ *Lyrics not found!*\n\n💡 Try searching for another song.");
-        }
-
-        // **LOG THE EXACT LYRICS BEFORE SENDING**
-        console.log("Extracted Lyrics:", plainLyrics);
-
-        // Format lyrics properly
-        let formattedLyrics = plainLyrics.replace(/\\n/g, "\n").trim();
-
-        // WhatsApp message limit is ~4096 characters, so split long lyrics
-        const MAX_MESSAGE_LENGTH = 4000;
-        let messages = [];
-
-        while (formattedLyrics.length > 0) {
-            messages.push(formattedLyrics.substring(0, MAX_MESSAGE_LENGTH));
-            formattedLyrics = formattedLyrics.substring(MAX_MESSAGE_LENGTH);
-        }
-
-        // Send lyrics in chunks
-        await client.sendMessage(m.chat, { text: `🎶 *Lyrics Found!*\n\n📌 *Title:* _${trackName}_\n👤 *Artist:* _${artistName}_\n\n📜 *Lyrics:*` }, { quoted: m });
-
-        for (let msg of messages) {
-            console.log("Sending chunk:", msg); // **DEBUG EACH MESSAGE SENT**
-            await client.sendMessage(m.chat, { text: msg });
-        }
-
-    } catch (error) {
-        console.error("Lyrics fetch error:", error);
-
-        if (error.response) {
-            console.error("API Error Response:", JSON.stringify(error.response.data, null, 2));
-            return m.reply(`❌ *Error fetching lyrics!*\n\n📌 *API Error:* ${error.response.data.message || "Unknown error"}`);
+            await m.reply(`🎵 **Lyrics for "${text}"**:\n\n${lyrics}`);
         } else {
-            return m.reply("❌ *Failed to fetch lyrics! Please try again later.*");
+            m.reply("⚠️ No lyrics found or invalid response from API.");
         }
+    } catch (error) {
+        m.reply("❌ Something went wrong...\n\n" + error);
     }
 };
