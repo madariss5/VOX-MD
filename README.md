@@ -420,35 +420,54 @@ Need direct support? Click below to chat with the owner on WhatsApp.
 
 ---
 
-## 👑 Kanambo ➪ *Owner & Developer*  
-### 🎊👇 Owner github
-[![GitHub](https://img.shields.io/badge/GitHub-Kanambo-181717?style=for-the-badge&logo=github)](https://github.com/Kanambp)  
+<table align="center">
+<tr>
+    <td align="center"><strong>👑 Kanambo</strong><br>Owner & Developer<br>
+        <a href="https://github.com/Kanambp">
+            <img src="https://img.shields.io/badge/GitHub-Kanambo-181717?style=for-the-badge&logo=github">
+        </a>
+        <br>
+        <a href="https://github.com/Vox-Net/VOX-MD">
+            <img src="https://img.shields.io/badge/VOX--MD-Repository-blue?style=for-the-badge&logo=github">
+        </a>
+    </td>
+    <td align="center"><strong>🛠️ Dika Ardnt</strong><br>Base Code (Case Method)<br>
+        <a href="https://github.com/DikaArdnt">
+            <img src="https://img.shields.io/badge/GitHub-DikaArdnt-181717?style=for-the-badge&logo=github">
+        </a>
+    </td>
+    <td align="center"><strong>⚙️ Adiwajshing</strong><br>Baileys Library Creator<br>
+        <a href="https://github.com/WhiskeySockets/Baileys">
+            <img src="https://img.shields.io/badge/GitHub-Adiwajshing-181717?style=for-the-badge&logo=github">
+        </a>
+    </td>
+</tr>
+<tr>
+    <td align="center"><strong>🌀 WAWebSockets</strong><br>Web Sockets Reverse Engineering<br>
+        <a href="https://discord.gg/WeJM5FP9GG">
+            <img src="https://img.shields.io/badge/Join%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white">
+        </a>
+    </td>
+    <td align="center"><strong>🔥 Fortunatus Mokaya</strong><br>Debugging & Compilation<br>
+        <a href="https://github.com/Fortunatusmokaya">
+            <img src="https://img.shields.io/badge/GitHub-Fortunatusmokaya-181717?style=for-the-badge&logo=github">
+        </a>
+    </td>
+    <td align="center"><strong>🐉 Malik</strong><br>Decompiling & Fixes<br>
+        <a href="https://github.com/darkLo1rd">
+            <img src="https://img.shields.io/badge/GitHub-darkLo1rd-181717?style=for-the-badge&logo=github">
+        </a>
+    </td>
+</tr>
+<tr>
+    <td align="center"><strong>🤖 ChatGPT</strong><br>Debugging & Enhancements<br>
+        <a href="https://chat.openai.com">
+            <img src="https://img.shields.io/badge/ChatGPT-OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white">
+        </a>
+    </td>
+</tr>
+</table>
 
-### 👍 owner's bot repo👇
-[![VOX-MD Repository](https://img.shields.io/badge/VOX--MD-Repository-blue?style=for-the-badge&logo=github)](https://github.com/Vox-Net/VOX-MD)  
-
----
-
-### 🛠️ Dika Ardnt ➪ *Indonesia*  
-✨ Base Code (Case Method)  
-[![GitHub](https://img.shields.io/badge/GitHub-DikaArdnt-181717?style=for-the-badge&logo=github)](https://github.com/DikaArdnt)  
-
-### ⚙️ Adiwajshing ➪ *India*  
-📚 Baileys Library Creator  
-[![GitHub](https://img.shields.io/badge/GitHub-Adiwajshing-181717?style=for-the-badge&logo=github)](https://github.com/WhiskeySockets/Baileys)  
-
-### 🌀 WAWebSockets Discord Community  
-🔍 Web Sockets Reverse Engineering  
-[![Discord](https://img.shields.io/badge/Join%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/WeJM5FP9GG)  
-
-### 🔥 Fortunatus Mokaya ➪ *Kenya*  
-🛠️ Debugging & Compilation and some source codes
-[![GitHub](https://img.shields.io/badge/GitHub-Fortunatusmokaya-181717?style=for-the-badge&logo=github)](https://github.com/Fortunatusmokaya)  
-
-
-### 🤖 ChatGPT (AI Assistant)  
-💡 Debugging & Enhancements  
-[![OpenAI](https://img.shields.io/badge/ChatGPT-OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)](https://chat.openai.com)  
 
 ---
 
