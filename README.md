@@ -90,3 +90,49 @@ Click the icon below to join our official WhatsApp group for updates and support
 Need direct support? Click below to chat with the owner on WhatsApp.  
 
 [![Contact Owner](https://img.shields.io/badge/Chat%20on%20WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/254114148625)
+
+# ✨ VOX-MD CREDITS  
+
+🚀 **Special Thanks & Acknowledgments**  
+
+---
+
+### 👑 Kanambo ➪ *Owner & Developer*  
+[![GitHub](https://img.shields.io/badge/GitHub-Kanambo-181717?style=for-the-badge&logo=github)](https://github.com/Kanambp)  
+[![VOX-MD Repository](https://img.shields.io/badge/VOX--MD-Repository-blue?style=for-the-badge&logo=github)](https://github.com/Vox-Net/VOX-MD)  
+
+---
+
+### 🛠️ Dika Ardnt ➪ *Indonesia*  
+✨ Base Code (Case Method)  
+[![GitHub](https://img.shields.io/badge/GitHub-DikaArdnt-181717?style=for-the-badge&logo=github)](https://github.com/DikaArdnt)  
+
+### ⚙️ Adiwajshing ➪ *India*  
+📚 Baileys Library Creator  
+[![GitHub](https://img.shields.io/badge/GitHub-Adiwajshing-181717?style=for-the-badge&logo=github)](https://github.com/WhiskeySockets/Baileys)  
+
+### 🌀 WAWebSockets Discord Community  
+🔍 Web Sockets Reverse Engineering  
+[![Discord](https://img.shields.io/badge/Join%20Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/WeJM5FP9GG)  
+
+### 🔥 Fortunatus Mokaya ➪ *Kenya*  
+🛠️ Debugging & Compilation  
+[![GitHub](https://img.shields.io/badge/GitHub-Fortunatusmokaya-181717?style=for-the-badge&logo=github)](https://github.com/Fortunatusmokaya)  
+
+### 🐉 Malik ➪ *Kenya*  
+🔬 Decompiling & Fixes  
+[![GitHub](https://img.shields.io/badge/GitHub-darkLo1rd-181717?style=for-the-badge&logo=github)](https://github.com/darkLo1rd)  
+
+### 🤖 ChatGPT (AI Assistant)  
+💡 Debugging & Enhancements  
+[![OpenAI](https://img.shields.io/badge/ChatGPT-OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)](https://chat.openai.com)  
+
+---
+
+## ⚡ Powered by VOXNET.INC  
+[![VOXNET.INC](https://img.shields.io/badge/Powered%20by-VOXNET.INC-FF5733?style=for-the-badge&logo=vercel&logoColor=white)](https://github.com/Vox-Net)  
+
+🔹 **BOT NAME** ➪ *VOX-MD*  
+🔹 **AUTHOR / DEV / OWNER** ➪ *KANAMBO*  
+
+---
