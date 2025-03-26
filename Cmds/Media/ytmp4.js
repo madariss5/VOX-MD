@@ -15,15 +15,16 @@ module.exports = async (context) => {
     try {
         const response = await axios.get(apiUrl, { timeout: 10000 }); // 10s timeout
 
-        if (!response.data || response.data.status !== 200 || !response.data.result?.downloadUrl) {
+        if (!response.data || response.data.status !== 200 || !response.data.success || !response.data.result?.download_url) {
             throw new Error("Invalid API response or no download URL found");
         }
 
         let videoData = {
             title: response.data.result.title || "Unknown Title",
-            thumbnail: response.data.result.image || "https://i.ytimg.com/vi/default.jpg",
+            quality: response.data.result.quality || "Unknown Quality",
+            thumbnail: response.data.result.thumbnail || "https://i.ytimg.com/vi/default.jpg",
             videoUrl: link,
-            downloadUrl: response.data.result.downloadUrl
+            downloadUrl: response.data.result.download_url
         };
 
         // Send metadata & thumbnail
@@ -34,6 +35,7 @@ module.exports = async (context) => {
                 caption: `KANAMBO THE VOX MD BOT
 ╭═════════════════⊷
 ║ 📽️ *Title:* ${videoData.title}
+║ 🎞️ *Quality:* ${videoData.quality}
 ║ 🔗 *Video Link:* [Watch Here](${videoData.videoUrl})
 ╰═════════════════⊷
 *Powered by VOX MD BOT*`
@@ -47,7 +49,7 @@ module.exports = async (context) => {
             {
                 video: { url: videoData.downloadUrl },
                 mimetype: "video/mp4",
-                caption: `🎥 *${videoData.title}*`
+                caption: `🎥 *${videoData.title}* - ${videoData.quality}`
             },
             { quoted: m }
         );
