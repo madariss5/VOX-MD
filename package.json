@@ -4,10 +4,9 @@
   "description": "WhatsApp Multi Device Bot",
   "main": "index.js",
   "type": "commonjs",
-  "scripts": {
-  "start": "node index.js",
-    "pm2 start index.js --deep-monitoring --attach --name VOX-MD",
-  "stop": "pm2 stop VOX-MD",
+    "scripts": {
+    "start": "pm2 start index.js --deep-monitoring --attach --name VOX-MD",
+    "stop": "pm2 stop VOX-MD",
     "restart": "pm2 restart VOX-MD"
   },
  
