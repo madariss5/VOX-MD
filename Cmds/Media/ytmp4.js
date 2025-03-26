@@ -1,39 +1,62 @@
-module.exports = async (context) => {
-    const { client, m, text, botname, fetchJson } = context;
+const axios = require("axios");
 
-    if (!text) {
-        return m.reply("⚠️ Provide a valid YouTube link for download.\nExample: https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+module.exports = async (context) => {
+    const { client, m, text } = context;
+
+    if (!text || !text.match(/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/)) {
+        return m.reply("❌ Please provide a valid YouTube link!\n\nExample: `.ytmp4 https://youtube.com/watch?v=MwpMEbgC7DA`");
     }
 
+    await m.reply("🔄 *VOX MD Bot is fetching your video... Please wait...*");
+
+    const link = text.trim();
+    const apiUrl = `https://apis.davidcyriltech.my.id/download/ytmp4?url=${link}`;
+
     try {
-        // API URL with encoded text (URL)
-        const apiUrl = `https://kanambo.voxnet2025.workers.dev/downup/ytmp4?url=${encodeURIComponent(text)}&quality=480&server=auto`;
-        console.log("Fetching video from:", apiUrl);
+        const response = await axios.get(apiUrl, { timeout: 10000 }); // 10s timeout
 
-        // Fetch API response
-        const data = await fetchJson(apiUrl);
-        console.log("API Response:", JSON.stringify(data, null, 2)); // Log response for debugging
-
-        // Validate API response
-        if (!data || data.status !== 200 || !data.result || !data.result.media) {
-            return m.reply("❌ API response invalid. Please check the link or try again later.");
+        if (!response.data || response.data.status !== 200 || !response.data.result?.downloadUrl) {
+            throw new Error("Invalid API response or no download URL found");
         }
 
-        const videoUrl = data.result.media;
-        console.log("Video URL:", videoUrl);
+        let videoData = {
+            title: response.data.result.title || "Unknown Title",
+            thumbnail: response.data.result.image || "https://i.ytimg.com/vi/default.jpg",
+            videoUrl: link,
+            downloadUrl: response.data.result.downloadUrl
+        };
 
-        // Send video message
+        // Send metadata & thumbnail
         await client.sendMessage(
             m.chat,
             {
-                video: { url: videoUrl },
-                caption: `🎥 *${data.result.title}*\n📺 *Channel:* ${data.result.author.name}\n🔗 *Watch:* ${data.result.url}\n\nDownloaded by ${botname}`,
-                gifPlayback: false,
+                image: { url: videoData.thumbnail },
+                caption: `KANAMBO THE VOX MD BOT
+╭═════════════════⊷
+║ 📽️ *Title:* ${videoData.title}
+║ 🔗 *Video Link:* [Watch Here](${videoData.videoUrl})
+╰═════════════════⊷
+*Powered by VOX MD BOT*`
             },
             { quoted: m }
         );
-    } catch (e) {
-        console.error("Error fetching video:", e);
-        m.reply("❌ An error occurred while processing the request. Please try again.\n" + e.message);
+
+        // Send as a video file
+        await client.sendMessage(
+            m.chat,
+            {
+                video: { url: videoData.downloadUrl },
+                mimetype: "video/mp4",
+                caption: `🎥 *${videoData.title}*`
+            },
+            { quoted: m }
+        );
+
+        // Send success message
+        await m.reply("✅ *Successfully sent! 🎬*");
+
+    } catch (error) {
+        console.error(`API Error:`, error.message);
+        return m.reply("⚠️ An error occurred. The API might be down or unable to process the request.");
     }
 };
