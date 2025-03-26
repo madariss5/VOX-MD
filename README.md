@@ -98,10 +98,10 @@ Need direct support? Click below to chat with the owner on WhatsApp.
 ---
 
 ### 👑 Kanambo ➪ *Owner & Developer*  
-🎊👇 Owner github
+####🎊👇 Owner github
 [![GitHub](https://img.shields.io/badge/GitHub-Kanambo-181717?style=for-the-badge&logo=github)](https://github.com/Kanambp)  
 
-👍 owner's bot repo👇
+####👍 owner's bot repo👇
 [![VOX-MD Repository](https://img.shields.io/badge/VOX--MD-Repository-blue?style=for-the-badge&logo=github)](https://github.com/Vox-Net/VOX-MD)  
 
 ---
