@@ -35,6 +35,9 @@ module.exports = async (context) => {
             return m.reply("❌ *Lyrics not found!*\n\n💡 Try searching for another song.");
         }
 
+        // **LOG THE EXACT LYRICS BEFORE SENDING**
+        console.log("Extracted Lyrics:", plainLyrics);
+
         // Format lyrics properly
         let formattedLyrics = plainLyrics.replace(/\\n/g, "\n").trim();
 
@@ -51,6 +54,7 @@ module.exports = async (context) => {
         await client.sendMessage(m.chat, { text: `🎶 *Lyrics Found!*\n\n📌 *Title:* _${trackName}_\n👤 *Artist:* _${artistName}_\n\n📜 *Lyrics:*` }, { quoted: m });
 
         for (let msg of messages) {
+            console.log("Sending chunk:", msg); // **DEBUG EACH MESSAGE SENT**
             await client.sendMessage(m.chat, { text: msg });
         }
 
