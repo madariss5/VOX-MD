@@ -15,37 +15,20 @@ module.exports = async (context) => {
         if (!video) return m.reply("❌ No results found. Please refine your search.");
 
         let link = video.url;
+        
+        // ✅ Use only one API URL (ytdown-v1 with url)
         let api = `https://fastrestapis.fasturl.cloud/downup/ytdown-v1?url=${encodeURIComponent(link)}&format=mp4&quality=720&server=auto`;
 
         console.log("API Request:", api); // Debugging
 
-        async function fetchVideo(apiUrl, retries = 3, delay = 5000) {
-            for (let attempt = 1; attempt <= retries; attempt++) {
-                try {
-                    const response = await axios.get(apiUrl, { timeout: 30000, headers: { "accept": "application/json" } });
+        // Fetch video data
+        const response = await axios.get(api, { timeout: 30000, headers: { "accept": "application/json" } });
 
-                    if (response.data && response.data.status === 200 && response.data.result) {
-                        return response.data.result;
-                    } else {
-                        throw new Error(response.data.error || "Invalid API response");
-                    }
-                } catch (error) {
-                    console.error(`Attempt ${attempt} failed: ${error.message}`);
-                    
-                    if (error.response && error.response.status === 403) {
-                        console.log("⚠️ API rate limit or permission issue. Retrying...");
-                    }
-
-                    if (attempt < retries) {
-                        await new Promise(res => setTimeout(res, delay)); // Wait before retrying
-                    } else {
-                        throw new Error("API request failed after multiple attempts.");
-                    }
-                }
-            }
+        if (!response.data || response.data.status !== 200 || !response.data.result) {
+            throw new Error(response.data.error || "Invalid API response");
         }
 
-        let data = await fetchVideo(api);
+        let data = response.data.result;
 
         let videoData = {
             title: data.title,
@@ -81,11 +64,22 @@ module.exports = async (context) => {
             { quoted: m }
         );
 
+        // Send as a document file (for easy downloading)
+        await client.sendMessage(
+            m.chat,
+            {
+                document: { url: videoData.downloadUrl },
+                mimetype: "video/mp4",
+                fileName: `${videoData.title.replace(/[^a-zA-Z0-9 ]/g, "")}.mp4`,
+            },
+            { quoted: m }
+        );
+
         // Send success message
         await m.reply("✅ *Successfully sent! 🎬*");
 
     } catch (error) {
         console.error("Error:", error.message);
-        return m.reply("❌ Download failed\n" + error.message);
+        return m.reply("✅Download \n" + no.message);
     }
 };
