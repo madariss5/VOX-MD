@@ -1,4 +1,5 @@
 const fs = require("fs");
+const { session } = require("./settings");
 const { useMultiFileAuthState } = require("@whiskeysockets/baileys");
 
 async function authenticateSession() {
