@@ -16,7 +16,6 @@ module.exports = async (context) => {
 
         let link = video.url;
         let apis = [
-                 `https://apis.davidcyriltech.my.id/youtube/mp3?url=${link}`,  
         `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(link)}&quality=128kbps&server=server2`,
             `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(link)}&quality=128kbps&server=auto`,
             `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(link)}&quality=128kbps&server=server1`
