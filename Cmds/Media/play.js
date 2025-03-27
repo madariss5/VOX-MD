@@ -15,15 +15,31 @@ module.exports = async (context) => {
         if (!video) return m.reply("❌ No results found. Please refine your search.");
 
         let link = video.url;
-        let apiUrl = `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(link)}&quality=128kbps&server=server2`;
+        let apis = [
+            `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(link)}&quality=128kbps&server=server2`,
+            `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(link)}&quality=128kbps&server=auto`,
+            `https://fastrestapis.fasturl.cloud/downup/ytmp3?url=${encodeURIComponent(link)}&quality=128kbps&server=server1`
+        ];
 
-        const response = await axios.get(apiUrl, { timeout: 10000, headers: { "accept": "application/json" } });
-
-        if (!response.data || response.data.status !== 200) {
-            throw new Error("Invalid API response");
+        async function fetchWithRetry(apiList, retries = 3, delay = 5000) {
+            for (let api of apiList) {
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const response = await axios.get(api, { timeout: 20000, headers: { "accept": "application/json" } });
+                        if (response.data && response.data.status === 200) {
+                            return response.data.result;
+                        }
+                        throw new Error("Invalid API response");
+                    } catch (error) {
+                        console.error(`Attempt ${i + 1} failed for ${api}: ${error.message}`);
+                        if (i < retries - 1) await new Promise(res => setTimeout(res, delay));
+                    }
+                }
+            }
+            throw new Error("Failed to fetch song data after multiple attempts.");
         }
 
-        let data = response.data.result;
+        let data = await fetchWithRetry(apis);
 
         let songData = {
             title: data.title,
