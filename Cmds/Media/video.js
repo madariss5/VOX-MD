@@ -80,6 +80,6 @@ module.exports = async (context) => {
 
     } catch (error) {
         console.error("Error:", error.message);
-        return m.reply("✅Download \n" + no.message);
+        return m.reply("❌ Download failed\n" + error.message);
     }
 };
