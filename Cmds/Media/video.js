@@ -64,16 +64,7 @@ module.exports = async (context) => {
             { quoted: m }
         );
 
-        // Send as a document file (for easy downloading)
-        await client.sendMessage(
-            m.chat,
-            {
-                document: { url: videoData.downloadUrl },
-                mimetype: "video/mp4",
-                fileName: `${videoData.title.replace(/[^a-zA-Z0-9 ]/g, "")}.mp4`,
-            },
-            { quoted: m }
-        );
+        
 
         // Send success message
         await m.reply("✅ *Successfully sent! 🎬*");
