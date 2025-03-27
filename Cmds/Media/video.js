@@ -14,20 +14,18 @@ module.exports = async (context) => {
 
         if (!video) return m.reply("❌ No results found. Please refine your search.");
 
-        // API URLs with fallback
+        let link = video.url;
         let apis = [
-            `https://fastrestapis.fasturl.cloud/downup/ytdown-v2?name=${encodeURIComponent(video.title)}&format=mp4&quality=720`,
-            `https://fastrestapis.fasturl.cloud/downup/ytdown-v1?name=${encodeURIComponent(video.title)}&format=mp4&quality=720&server=auto`
+            `https://fastrestapis.fasturl.cloud/downup/ytdown-v2?url=${encodeURIComponent(link)}&format=mp4&quality=720`,
+            `https://fastrestapis.fasturl.cloud/downup/ytdown-v1?url=${encodeURIComponent(link)}&format=mp4&quality=720&server=auto`
         ];
 
-        async function fetchWithRetry(apiList, retries = 2, delay = 5000) {
+        async function fetchWithRetry(apiList, retries = 3, delay = 5000) {
             for (let api of apiList) {
                 for (let i = 0; i < retries; i++) {
                     try {
-                        console.log("API Request:", api); // Debugging
                         const response = await axios.get(api, { timeout: 30000, headers: { "accept": "application/json" } });
-
-                        if (response.data && response.data.status === 200 && response.data.result) {
+                        if (response.data && response.data.status === 200) {
                             return response.data.result;
                         }
                         throw new Error("Invalid API response");
@@ -47,7 +45,7 @@ module.exports = async (context) => {
             artist: data.author.name,
             thumbnail: data.metadata.thumbnail,
             videoUrl: data.url,
-            downloadUrl: data.media // ✅ Corrected media URL
+            downloadUrl: data.media
         };
 
         // Send metadata & thumbnail
@@ -65,7 +63,7 @@ module.exports = async (context) => {
             { quoted: m }
         );
 
-        // Send as a regular video with caption
+        // Send as a regular video
         await client.sendMessage(
             m.chat,
             {
