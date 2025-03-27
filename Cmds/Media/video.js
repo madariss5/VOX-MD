@@ -17,7 +17,7 @@ module.exports = async (context) => {
         let link = video.url;
         
         // ✅ Use only one API URL (ytdown-v1 with url)
-        let api = `https://fastrestapis.fasturl.cloud/downup/ytdown-v1?url=${encodeURIComponent(link)}&format=mp4&quality=720&server=auto`;
+        let api = `https://kanambo.voxnet2025.workers.dev/downup/ytdown-v1?url=${encodeURIComponent(link)}&format=mp4&quality=720&server=auto`;
 
         console.log("API Request:", api); // Debugging
 
