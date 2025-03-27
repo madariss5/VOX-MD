@@ -14,13 +14,13 @@ module.exports = async (context) => {
 
         if (!video) return m.reply("❌ No results found. Please refine your search.");
 
-        let api = `https://fastrestapis.fasturl.cloud/downup/ytdown-v2?name=${encodeURIComponent(video.videoId)}&format=mp4&quality=720`;
+        let api = `https://fastrestapis.fasturl.cloud/downup/ytdown-v2?name=${encodeURIComponent(video.title)}&format=mp4&quality=720`;
 
         async function fetchWithRetry(apiUrl, retries = 3, delay = 5000) {
             for (let i = 0; i < retries; i++) {
                 try {
                     const response = await axios.get(apiUrl, { timeout: 30000, headers: { "accept": "application/json" } });
-                    if (response.data && response.data.status === 200) {
+                    if (response.data && response.data.status === 200 && response.data.result) {
                         return response.data.result;
                     }
                     throw new Error("Invalid API response");
@@ -39,7 +39,7 @@ module.exports = async (context) => {
             artist: data.author.name,
             thumbnail: data.metadata.thumbnail,
             videoUrl: data.url,
-            downloadUrl: data.media
+            downloadUrl: data.media // ✅ Corrected the media URL
         };
 
         // Send metadata & thumbnail
