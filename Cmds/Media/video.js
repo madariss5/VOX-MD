@@ -16,30 +16,23 @@ module.exports = async (context) => {
 
         let api = `https://fastrestapis.fasturl.cloud/downup/ytdown-v2?name=${encodeURIComponent(video.title)}&format=mp4&quality=720`;
 
-        async function fetchWithRetry(apiUrl, retries = 3, delay = 5000) {
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await axios.get(apiUrl, { timeout: 30000, headers: { "accept": "application/json" } });
-                    if (response.data && response.data.status === 200 && response.data.result) {
-                        return response.data.result;
-                    }
-                    throw new Error("Invalid API response");
-                } catch (error) {
-                    console.error(`Attempt ${i + 1} failed for ${apiUrl}: ${error.message}`);
-                    if (i < retries - 1) await new Promise(res => setTimeout(res, delay));
-                }
-            }
-            throw new Error("Failed to fetch video data after multiple attempts.");
+        console.log("API Request:", api); // Debugging
+
+        // Fetch video data
+        const response = await axios.get(api, { timeout: 30000, headers: { "accept": "application/json" } });
+
+        if (!response.data || response.data.status !== 200 || !response.data.result) {
+            throw new Error("Invalid API response");
         }
 
-        let data = await fetchWithRetry(api);
+        let data = response.data.result;
 
         let videoData = {
             title: data.title,
             artist: data.author.name,
             thumbnail: data.metadata.thumbnail,
             videoUrl: data.url,
-            downloadUrl: data.media // ✅ Corrected the media URL
+            downloadUrl: data.media // ✅ Corrected media URL
         };
 
         // Send metadata & thumbnail
