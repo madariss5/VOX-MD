@@ -15,20 +15,37 @@ module.exports = async (context) => {
         if (!video) return m.reply("❌ No results found. Please refine your search.");
 
         let link = video.url;
-        
-        // ✅ Use only one API URL (ytdown-v1 with url)
-        let api = `https://kanambo.voxnet2025.workers.dev/downup/ytdown-v1?url=${encodeURIComponent(link)}&format=mp4&quality=720&server=auto`;
+        let api = `https://fastrestapis.fasturl.cloud/downup/ytdown-v1?url=${encodeURIComponent(link)}&format=mp4&quality=720&server=auto`;
 
         console.log("API Request:", api); // Debugging
 
-        // Fetch video data
-        const response = await axios.get(api, { timeout: 30000, headers: { "accept": "application/json" } });
+        async function fetchVideo(apiUrl, retries = 3, delay = 5000) {
+            for (let attempt = 1; attempt <= retries; attempt++) {
+                try {
+                    const response = await axios.get(apiUrl, { timeout: 30000, headers: { "accept": "application/json" } });
 
-        if (!response.data || response.data.status !== 200 || !response.data.result) {
-            throw new Error(response.data.error || "Invalid API response");
+                    if (response.data && response.data.status === 200 && response.data.result) {
+                        return response.data.result;
+                    } else {
+                        throw new Error(response.data.error || "Invalid API response");
+                    }
+                } catch (error) {
+                    console.error(`Attempt ${attempt} failed: ${error.message}`);
+                    
+                    if (error.response && error.response.status === 403) {
+                        console.log("⚠️ API rate limit or permission issue. Retrying...");
+                    }
+
+                    if (attempt < retries) {
+                        await new Promise(res => setTimeout(res, delay)); // Wait before retrying
+                    } else {
+                        throw new Error("API request failed after multiple attempts.");
+                    }
+                }
+            }
         }
 
-        let data = response.data.result;
+        let data = await fetchVideo(api);
 
         let videoData = {
             title: data.title,
@@ -63,8 +80,6 @@ module.exports = async (context) => {
             },
             { quoted: m }
         );
-
-        
 
         // Send success message
         await m.reply("✅ *Successfully sent! 🎬*");
