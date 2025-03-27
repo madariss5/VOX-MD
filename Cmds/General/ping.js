@@ -1,29 +1,26 @@
 module.exports = async (context) => {
     const { client, m, dreadedspeed } = context;
 
-    // Get device information
-    const battery = await client.fetchBatteryStatus(); // Fetch battery percentage
-    const phoneInfo = m.deviceInfo || {}; // Get device information
-    const { model, manufacturer, os_version, ram, storage } = phoneInfo;
+    try {
+        // Fetch battery percentage from Baileys
+        let batteryStatus = client?.battery || { value: "Unknown", charging: false };
+        let batteryLevel = batteryStatus.value !== undefined ? `${batteryStatus.value}%` : "Unknown";
+        let isCharging = batteryStatus.charging ? "⚡ Charging" : "🔋 Not Charging";
 
-    // Construct response message
-    let response = `*📶 Pong!*\n⏱️ *Speed:* ${dreadedspeed.toFixed(4)}ms\n`;
+        // Extract device info (Baileys usually provides some device metadata)
+        const phoneInfo = client?.user || {}; 
+        const { phone, platform } = phoneInfo;
+        
+        // Construct the response message
+        let response = `*📶 Pong!*\n⏱️ *Speed:* ${dreadedspeed.toFixed(4)}ms\n`;
+        response += `🔋 *Battery:* ${batteryLevel} (${isCharging})\n`;
+        response += `📱 *Phone Model:* ${phone?.device_model || "Unknown"}\n`;
+        response += `🛠️ *OS Platform:* ${platform || "Unknown"}\n`;
+        response += `💾 *RAM & Storage:* Unavailable (Baileys does not provide this data)\n`;
 
-    if (battery) {
-        response += `🔋 *Battery:* ${battery.percentage}%\n`;
+        await m.reply(response);
+    } catch (error) {
+        console.error("Error executing ping:", error);
+        await m.reply("❌ Error fetching device info.");
     }
-    if (model) {
-        response += `📱 *Phone Model:* ${manufacturer} ${model}\n`;
-    }
-    if (os_version) {
-        response += `🛠️ *OS Version:* ${os_version}\n`;
-    }
-    if (ram) {
-        response += `💾 *RAM:* ${ram}GB\n`;
-    }
-    if (storage) {
-        response += `📂 *Storage (ROM):* ${storage}GB\n`;
-    }
-
-    await m.reply(response);
 };
