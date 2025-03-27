@@ -25,7 +25,7 @@ module.exports = async (context) => {
             for (let api of apiList) {
                 for (let i = 0; i < retries; i++) {
                     try {
-                        const response = await axios.get(api, { timeout: 20000, headers: { "accept": "application/json" } });
+                        const response = await axios.get(api, { timeout: 30000, headers: { "accept": "application/json" } });
                         if (response.data && response.data.status === 200) {
                             return response.data.result;
                         }
