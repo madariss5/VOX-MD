@@ -44,12 +44,14 @@ module.exports = async (context) => {
             await client.sendMessage(m.chat, {
                 text: `✅ *Media Upload Successful!*\n\n📁 *File Size:* ${fileSizeMB} MB\n🔗 *URL:* ${link}\n\n✨ _Powered by VOX-MD_`
             });
+
+            // Delete temp file after successful upload
+            await fs.unlink(mediaPath);
+            console.log("Temporary file deleted!");
         } else {
             await client.sendMessage(m.chat, { text: `♕ ${mediaBuffer.length} Byte(s)\n♕ (Unknown Format)` });
         }
 
-        await fs.unlink(mediaPath);
-        console.log("Temporary file deleted!");
     } catch (error) {
         console.error("Media upload error:", error.message);
         m.reply("❌ *Failed to process your media!* Please try again later.");
