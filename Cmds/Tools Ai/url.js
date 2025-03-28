@@ -1,4 +1,4 @@
-const uploadtoimgur = require("../lib/Imgur.js");
+const uploadtoimgur = require('./lib/Imgur');
 const fs = require("fs");
 const path = require("path");
 
