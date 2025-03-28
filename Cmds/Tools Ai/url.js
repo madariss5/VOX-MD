@@ -1,41 +1,50 @@
 const path = require("path");
-const uploadtoimgur = require(path.join(__dirname, "../../lib/Imgur.js"));
-const fs = require("fs");
+const fs = require("fs").promises;
+const uploadToImgur = require(path.join(__dirname, "../../lib/Imgur.js"));
 
+module.exports = async (context) => {
+    const { client, m, quoted } = context;
 
-module.exports = async (m) => {
-  let q = m.quoted ? m.quoted : m;
-  let mime = (q.msg || q).mimetype || "";
+    let q = quoted ? quoted : m;
+    let mime = (q.msg || q).mimetype || "";
 
-  if (!mime) {
-    throw "✳️ Respond to an image or video.";
-  }
+    if (!mime) {
+        return m.reply("✳️ *Please respond to an image or video!*");
+    }
 
-  let mediaBuffer = await q.download();
-  if (mediaBuffer.length > 10 * 1024 * 1024) {
-    throw "✴️ Media size exceeds 10 MB. Please upload a smaller file.";
-  }
+    try {
+        // Notify user that upload is in progress
+        await client.sendMessage(m.chat, { text: "⏳ *Uploading media... Please wait!*" });
 
-  let currentModuleDirectory = path.dirname(__filename);
-  let tmpDir = path.join(currentModuleDirectory, "../tmp");
+        let mediaBuffer = await q.download();
+        if (mediaBuffer.length > 10 * 1024 * 1024) {
+            return m.reply("❌ *Media size exceeds 10 MB.* Please upload a smaller file.");
+        }
 
-  if (!fs.existsSync(tmpDir)) {
-    fs.mkdirSync(tmpDir);
-  }
+        let tmpDir = path.join(__dirname, "../../tmp");
+        await fs.mkdir(tmpDir, { recursive: true });
 
-  let mediaPath = path.join(tmpDir, `media_${Date.now()}.${mime.split("/")[1]}`);
-  fs.writeFileSync(mediaPath, mediaBuffer);
+        let mediaExt = mime.split("/")[1] || "tmp";
+        let mediaPath = path.join(tmpDir, `media_${Date.now()}.${mediaExt}`);
+        await fs.writeFile(mediaPath, mediaBuffer);
 
-  let isImageOrVideo = /image\/(png|jpe?g|gif)|video\/mp4/.test(mime);
+        let isImageOrVideo = /image\/(png|jpe?g|gif)|video\/mp4/.test(mime);
 
-  if (isImageOrVideo) {
-    let link = await uploadtoimgur(mediaPath);
-    const fileSizeMB = (mediaBuffer.length / (1024 * 1024)).toFixed(2);
+        if (isImageOrVideo) {
+            // Upload media using Imgur
+            let link = await uploadToImgur(mediaPath);
+            const fileSizeMB = (mediaBuffer.length / (1024 * 1024)).toFixed(2);
 
-    m.reply(`✅ *Media Upload Successful*\n♕ *File Size:* ${fileSizeMB} MB\n♕ *URL:* ${link}`);
-  } else {
-    m.reply(`♕ ${mediaBuffer.length} Byte(s)\n♕ (Unknown Format)`);
-  }
+            await client.sendMessage(m.chat, {
+                text: `✅ *Media Upload Successful!*\n\n📁 *File Size:* ${fileSizeMB} MB\n🔗 *URL:* ${link}\n\n✨ _Powered by VOX-MD_`
+            });
+        } else {
+            await client.sendMessage(m.chat, { text: `♕ ${mediaBuffer.length} Byte(s)\n♕ (Unknown Format)` });
+        }
 
-  fs.unlinkSync(mediaPath);
+        await fs.unlink(mediaPath);
+    } catch (error) {
+        console.error("Media upload error:", error.message);
+        m.reply("❌ *Failed to process your media!* Please try again later.");
+    }
 };
