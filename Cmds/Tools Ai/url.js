@@ -2,7 +2,7 @@
 const fs = require("fs");
 const path = require("path");
 
-module.exports = async (m) => {uploadtoimgur}{
+module.exports = async (uploadtoimgur) => {
   try {
     let q = m.quoted ? m.quoted : m;
     let mime = (q.msg || q).mimetype || "";
