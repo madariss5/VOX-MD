@@ -25,7 +25,7 @@ module.exports = async (context) => {
         if (!text) return m.reply("Provide a TikTok link for the video.");
         if (!text.includes("tiktok.com")) return m.reply("That is not a valid TikTok link.");
 
-        const url = `https://api.dreaded.site/api/tiktok?url=${text}`;
+        const url = `https://fastrestapis.fasturl.cloud/downup/ttdown?url=${text}`;
         const data = await fetchTikTokData(url);
 
         const tikVideoUrl = data.tiktok.video;
