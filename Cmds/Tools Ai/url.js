@@ -1,6 +1,7 @@
-const uploadtoimgur = require("../lib/Imgur.js");
-const fs = require("fs");
 const path = require("path");
+const uploadtoimgur = require(path.join(__dirname, "../../lib/Imgur.js"));
+const fs = require("fs");
+
 
 module.exports = async (m) => {
   let q = m.quoted ? m.quoted : m;
