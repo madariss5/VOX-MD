@@ -1,8 +1,8 @@
-const uploadtoimgur = require('./lib/Imgur');
+
 const fs = require("fs");
 const path = require("path");
 
-module.exports = async (m) => {
+module.exports = async (m) => {uploadtoimgur}{
   try {
     let q = m.quoted ? m.quoted : m;
     let mime = (q.msg || q).mimetype || "";
