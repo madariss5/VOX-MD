@@ -3,7 +3,7 @@ const fs = require("fs").promises;
 const uploadToImgur = require(path.join(__dirname, "../../lib/Imgur.js"));
 
 module.exports = async (context) => {
-    const { client, m, quoted } = context;
+    const { client, m, quoted, uploadToimgur } = context;
 
     console.log("Processing URL command...");
 
